@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import it.mobile.bisax.ptzvision.ui.MainScreen
 import it.mobile.bisax.ptzvision.ui.theme.PTZVisionTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,9 +16,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             PTZVisionTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    MainScreen(context = this@MainActivity)
                 }
             }
         }
