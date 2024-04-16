@@ -1,4 +1,4 @@
-package it.mobile.bisax.ptzvision.ui.blocks
+package it.mobile.bisax.ptzvision.ui.console.blocks
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -31,7 +31,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import it.mobile.bisax.ptzvision.ui.MainViewModel
+import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan

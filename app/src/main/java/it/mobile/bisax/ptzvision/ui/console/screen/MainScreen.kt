@@ -1,9 +1,10 @@
-package it.mobile.bisax.ptzvision.ui
+package it.mobile.bisax.ptzvision.ui.console.screen
 
 import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
+import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 
 @Composable
 fun MainScreen(

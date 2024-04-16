@@ -1,4 +1,4 @@
-package it.mobile.bisax.ptzvision.ui.blocks
+package it.mobile.bisax.ptzvision.ui.console.blocks
 
 import android.util.Log
 import androidx.compose.foundation.background

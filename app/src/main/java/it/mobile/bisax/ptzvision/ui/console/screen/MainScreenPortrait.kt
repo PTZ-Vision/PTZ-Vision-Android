@@ -1,4 +1,4 @@
-package it.mobile.bisax.ptzvision.ui
+package it.mobile.bisax.ptzvision.ui.console.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,9 +21,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import it.mobile.bisax.ptzvision.ui.blocks.JoyStick
-import it.mobile.bisax.ptzvision.ui.blocks.ScenesGrid
-import it.mobile.bisax.ptzvision.ui.blocks.SliderBox
+import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
+import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
+import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
 
 @Composable
 fun MainScreenPortrait(

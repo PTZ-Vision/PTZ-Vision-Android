@@ -1,4 +1,4 @@
-package it.mobile.bisax.ptzvision.ui
+package it.mobile.bisax.ptzvision.ui.console
 
 import android.content.Context
 import android.util.Log
