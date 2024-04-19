@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.sp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
 import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
+import it.mobile.bisax.ptzvision.ui.console.blocks.SecondaryCams
+import it.mobile.bisax.ptzvision.ui.console.blocks.SelectedCam
 import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
 
 @Composable
@@ -32,28 +34,20 @@ fun MainScreenPortrait(
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
     Column(modifier = Modifier.fillMaxSize()) {
-        SliderBox(
+        SecondaryCams(
             modifier = Modifier
-                .weight(0.15f)
-                .padding(15.dp),
-            setPosition = { maxPos, posY -> mainViewModel.setZoomIntensity(maxPos, posY) },
-            enabled = !(mainUiState.isAIEnabled)
+                .weight(0.2f)
         )
-        SliderBox(
+        SelectedCam(
             modifier = Modifier
-                .weight(0.15f)
-                .padding(15.dp),
-            setPosition = { maxPos, posY -> mainViewModel.setFocusIntensity(maxPos,posY) },
-            enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled)
+                .fillMaxWidth()
+                .weight(0.3f)
         )
-        ScenesGrid(modifier = Modifier.weight(0.40f))
+        ScenesGrid(
+            modifier = Modifier.weight(0.3f),
+            verticalArrangement = Arrangement.SpaceEvenly
+        )
 
-        JoyStick(
-            modifier = Modifier
-                .weight(0.3f),
-            enabled = !(mainUiState.isAIEnabled),
-            mainViewModel = mainViewModel
-        )
         Row (modifier= Modifier
             .then(
                 if (LocalConfiguration.current.screenWidthDp < 1000) {
@@ -66,7 +60,7 @@ fun MainScreenPortrait(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(modifier = Modifier
-                .weight(0.6f),
+                .weight(0.5f),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -81,13 +75,7 @@ fun MainScreenPortrait(
                     onClick = { mainViewModel.toggleAutoFocus() },
                     modifier = Modifier
                         .weight(0.5f)
-                        .then(
-                            if (LocalConfiguration.current.screenWidthDp < 1000) {
-                                Modifier.padding(15.dp, 5.dp)
-                            } else {
-                                Modifier.padding(30.dp, 0.dp)
-                            }
-                        ),
+                        .padding(5.dp, 5.dp),
                     enabled = !(mainUiState.isAIEnabled),
                     colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAutoFocusEnabled) Color.Green else Color.Gray)
                 ) {
@@ -100,20 +88,41 @@ fun MainScreenPortrait(
             Button(
                 onClick = { mainViewModel.toggleAI() },
                 modifier = Modifier
-                    .weight(0.4f)
-                    .then(
-                        if (LocalConfiguration.current.screenWidthDp < 800) {
-                            Modifier.padding(10.dp, 0.dp)
-                        } else if (LocalConfiguration.current.screenWidthDp < 1000) {
-                            Modifier.padding(20.dp, 0.dp)
-                        } else {
-                            Modifier.padding(60.dp, 0.dp)
-                        }
-                    ),
+                    .weight(0.5f)
+                    .padding(30.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray)
             ) {
                 Text(text = "AI Tracking")
             }
         }
+
+        Row(modifier = Modifier
+            .fillMaxSize()
+            .weight(0.2f)) {
+
+
+            SliderBox(
+                modifier = Modifier
+                    .weight(0.25f)
+                    .padding(15.dp),
+                setPosition = { maxPos, posY -> mainViewModel.setZoomIntensity(maxPos, posY) },
+                enabled = !(mainUiState.isAIEnabled)
+            )
+            SliderBox(
+                modifier = Modifier
+                    .weight(0.25f)
+                    .padding(15.dp),
+                setPosition = { maxPos, posY -> mainViewModel.setFocusIntensity(maxPos,posY) },
+                enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled)
+            )
+
+            JoyStick(
+                modifier = Modifier
+                    .weight(0.5f),
+                enabled = !(mainUiState.isAIEnabled),
+                mainViewModel = mainViewModel
+            )
+        }
+
     }
 }

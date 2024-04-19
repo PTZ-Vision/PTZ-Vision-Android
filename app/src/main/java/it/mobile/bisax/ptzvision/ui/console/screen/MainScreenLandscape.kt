@@ -1,10 +1,6 @@
 package it.mobile.bisax.ptzvision.ui.console.screen
 
-import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -29,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
 import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
+import it.mobile.bisax.ptzvision.ui.console.blocks.SecondaryCams
+import it.mobile.bisax.ptzvision.ui.console.blocks.SelectedCam
 import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
 
 @Composable
@@ -44,34 +42,10 @@ fun MainScreenLandscape(
             .weight(0.5f)) {
             Column(modifier = Modifier
                 .weight(0.5f)) {
-                Text(
-                    text = "PTZ Vision",
-                    fontFamily = FontFamily.Monospace,
+                SecondaryCams(
                     modifier = Modifier
-                        .padding(16.dp, 3.dp)
-                        .fillMaxWidth(),
-                    fontSize = if (LocalConfiguration.current.screenWidthDp < 1000) 10.sp else 30.sp
+                        .weight(0.7f)
                 )
-                Row(modifier = Modifier.weight(0.7f)) {
-                    Box(
-                        modifier = Modifier
-                            .weight(0.333f)
-                            .fillMaxHeight()
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(0.333f)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(0.334f)
-                            .clickable{
-                                Log.d("MainScreenLandscape", "Change Camera")
-                            }
-                    )
-                }
                 Row (modifier= Modifier
                     .then(
                         if (LocalConfiguration.current.screenWidthDp < 1000) {
@@ -80,7 +54,8 @@ fun MainScreenLandscape(
                             Modifier.height(70.dp)
                         }
                     )
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .weight(0.3f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(modifier = Modifier
@@ -134,11 +109,10 @@ fun MainScreenLandscape(
                     }
                 }
             }
-            Box(
+            SelectedCam(
                 modifier = Modifier
-                    .background(Color(0x88666666))
                     .weight(0.5f)
-                    .fillMaxHeight()
+                    .fillMaxHeight(),
             )
         }
         Row(modifier = Modifier
@@ -160,7 +134,14 @@ fun MainScreenLandscape(
                 setPosition = { maxPos, posY -> mainViewModel.setFocusIntensity(maxPos,posY) },
                 enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled)
             )
-            ScenesGrid(modifier = Modifier.weight(0.40f))
+            ScenesGrid(
+                modifier = Modifier.weight(0.40f),
+                verticalArrangement =
+                    if(LocalConfiguration.current.screenHeightDp < 600)
+                        Arrangement.SpaceEvenly
+                    else
+                        Arrangement.Bottom
+                )
 
             JoyStick(
                 modifier = Modifier
