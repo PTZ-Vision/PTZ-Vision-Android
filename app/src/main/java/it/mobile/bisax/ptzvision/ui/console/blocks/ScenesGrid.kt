@@ -26,7 +26,10 @@ data class ButtonData(
 )
 
 @Composable
-fun ScenesGrid(modifier: Modifier = Modifier) {
+fun ScenesGrid(
+    modifier: Modifier = Modifier,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Bottom
+) {
     val buttons = List(9) {
         ButtonData(
             "Scene ${it+1}",
@@ -42,7 +45,7 @@ fun ScenesGrid(modifier: Modifier = Modifier) {
             0.dp,
             if (LocalConfiguration.current.screenWidthDp < 1000) 0.dp else 40.dp
         ),
-        verticalArrangement = Arrangement.Bottom
+        verticalArrangement = verticalArrangement
     ) {
         // 3 rows of 3 buttons
         for (i in 0 until 3) {

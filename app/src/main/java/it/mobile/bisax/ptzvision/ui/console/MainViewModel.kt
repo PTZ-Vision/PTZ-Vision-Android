@@ -7,8 +7,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import it.mobile.bisax.ptzvision.utils.JoyStickDir
-import it.mobile.bisax.ptzvision.utils.JoyStickPos
+import it.mobile.bisax.ptzvision.ui.console.utils.JoyStickDir
+import it.mobile.bisax.ptzvision.ui.console.utils.JoyStickPos
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update

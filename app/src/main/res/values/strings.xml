@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">PTZ Vision</string>
+
+    <string name="home_route">Home</string>
+    <string name="settings_route">Settings</string>
+    <string name="console_route">Console</string>
+
+    <string name="console_btn">Go to console</string>
+    <string name="settings_btn">Settings</string>
 </resources>

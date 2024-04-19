@@ -1,4 +1,4 @@
-package it.mobile.bisax.ptzvision.utils
+package it.mobile.bisax.ptzvision.ui.console.utils
 
 enum class JoyStickDir {
     NONE,
