@@ -36,7 +36,6 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan
 import kotlin.math.cos
-import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sign
@@ -107,7 +106,7 @@ fun JoyStick(
                                         positionX = 0f
                                         positionY = 0f
 
-                                        mainViewModel.setPTIntensity()
+                                        mainViewModel.setPanTilt(0f, 0f)
                                     }) { pointerInputChange: PointerInputChange, offset: Offset ->
                                         val x = offsetX + offset.x - centerX
                                         val y = offsetY + offset.y - centerY
@@ -137,11 +136,18 @@ fun JoyStick(
                                             positionX = first
                                             positionY = second
 
-                                            mainViewModel.setPTIntensity(
-                                                padSize.toPx() / 2,
-                                                min(radius, maxRadius),
-                                                theta
-                                            )
+                                            val scaledDistance = radius / maxRadius
+                                            if (radius > maxRadius) {
+                                                polarToCartesian(1f, theta)
+                                            }
+                                            else{
+                                                polarToCartesian(scaledDistance, theta)
+                                            }.apply {
+                                                val posXinSquare = 0.5f*sqrt(2+first.pow(2)-second.pow(2)+2*first*sqrt(2.0f)) - 0.5f*sqrt(2+first.pow(2)-second.pow(2)-2*first*sqrt(2.0f))
+                                                val posYinSquare = 0.5f*sqrt(2-first.pow(2)+second.pow(2)+2*second*sqrt(2.0f)) - 0.5f*sqrt(2-first.pow(2)+second.pow(2)-2*second*sqrt(2.0f))
+
+                                                mainViewModel.setPanTilt(posXinSquare, -posYinSquare) // negative y because of the inverted y axis in the UI space
+                                            }
                                         }
                                     }
                                 }

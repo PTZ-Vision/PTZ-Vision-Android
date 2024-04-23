@@ -4,16 +4,11 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import it.mobile.bisax.ptzvision.ui.console.utils.JoyStickDir
-import it.mobile.bisax.ptzvision.ui.console.utils.JoyStickPos
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlin.math.PI
-import kotlin.math.roundToInt
 
 class MainViewModel(
     context: Context
@@ -37,11 +32,13 @@ class MainViewModel(
         saveUIState(appContext)
     }
 
-    private var joyStickParams by mutableStateOf(JoyStickPos(JoyStickDir.NONE, 0f))
+    /*private var joyStickParams by mutableStateOf(JoyStickPos(JoyStickDir.NONE, 0f))*/
+    private var panIntensity by mutableFloatStateOf(0f)
+    private var tiltIntensity by mutableFloatStateOf(0f)
     private var zoomIntensity by mutableFloatStateOf(0f)
     private var focusIntensity by mutableFloatStateOf(0f)
 
-    fun setPTIntensity(maxRadius:Float = 1f, radius: Float = 0f, theta: Float= Float.NEGATIVE_INFINITY) {
+    /*fun setPTIntensity(maxRadius:Float = 1f, radius: Float = 0f, theta: Float= Float.NEGATIVE_INFINITY) {
         val intensity = radius / maxRadius
         var degree: Float = theta * 180f/ PI.toFloat()
         degree = (degree * 100f).roundToInt() / 100.0f
@@ -61,6 +58,12 @@ class MainViewModel(
 
         joyStickParams = JoyStickPos(direction, intensity)
         Log.d("JoyStick", "JoyStickPos: $joyStickParams")
+    }*/
+
+    fun setPanTilt(xPos: Float, yPos: Float) {
+        panIntensity = xPos
+        tiltIntensity = yPos
+        Log.d("PanTilt", "PanPos: $panIntensity, TiltPos: $tiltIntensity")
     }
 
     fun setZoomIntensity(maxPos: Float, posY: Float) {
@@ -78,11 +81,12 @@ class MainViewModel(
 
         val isAIEnabled = sharedPref.getBoolean("isAIEnabled", false)
         val isAutoFocusEnabled = sharedPref.getBoolean("isAutoFocusEnabled", false)
-
+        val selectedCam = sharedPref.getInt("selectedCam", 0)
 
         return MainUiState(
             isAIEnabled = isAIEnabled,
-            isAutoFocusEnabled = isAutoFocusEnabled
+            isAutoFocusEnabled = isAutoFocusEnabled,
+            selectedCam = 0
         )
     }
 
