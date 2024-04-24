@@ -28,6 +28,7 @@ import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
 import it.mobile.bisax.ptzvision.ui.console.blocks.SecondaryCams
 import it.mobile.bisax.ptzvision.ui.console.blocks.SelectedCam
 import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
+import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 
 @Composable
 fun MainScreenLandscape(
@@ -39,9 +40,18 @@ fun MainScreenLandscape(
         Row(modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .weight(0.5f)) {
+            .weight(0.5f)
+        ) {
+            if(mainUiState.layout == SettingsUiState.Layout.J_LEFT){
+                SelectedCam(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .fillMaxHeight(),
+                )
+            }
             Column(modifier = Modifier
-                .weight(0.5f)) {
+                .weight(0.5f)
+            ) {
                 SecondaryCams(
                     modifier = Modifier
                         .weight(0.7f)
@@ -58,6 +68,29 @@ fun MainScreenLandscape(
                     .weight(0.3f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val aiBtn = @Composable {
+                        Button(
+                            onClick = { mainViewModel.toggleAI() },
+                            modifier = Modifier
+                                .weight(0.4f)
+                                .then(
+                                    if (LocalConfiguration.current.screenWidthDp < 800) {
+                                        Modifier.padding(10.dp, 0.dp)
+                                    } else if (LocalConfiguration.current.screenWidthDp < 1000) {
+                                        Modifier.padding(20.dp, 0.dp)
+                                    } else {
+                                        Modifier.padding(60.dp, 0.dp)
+                                    }
+                                ),
+                            colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray)
+                        ) {
+                            Text(text = "AI Tracking")
+                        }
+                    }
+
+                    if(mainUiState.layout == SettingsUiState.Layout.J_LEFT)
+                        aiBtn()
+
                     Row(modifier = Modifier
                         .weight(0.6f),
                         horizontalArrangement = Arrangement.SpaceAround,
@@ -90,65 +123,71 @@ fun MainScreenLandscape(
                             )
                         }
                     }
-                    Button(
-                        onClick = { mainViewModel.toggleAI() },
-                        modifier = Modifier
-                            .weight(0.4f)
-                            .then(
-                                if (LocalConfiguration.current.screenWidthDp < 800) {
-                                    Modifier.padding(10.dp, 0.dp)
-                                } else if (LocalConfiguration.current.screenWidthDp < 1000) {
-                                    Modifier.padding(20.dp, 0.dp)
-                                } else {
-                                    Modifier.padding(60.dp, 0.dp)
-                                }
-                            ),
-                        colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray)
-                    ) {
-                        Text(text = "AI Tracking")
-                    }
+
+                    if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT)
+                        aiBtn()
                 }
             }
-            SelectedCam(
-                modifier = Modifier
-                    .weight(0.5f)
-                    .fillMaxHeight(),
-            )
+            if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT) {
+                SelectedCam(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .fillMaxHeight(),
+                )
+            }
         }
         Row(modifier = Modifier
             .fillMaxSize()
             .weight(0.5f)) {
 
+            val sliders = @Composable{
+                SliderBox(
+                    modifier = Modifier
+                        .weight(0.15f)
+                        .padding(15.dp),
+                    setPosition = { maxPos, posY -> mainViewModel.setZoomIntensity(maxPos, posY) },
+                    enabled = !(mainUiState.isAIEnabled)
+                )
+                SliderBox(
+                    modifier = Modifier
+                        .weight(0.15f)
+                        .padding(15.dp),
+                    setPosition = { maxPos, posY -> mainViewModel.setFocusIntensity(maxPos,posY) },
+                    enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled)
+                )
+            }
 
-            SliderBox(
-                modifier = Modifier
-                    .weight(0.15f)
-                    .padding(15.dp),
-                setPosition = { maxPos, posY -> mainViewModel.setZoomIntensity(maxPos, posY) },
-                enabled = !(mainUiState.isAIEnabled)
-            )
-            SliderBox(
-                modifier = Modifier
-                    .weight(0.15f)
-                    .padding(15.dp),
-                setPosition = { maxPos, posY -> mainViewModel.setFocusIntensity(maxPos,posY) },
-                enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled)
-            )
+            val joystick = @Composable{
+                JoyStick(
+                    modifier = Modifier
+                        .weight(0.3f),
+                    enabled = !(mainUiState.isAIEnabled),
+                    mainViewModel = mainViewModel
+                )
+            }
+
+            if(mainUiState.layout == SettingsUiState.Layout.J_LEFT){
+                joystick()
+            }
+            else{
+                sliders()
+            }
+
             ScenesGrid(
-                modifier = Modifier.weight(0.40f),
+                modifier = Modifier.weight(0.4f),
                 verticalArrangement =
                     if(LocalConfiguration.current.screenHeightDp < 600)
                         Arrangement.SpaceEvenly
                     else
                         Arrangement.Bottom
-                )
-
-            JoyStick(
-                modifier = Modifier
-                    .weight(0.3f),
-                enabled = !(mainUiState.isAIEnabled),
-                mainViewModel = mainViewModel
             )
+
+            if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT) {
+                joystick()
+            }
+            else{
+                sliders()
+            }
         }
     }
 

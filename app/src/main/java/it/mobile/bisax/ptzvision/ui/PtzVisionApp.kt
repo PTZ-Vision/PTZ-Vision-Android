@@ -48,7 +48,7 @@ fun PtzVisionApp(
             }
 
             composable(route =  PTZRoutes.SETTINGS.name){
-                SettingsScreen()
+                SettingsScreen(context = LocalContext.current)
             }
 
             composable(route =  PTZRoutes.CONSOLE.name){

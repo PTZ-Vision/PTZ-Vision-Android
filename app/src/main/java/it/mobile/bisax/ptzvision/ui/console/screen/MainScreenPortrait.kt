@@ -27,12 +27,25 @@ import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
 import it.mobile.bisax.ptzvision.ui.console.blocks.SecondaryCams
 import it.mobile.bisax.ptzvision.ui.console.blocks.SelectedCam
 import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
+import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 
 @Composable
 fun MainScreenPortrait(
     mainViewModel: MainViewModel
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
+
+    val aiBtn = @Composable{modifier:Modifier ->
+        Button(
+            onClick = { mainViewModel.toggleAI() },
+            modifier = modifier
+                .padding(25.dp, 0.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray)
+        ) {
+            Text(text = "AI Tracking")
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         SecondaryCams(
             modifier = Modifier
@@ -42,10 +55,7 @@ fun MainScreenPortrait(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.3f)
-        )
-        ScenesGrid(
-            modifier = Modifier.weight(0.3f),
-            verticalArrangement = Arrangement.SpaceEvenly
+                .padding(0.dp, 0.dp, 0.dp, 10.dp)
         )
 
         Row (modifier= Modifier
@@ -59,6 +69,9 @@ fun MainScreenPortrait(
             .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            if(mainUiState.layout == SettingsUiState.Layout.J_LEFT)
+                aiBtn(Modifier.weight(0.5f))
+
             Row(modifier = Modifier
                 .weight(0.5f),
                 horizontalArrangement = Arrangement.SpaceAround,
@@ -85,21 +98,21 @@ fun MainScreenPortrait(
                     )
                 }
             }
-            Button(
-                onClick = { mainViewModel.toggleAI() },
-                modifier = Modifier
-                    .weight(0.5f)
-                    .padding(30.dp, 0.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray)
-            ) {
-                Text(text = "AI Tracking")
-            }
+            if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT)
+                aiBtn(Modifier.weight(0.5f))
         }
 
         Row(modifier = Modifier
             .fillMaxSize()
-            .weight(0.2f)) {
+            .weight(0.25f)) {
 
+            if(mainUiState.layout == SettingsUiState.Layout.J_LEFT)
+                JoyStick(
+                    modifier = Modifier
+                        .weight(0.5f),
+                    enabled = !(mainUiState.isAIEnabled),
+                    mainViewModel = mainViewModel
+                )
 
             SliderBox(
                 modifier = Modifier
@@ -116,13 +129,18 @@ fun MainScreenPortrait(
                 enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled)
             )
 
-            JoyStick(
-                modifier = Modifier
-                    .weight(0.5f),
-                enabled = !(mainUiState.isAIEnabled),
-                mainViewModel = mainViewModel
-            )
+            if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT)
+                JoyStick(
+                    modifier = Modifier
+                        .weight(0.5f),
+                    enabled = !(mainUiState.isAIEnabled),
+                    mainViewModel = mainViewModel
+                )
         }
+        ScenesGrid(
+            modifier = Modifier.weight(0.25f),
+            verticalArrangement = Arrangement.SpaceEvenly
+        )
 
     }
 }

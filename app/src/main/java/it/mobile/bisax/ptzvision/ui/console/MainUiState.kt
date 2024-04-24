@@ -1,13 +1,9 @@
 package it.mobile.bisax.ptzvision.ui.console
 
-data class ButtonData(
-    val label: String,
-    val onClick: () -> Unit,
-    val onLongClick: () -> Unit,
-)
+import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 
 data class MainUiState(
+    val layout: SettingsUiState.Layout,
     val isAIEnabled: Boolean,
     val isAutoFocusEnabled: Boolean,
-    //val buttons: MutableList<ButtonData>
 )
