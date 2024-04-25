@@ -1,6 +1,8 @@
 package it.mobile.bisax.ptzvision.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -34,10 +36,17 @@ fun PtzVisionApp(
             navController = navController,
             startDestination = PTZRoutes.HOME.name,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
+            enterTransition = {
+                slideInHorizontally { initialOffsetX -> initialOffsetX}
+            },
+            exitTransition = {
+                slideOutHorizontally { initialOffsetX -> -initialOffsetX*2 }
+            }
         ){
             composable(route =  PTZRoutes.HOME.name){
                 HomeScreen(
+                    context = LocalContext.current,
                     goToConsole = {
                         navToConsole(navController = navController)
                     },

@@ -1,5 +1,8 @@
 package it.mobile.bisax.ptzvision.ui.home
 
+import android.app.Activity
+import android.content.Context
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,9 +17,11 @@ import it.mobile.bisax.ptzvision.R
 
 @Composable
 fun HomeScreen(
+    context: Context,
     goToConsole: () -> Unit,
     goToSettings: () -> Unit
 ) {
+    (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     Surface(
         modifier = Modifier
             .fillMaxSize()

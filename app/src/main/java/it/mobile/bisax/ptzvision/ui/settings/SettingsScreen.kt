@@ -1,9 +1,11 @@
 package it.mobile.bisax.ptzvision.ui.settings
 
+import android.app.Activity
 import android.content.Context
-import androidx.compose.foundation.layout.Column
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,15 +40,20 @@ fun SettingsTopBar() {
 fun SettingsScreen(
     context: Context
 ) {
+    (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     Surface {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Settings")
-            SettingsSection(
-                modifier = Modifier,
-                title = "Layout"
-            ) {
-                Row {
-                    Layout(SettingsViewModel(context))
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            item{
+                Text(text = "Settings")
+            }
+            item{
+                SettingsSection(
+                    modifier = Modifier,
+                    title = "Layout"
+                ) {
+                    Row {
+                        Layout(SettingsViewModel(context))
+                    }
                 }
             }
         }
