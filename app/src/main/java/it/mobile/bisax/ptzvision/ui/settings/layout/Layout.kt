@@ -37,7 +37,12 @@ fun Layout(
             it == R.drawable.layout_r
         }
     }
-    val onChangeState: (Int) -> Unit = { settingsViewModel.changeLayout(it) }
+    val onChangeState: (Int) -> Unit = {
+        if(it == R.drawable.layout_l)
+            settingsViewModel.changeLayout(SettingsUiState.Layout.J_LEFT)
+        else
+            settingsViewModel.changeLayout(SettingsUiState.Layout.J_RIGHT)
+    }
 
     Column(Modifier.padding(8.dp)) {
         textToEnableList.forEach { textToEnableState ->

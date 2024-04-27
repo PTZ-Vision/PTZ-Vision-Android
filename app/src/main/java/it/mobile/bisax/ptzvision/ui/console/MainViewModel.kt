@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import it.mobile.bisax.ptzvision.R
 import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -60,7 +59,7 @@ class MainViewModel(
             context.getSharedPreferences(
                 "Settings",
                 Context.MODE_PRIVATE
-            ).getInt("layout", R.drawable.layout_r)
+            ).getInt("layout", 0)
         )
 
         return MainUiState(

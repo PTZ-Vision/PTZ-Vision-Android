@@ -2,7 +2,6 @@ package it.mobile.bisax.ptzvision.ui.settings
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import it.mobile.bisax.ptzvision.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -15,8 +14,7 @@ class SettingsViewModel(
 
     val settingsUiState: StateFlow<SettingsUiState> = _settingsUiState
 
-    fun changeLayout(layoutID: Int) {
-        val layout: SettingsUiState.Layout = SettingsUiState.Layout.fromInt(layoutID)
+    fun changeLayout(layout: SettingsUiState.Layout) {
 
         _settingsUiState.update{currentState ->
             currentState.copy(layout = layout)
@@ -28,7 +26,7 @@ class SettingsViewModel(
     private fun setUIState(context: Context): SettingsUiState {
         val sharedPref = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
 
-        val layout = sharedPref.getInt("layout", R.drawable.layout_r)
+        val layout = sharedPref.getInt("layout", 0)
 
         return SettingsUiState(
             layout = SettingsUiState.Layout.fromInt(layout)
