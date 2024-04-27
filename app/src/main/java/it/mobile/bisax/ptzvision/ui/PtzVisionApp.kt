@@ -6,6 +6,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,7 +27,8 @@ enum class PTZRoutes(@StringRes val route: Int) {
 
 @Composable
 fun PtzVisionApp(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    windowSize: WindowSizeClass
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -61,7 +63,10 @@ fun PtzVisionApp(
             }
 
             composable(route =  PTZRoutes.CONSOLE.name){
-                MainScreen(context = LocalContext.current)
+                MainScreen(
+                    context = LocalContext.current,
+                    windowSize = windowSize
+                )
             }
         }
     }

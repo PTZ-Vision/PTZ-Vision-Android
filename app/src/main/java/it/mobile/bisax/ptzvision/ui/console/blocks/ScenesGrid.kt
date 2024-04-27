@@ -11,12 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 
 data class ButtonData(
@@ -28,7 +29,8 @@ data class ButtonData(
 @Composable
 fun ScenesGrid(
     modifier: Modifier = Modifier,
-    verticalArrangement: Arrangement.Vertical = Arrangement.Bottom
+    windowSize: WindowSizeClass,
+    isLandScape: Boolean
 ) {
     val buttons = List(9) {
         ButtonData(
@@ -41,11 +43,12 @@ fun ScenesGrid(
         .fillMaxSize()
         .padding(
             0.dp,
-            0.dp,
-            0.dp,
-            if (LocalConfiguration.current.screenWidthDp < 1000) 0.dp else 40.dp
+            if(!isLandScape || windowSize.heightSizeClass <= WindowHeightSizeClass.Compact)
+                0.dp
+            else
+                40.dp
         ),
-        verticalArrangement = verticalArrangement
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
         // 3 rows of 3 buttons
         for (i in 0 until 3) {

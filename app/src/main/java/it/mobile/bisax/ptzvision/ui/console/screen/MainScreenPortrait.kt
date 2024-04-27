@@ -10,13 +10,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,20 +32,10 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 
 @Composable
 fun MainScreenPortrait(
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    windowSize: WindowSizeClass
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
-
-    val aiBtn = @Composable{modifier:Modifier ->
-        Button(
-            onClick = { mainViewModel.toggleAI() },
-            modifier = modifier
-                .padding(25.dp, 0.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray)
-        ) {
-            Text(text = "AI Tracking")
-        }
-    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         SecondaryCams(
@@ -59,16 +50,27 @@ fun MainScreenPortrait(
         )
 
         Row (modifier= Modifier
-            .then(
-                if (LocalConfiguration.current.screenWidthDp < 1000) {
-                    Modifier.height(50.dp)
-                } else {
-                    Modifier.height(70.dp)
-                }
-            )
+            .height(70.dp)
             .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val aiBtn = @Composable{modifier:Modifier ->
+                Button(
+                    onClick = { mainViewModel.toggleAI() },
+                    modifier = modifier
+                        .padding(
+                            if(windowSize.widthSizeClass == WindowWidthSizeClass.Compact)
+                                25.dp
+                            else
+                                60.dp,
+                            0.dp
+                        ),
+                    colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray)
+                ) {
+                    Text(text = "AI Tracking")
+                }
+            }
+
             if(mainUiState.layout == SettingsUiState.Layout.J_LEFT)
                 aiBtn(Modifier.weight(0.5f))
 
@@ -78,11 +80,11 @@ fun MainScreenPortrait(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "10.5x",
+                    text = "1x",
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(0.5f),
                     fontFamily = FontFamily.Monospace,
-                    fontSize = if (LocalConfiguration.current.screenWidthDp < 1000) 15.sp else 20.sp
+                    fontSize = if(windowSize.widthSizeClass == WindowWidthSizeClass.Compact) 15.sp else 20.sp
                 )
                 Button(
                     onClick = { mainViewModel.toggleAutoFocus() },
@@ -139,7 +141,8 @@ fun MainScreenPortrait(
         }
         ScenesGrid(
             modifier = Modifier.weight(0.25f),
-            verticalArrangement = Arrangement.SpaceEvenly
+            windowSize = windowSize,
+            isLandScape = false
         )
 
     }

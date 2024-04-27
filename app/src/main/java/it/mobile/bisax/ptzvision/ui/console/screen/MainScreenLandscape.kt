@@ -11,13 +11,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,8 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 
 @Composable
 fun MainScreenLandscape(
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    windowSize: WindowSizeClass
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
 
@@ -57,13 +59,6 @@ fun MainScreenLandscape(
                         .weight(0.7f)
                 )
                 Row (modifier= Modifier
-                    .then(
-                        if (LocalConfiguration.current.screenWidthDp < 1000) {
-                            Modifier.height(50.dp)
-                        } else {
-                            Modifier.height(70.dp)
-                        }
-                    )
                     .fillMaxWidth()
                     .weight(0.3f),
                     verticalAlignment = Alignment.CenterVertically
@@ -74,12 +69,16 @@ fun MainScreenLandscape(
                             modifier = Modifier
                                 .weight(0.4f)
                                 .then(
-                                    if (LocalConfiguration.current.screenWidthDp < 800) {
-                                        Modifier.padding(10.dp, 0.dp)
-                                    } else if (LocalConfiguration.current.screenWidthDp < 1000) {
-                                        Modifier.padding(20.dp, 0.dp)
-                                    } else {
-                                        Modifier.padding(60.dp, 0.dp)
+                                    when (windowSize.widthSizeClass) {
+                                        WindowWidthSizeClass.Compact -> {
+                                            Modifier.padding(10.dp, 0.dp)
+                                        }
+                                        WindowWidthSizeClass.Medium -> {
+                                            Modifier.padding(10.dp, 0.dp)
+                                        }
+                                        else -> {
+                                            Modifier.padding(20.dp, 0.dp)
+                                        }
                                     }
                                 ),
                             colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray)
@@ -101,17 +100,17 @@ fun MainScreenLandscape(
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(0.5f),
                             fontFamily = FontFamily.Monospace,
-                            fontSize = if (LocalConfiguration.current.screenWidthDp < 1000) 15.sp else 20.sp
+                            fontSize = if(windowSize.widthSizeClass == WindowWidthSizeClass.Compact) 15.sp else 20.sp
                         )
                         Button(
                             onClick = { mainViewModel.toggleAutoFocus() },
                             modifier = Modifier
                                 .weight(0.5f)
                                 .then(
-                                    if (LocalConfiguration.current.screenWidthDp < 1000) {
+                                    if (windowSize.widthSizeClass <= WindowWidthSizeClass.Medium) {
                                         Modifier.padding(15.dp, 5.dp)
                                     } else {
-                                        Modifier.padding(30.dp, 0.dp)
+                                        Modifier.padding(24.dp, 0.dp)
                                     }
                                 ),
                             enabled = !(mainUiState.isAIEnabled),
@@ -175,11 +174,8 @@ fun MainScreenLandscape(
 
             ScenesGrid(
                 modifier = Modifier.weight(0.4f),
-                verticalArrangement =
-                    if(LocalConfiguration.current.screenHeightDp < 600)
-                        Arrangement.SpaceEvenly
-                    else
-                        Arrangement.Bottom
+                windowSize = windowSize,
+                isLandScape = true
             )
 
             if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT) {
