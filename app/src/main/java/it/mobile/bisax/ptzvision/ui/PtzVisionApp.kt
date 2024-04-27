@@ -48,13 +48,13 @@ fun PtzVisionApp(
         ){
             composable(route =  PTZRoutes.HOME.name){
                 HomeScreen(
-                    context = LocalContext.current,
                     goToConsole = {
                         navToConsole(navController = navController)
                     },
                     goToSettings = {
                         navToSettings(navController = navController)
-                    }
+                    },
+                    windowSize = windowSize
                 )
             }
 
