@@ -18,6 +18,7 @@ import it.mobile.bisax.ptzvision.R
 import it.mobile.bisax.ptzvision.ui.console.screen.MainScreen
 import it.mobile.bisax.ptzvision.ui.home.HomeScreen
 import it.mobile.bisax.ptzvision.ui.settings.SettingsScreen
+import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 
 enum class PTZRoutes(@StringRes val route: Int) {
     HOME(R.string.home_route),
@@ -59,7 +60,12 @@ fun PtzVisionApp(
             }
 
             composable(route =  PTZRoutes.SETTINGS.name){
-                SettingsScreen(context = LocalContext.current)
+                SettingsScreen(
+                    context = LocalContext.current,
+                    settingsViewModel = SettingsViewModel(LocalContext.current),
+                    goHome = {
+                        navToGeneral(navController = navController)
+                    })
             }
 
             composable(route =  PTZRoutes.CONSOLE.name){
@@ -81,7 +87,7 @@ fun navToConsole(
 fun navToGeneral(
     navController: NavHostController
 ){
-    navController.navigate(PTZRoutes.HOME.name)
+    navController.popBackStack()
 }
 
 fun navToSettings(

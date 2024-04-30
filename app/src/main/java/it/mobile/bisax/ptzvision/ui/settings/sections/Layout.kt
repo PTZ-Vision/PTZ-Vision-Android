@@ -1,4 +1,4 @@
-package it.mobile.bisax.ptzvision.ui.settings.layout
+package it.mobile.bisax.ptzvision.ui.settings.sections
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
