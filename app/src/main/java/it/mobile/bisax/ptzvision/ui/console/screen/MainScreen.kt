@@ -8,26 +8,29 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalConfiguration
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 
 @Composable
 fun MainScreen(
     context: Context,
-    windowSize: WindowSizeClass
+    windowSize: WindowSizeClass,
+    settingsViewModel: SettingsViewModel,
+    mainViewModel: MainViewModel
 ) {
     (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val mainViewModel = MainViewModel(context = context)
-
     if(isLandscape){
         MainScreenLandscape(
             mainViewModel = mainViewModel,
+            settingsViewModel = settingsViewModel,
             windowSize = windowSize
         )
     }
     else{
         MainScreenPortrait(
             mainViewModel = mainViewModel,
+            settingsViewModel = settingsViewModel,
             windowSize = windowSize
         )
     }

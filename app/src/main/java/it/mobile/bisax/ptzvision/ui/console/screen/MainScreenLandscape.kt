@@ -30,13 +30,16 @@ import it.mobile.bisax.ptzvision.ui.console.blocks.SecondaryCams
 import it.mobile.bisax.ptzvision.ui.console.blocks.SelectedCam
 import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
 import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
+import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 
 @Composable
 fun MainScreenLandscape(
     mainViewModel: MainViewModel,
+    settingsViewModel: SettingsViewModel,
     windowSize: WindowSizeClass
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
+    val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
 
     Column {
         Row(modifier = Modifier
@@ -44,7 +47,7 @@ fun MainScreenLandscape(
             .height(150.dp)
             .weight(0.5f)
         ) {
-            if(mainUiState.layout == SettingsUiState.Layout.J_LEFT){
+            if(settingsUiState.layout == SettingsUiState.Layout.J_LEFT){
                 SelectedCam(
                     modifier = Modifier
                         .weight(0.5f)
@@ -87,7 +90,7 @@ fun MainScreenLandscape(
                         }
                     }
 
-                    if(mainUiState.layout == SettingsUiState.Layout.J_LEFT)
+                    if(settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
                         aiBtn()
 
                     Row(modifier = Modifier
@@ -123,11 +126,11 @@ fun MainScreenLandscape(
                         }
                     }
 
-                    if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT)
+                    if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
                         aiBtn()
                 }
             }
-            if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT) {
+            if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT) {
                 SelectedCam(
                     modifier = Modifier
                         .weight(0.5f)
@@ -165,7 +168,7 @@ fun MainScreenLandscape(
                 )
             }
 
-            if(mainUiState.layout == SettingsUiState.Layout.J_LEFT){
+            if(settingsUiState.layout == SettingsUiState.Layout.J_LEFT){
                 joystick()
             }
             else{
@@ -178,7 +181,7 @@ fun MainScreenLandscape(
                 isLandScape = true
             )
 
-            if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT) {
+            if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT) {
                 joystick()
             }
             else{

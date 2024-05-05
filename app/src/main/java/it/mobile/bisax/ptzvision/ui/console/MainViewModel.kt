@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -55,15 +54,8 @@ class MainViewModel(
 
         val isAIEnabled = sharedPref.getBoolean("isAIEnabled", false)
         val isAutoFocusEnabled = sharedPref.getBoolean("isAutoFocusEnabled", false)
-        val layout = SettingsUiState.Layout.fromInt(
-            context.getSharedPreferences(
-                "Settings",
-                Context.MODE_PRIVATE
-            ).getInt("layout", 0)
-        )
 
         return MainUiState(
-            layout = layout,
             isAIEnabled = isAIEnabled,
             isAutoFocusEnabled = isAutoFocusEnabled
         )

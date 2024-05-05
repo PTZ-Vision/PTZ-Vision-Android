@@ -29,13 +29,16 @@ import it.mobile.bisax.ptzvision.ui.console.blocks.SecondaryCams
 import it.mobile.bisax.ptzvision.ui.console.blocks.SelectedCam
 import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
 import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
+import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 
 @Composable
 fun MainScreenPortrait(
     mainViewModel: MainViewModel,
+    settingsViewModel: SettingsViewModel,
     windowSize: WindowSizeClass
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
+    val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         SecondaryCams(
@@ -71,7 +74,7 @@ fun MainScreenPortrait(
                 }
             }
 
-            if(mainUiState.layout == SettingsUiState.Layout.J_LEFT)
+            if(settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
                 aiBtn(Modifier.weight(0.5f))
 
             Row(modifier = Modifier
@@ -100,7 +103,7 @@ fun MainScreenPortrait(
                     )
                 }
             }
-            if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT)
+            if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
                 aiBtn(Modifier.weight(0.5f))
         }
 
@@ -108,7 +111,7 @@ fun MainScreenPortrait(
             .fillMaxSize()
             .weight(0.25f)) {
 
-            if(mainUiState.layout == SettingsUiState.Layout.J_LEFT)
+            if(settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
                 JoyStick(
                     modifier = Modifier
                         .weight(0.5f),
@@ -131,7 +134,7 @@ fun MainScreenPortrait(
                 enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled)
             )
 
-            if(mainUiState.layout == SettingsUiState.Layout.J_RIGHT)
+            if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
                 JoyStick(
                     modifier = Modifier
                         .weight(0.5f),
