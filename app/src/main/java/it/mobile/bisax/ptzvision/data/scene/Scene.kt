@@ -2,11 +2,13 @@ package it.mobile.bisax.ptzvision.data.scene
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import it.mobile.bisax.ptzvision.data.cam.Cam
 
 @Entity(
     tableName = "scene",
+    indices = [Index(value = ["idCamera"])],
     foreignKeys = [
         ForeignKey(
             entity = Cam::class,

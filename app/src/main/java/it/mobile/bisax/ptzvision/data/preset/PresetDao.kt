@@ -9,11 +9,11 @@ import androidx.room.Update
 @Dao
 interface PresetDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(item: Preset)
+    suspend fun insert(preset: Preset)
 
     @Update
-    suspend fun update(item: Preset)
+    suspend fun update(preset: Preset)
 
     @Delete
-    suspend fun delete(item: Preset)
+    suspend fun delete(preset: Preset)
 }
