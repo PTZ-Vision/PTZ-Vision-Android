@@ -3,19 +3,10 @@ package it.mobile.bisax.ptzvision.data.cam
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import it.mobile.bisax.ptzvision.data.preset.Preset
 
 @Entity(
     tableName = "cam",
     indices = [Index(value = ["ip"], unique = true)],
-    foreignKeys = [
-        androidx.room.ForeignKey(
-            entity = Preset::class,
-            parentColumns = ["id"],
-            childColumns = ["presetId"],
-            onDelete = androidx.room.ForeignKey.CASCADE
-        )
-    ]
 )
 data class Cam(
     @PrimaryKey(autoGenerate = true)
@@ -23,13 +14,14 @@ data class Cam(
     val name: String,
     val ip: String,
     val port: Int,
-    val presetId: Int,
     val active: Boolean,
-    val pan: Float,
-    val tilt: Float,
-    val zoom: Float,
-    val focus: Float,
-    val iris: Float,
-    val autofocus: Boolean,
-    val aiTracking: Boolean
+    val main: Boolean = false,
+    val autofocus: Boolean = false,
+    val aiTracking: Boolean = false,
+    val presetId: Int=0,
+    val pan: Float = 0f,
+    val tilt: Float = 0f,
+    val zoom: Float = 0f,
+    val focus: Float = 0f,
+    val iris: Float = 0f,
 )

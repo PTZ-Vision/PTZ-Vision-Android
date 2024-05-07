@@ -16,10 +16,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.mobile.bisax.ptzvision.data.cam.Cam
 import it.mobile.bisax.ptzvision.ui.settings.sections.Camera
+import it.mobile.bisax.ptzvision.ui.settings.sections.CameraAddBtn
 import it.mobile.bisax.ptzvision.ui.settings.sections.Layout
 
 @SuppressLint("SourceLockedOrientationActivity")
@@ -28,19 +34,23 @@ fun SettingsScreen(
     context: Context,
     settingsViewModel: SettingsViewModel,
     goHome: () -> Unit,
+    onCameraAddClick: () -> Unit,
+    onCameraModifyClick: (Cam) -> Unit
 ) {
     (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    val uiState by settingsViewModel.settingsUiState.collectAsState()
+
     Surface {
         LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
             item{
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp),
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
                         onClick = goHome
@@ -54,23 +64,37 @@ fun SettingsScreen(
                     Text(
                         text = "Settings",
                         modifier = Modifier.padding(10.dp, 0.dp, 0.dp, 0.dp),
-                        style = androidx.compose.ui.text.TextStyle(fontSize = 24.sp)
+                        style = TextStyle(fontSize = 24.sp)
                     )
                 }
             }
 
             item{
-                SettingsSection(title = "Cameras")
+                SettingsSection(
+                    title = "Cameras",
+                    helper = {
+                        CameraAddBtn(
+                            onAddClick = onCameraAddClick
+                        )
+                    }
+                ){}
             }
-            items(settingsViewModel.getCameraList()){ cam ->
-                Camera(cam)
+
+            items(uiState.cams){ cam ->
+                Camera(
+                    context = context,
+                    settingsViewModel,
+                    cam,
+                    onCameraModifyClick
+                )
             }
 
             item{
-                SettingsSection(title = "Layout")
-            }
-            item{
-                Layout(settingsViewModel = settingsViewModel)
+                SettingsSection(title = "Layout"){
+                    Layout(
+                        settingsViewModel = settingsViewModel
+                    )
+                }
             }
         }
     }

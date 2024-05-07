@@ -15,22 +15,36 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import it.mobile.bisax.ptzvision.R
+import it.mobile.bisax.ptzvision.data.cam.Cam
+import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.screen.MainScreen
 import it.mobile.bisax.ptzvision.ui.home.HomeScreen
 import it.mobile.bisax.ptzvision.ui.settings.SettingsScreen
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
+import it.mobile.bisax.ptzvision.ui.settings.cameraadd.CameraMode
+import it.mobile.bisax.ptzvision.ui.settings.cameraadd.CameraSet
 
 enum class PTZRoutes(@StringRes val route: Int) {
     HOME(R.string.home_route),
     SETTINGS(R.string.settings_route),
-    CONSOLE(R.string.console_route)
+    CONSOLE(R.string.console_route),
+    CAMERA_ADD(R.string.camera_add_route),
+    CAMERA_EDIT(R.string.camera_edit_route)
 }
+
+data class Test(
+    var name: String = "",
+    var flag: Boolean = false
+)
 
 @Composable
 fun PtzVisionApp(
     navController: NavHostController = rememberNavController(),
     windowSize: WindowSizeClass
 ) {
+    val mainViewModel = MainViewModel(context = LocalContext.current)
+    val settingsViewModel = SettingsViewModel(context = LocalContext.current)
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -62,16 +76,56 @@ fun PtzVisionApp(
             composable(route =  PTZRoutes.SETTINGS.name){
                 SettingsScreen(
                     context = LocalContext.current,
-                    settingsViewModel = SettingsViewModel(LocalContext.current),
+                    settingsViewModel = settingsViewModel,
                     goHome = {
                         navToGeneral(navController = navController)
-                    })
+                    },
+                    onCameraAddClick = {
+                        navToCameraAdd(navController = navController)
+                    },
+                    onCameraModifyClick = {
+                        navToCameraEdit(navController = navController, it)
+                    }
+                )
+            }
+
+            composable(
+                route =  PTZRoutes.CAMERA_ADD.name
+            ) {
+                CameraSet(
+                    settingsViewModel = settingsViewModel,
+                    context = LocalContext.current,
+                    onBack = {
+                        navToGeneral(navController = navController)
+                    },
+                    mode = CameraMode.ADD
+                )
+            }
+
+            composable(
+                route =  PTZRoutes.CAMERA_EDIT.name + "/{camId}/{camName}/{camIp}/{camPort}/{camActive}"
+            ) {
+                CameraSet (
+                    settingsViewModel = settingsViewModel,
+                    context = LocalContext.current,
+                    onBack = {
+                        navToGeneral(navController = navController)
+                    },
+                    mode = CameraMode.MODIFY,
+                    camId = it.arguments?.getString("camId")?.toInt() ?: 0,
+                    camName = it.arguments?.getString("camName") ?: "",
+                    camIp = it.arguments?.getString("camIp") ?: "",
+                    camPort = it.arguments?.getString("camPort")?.toInt() ?: 0,
+                    camActive = it.arguments?.getString("camActive")?.toBoolean() ?: false
+                )
             }
 
             composable(route =  PTZRoutes.CONSOLE.name){
                 MainScreen(
                     context = LocalContext.current,
-                    windowSize = windowSize
+                    windowSize = windowSize,
+                    mainViewModel = mainViewModel,
+                    settingsViewModel = settingsViewModel
                 )
             }
         }
@@ -96,6 +150,15 @@ fun navToSettings(
     navController.navigate(PTZRoutes.SETTINGS.name)
 }
 
-fun goBack(){
+fun navToCameraAdd(
+    navController: NavHostController
+){
+    navController.navigate(PTZRoutes.CAMERA_ADD.name)
+}
 
+fun navToCameraEdit(
+    navController: NavHostController,
+    cam: Cam
+){
+    navController.navigate(PTZRoutes.CAMERA_EDIT.name + "/${cam.id}/${cam.name}/${cam.ip}/${cam.port}/${cam.active}")
 }
