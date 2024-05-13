@@ -1,5 +1,6 @@
 package it.mobile.bisax.ptzvision.ui.console.screen
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,7 +37,8 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 fun MainScreenLandscape(
     mainViewModel: MainViewModel,
     settingsViewModel: SettingsViewModel,
-    windowSize: WindowSizeClass
+    windowSize: WindowSizeClass,
+    context: Context
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
@@ -52,6 +54,7 @@ fun MainScreenLandscape(
                     modifier = Modifier
                         .weight(0.5f)
                         .fillMaxHeight(),
+                    cam = mainUiState.activeCams[0]
                 )
             }
             Column(modifier = Modifier
@@ -59,7 +62,9 @@ fun MainScreenLandscape(
             ) {
                 SecondaryCams(
                     modifier = Modifier
-                        .weight(0.7f)
+                        .weight(0.7f),
+                    mainViewModel = mainViewModel,
+                    context = context
                 )
                 Row (modifier= Modifier
                     .fillMaxWidth()
@@ -135,6 +140,7 @@ fun MainScreenLandscape(
                     modifier = Modifier
                         .weight(0.5f)
                         .fillMaxHeight(),
+                    cam = mainUiState.activeCams[0]
                 )
             }
         }
@@ -178,7 +184,8 @@ fun MainScreenLandscape(
             ScenesGrid(
                 modifier = Modifier.weight(0.4f),
                 windowSize = windowSize,
-                isLandScape = true
+                isLandScape = true,
+                mainViewModel = mainViewModel
             )
 
             if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT) {

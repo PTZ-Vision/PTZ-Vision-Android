@@ -24,14 +24,16 @@ fun MainScreen(
         MainScreenLandscape(
             mainViewModel = mainViewModel,
             settingsViewModel = settingsViewModel,
-            windowSize = windowSize
+            windowSize = windowSize,
+            context = context
         )
     }
     else{
         MainScreenPortrait(
             mainViewModel = mainViewModel,
             settingsViewModel = settingsViewModel,
-            windowSize = windowSize
+            windowSize = windowSize,
+            context = context
         )
     }
 }

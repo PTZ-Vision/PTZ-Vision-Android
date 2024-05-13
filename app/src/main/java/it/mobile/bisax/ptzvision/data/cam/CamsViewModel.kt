@@ -12,20 +12,18 @@ import kotlinx.coroutines.withContext
 
 class CamsViewModel(context: Context) : ViewModel() {
     val getAllCamsStream: Flow<List<Cam>>
+    val getActiveCamsStream: Flow<List<Cam>>
     private val repository: CamsRepository
 
     init {
         val camDao = PTZDatabase.getDatabase(context).camDao()
         repository = CamsRepository(camDao)
         getAllCamsStream = repository.getAllCamsStream()
+        getActiveCamsStream = repository.getActiveCamsStream()
     }
 
-    fun getCamById(id: Int): Flow<Cam?> {
+    private fun getCamById(id: Int): Flow<Cam?> {
         return repository.getCamStream(id)
-    }
-
-    fun getActiveCams(): Flow<List<Cam>> {
-        return repository.getActiveCamsStream()
     }
 
     suspend fun addCam(cam: Cam): Long {

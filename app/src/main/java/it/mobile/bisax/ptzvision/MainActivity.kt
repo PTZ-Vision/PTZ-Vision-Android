@@ -5,7 +5,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.lifecycle.ViewModelProvider
+import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
+import it.mobile.bisax.ptzvision.data.cam.CamsViewModelFactory
+import it.mobile.bisax.ptzvision.data.scene.ScenesViewModel
+import it.mobile.bisax.ptzvision.data.scene.ScenesViewModelFactory
 import it.mobile.bisax.ptzvision.ui.PtzVisionApp
+import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import it.mobile.bisax.ptzvision.ui.console.MainViewModelFactory
+import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
+import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModelFactory
 import it.mobile.bisax.ptzvision.ui.theme.PTZVisionTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,8 +25,23 @@ class MainActivity : ComponentActivity() {
         setContent {
             PTZVisionTheme {
                 val windowSize = calculateWindowSizeClass(this)
+
+                val camsFactory = CamsViewModelFactory(this)
+                val camsViewModel = ViewModelProvider(this, camsFactory)[CamsViewModel::class.java]
+
+                val scenesFactory = ScenesViewModelFactory(this)
+                val scenesViewModel = ViewModelProvider(this, scenesFactory)[ScenesViewModel::class.java]
+
+                val mainFactory = MainViewModelFactory(camsViewModel, scenesViewModel)
+                val mainViewModel = ViewModelProvider(this, mainFactory)[MainViewModel::class.java]
+
+                val settingsFactory = SettingsViewModelFactory(this, camsViewModel)
+                val settingsViewModel = ViewModelProvider(this, settingsFactory)[SettingsViewModel::class.java]
+
                 PtzVisionApp(
-                    windowSize = windowSize
+                    windowSize = windowSize,
+                    settingsViewModel = settingsViewModel,
+                    mainViewModel = mainViewModel
                 )
             }
         }

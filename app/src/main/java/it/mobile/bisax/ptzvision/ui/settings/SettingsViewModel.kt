@@ -8,17 +8,24 @@ import it.mobile.bisax.ptzvision.data.cam.Cam
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
-    context: Context
+    context: Context,
+    private val camsViewModel: CamsViewModel
 ) : ViewModel() {
     private val appContext = context.applicationContext
-    private val _camsViewModel = CamsViewModel(context)
-    private val _settingsUiState = MutableStateFlow(setUIState(context))
+    private val _settingsUiState = MutableStateFlow(SettingsUiState())
 
-    val settingsUiState: StateFlow<SettingsUiState> = _settingsUiState
+    val settingsUiState: StateFlow<SettingsUiState> = _settingsUiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            setUIState(appContext)
+        }
+    }
 
     fun changeLayout(layout: SettingsUiState.Layout) {
         _settingsUiState.update { currentState ->
@@ -36,12 +43,12 @@ class SettingsViewModel(
             active = false
         )
 
-        val id = _camsViewModel.addCam(cam)
+        val id = camsViewModel.addCam(cam)
         if(id == -1L) {
             return null
         }
         if (active) {
-            return _camsViewModel.addActive(id.toInt())
+            return camsViewModel.addActive(id.toInt())
         }
 
         return true
@@ -57,7 +64,7 @@ class SettingsViewModel(
         )
 
         try{
-            _camsViewModel.updateCam(cam)
+            camsViewModel.updateCam(cam)
             return true
         }
         catch (e: SQLiteConstraintException){
@@ -66,33 +73,29 @@ class SettingsViewModel(
     }
 
     fun removeCam(id: Int) {
-        _camsViewModel.removeCam(id)
+        camsViewModel.removeCam(id)
     }
 
     suspend fun removeActive(id: Int): Boolean {
-        return _camsViewModel.removeActive(id)
+        return camsViewModel.removeActive(id)
     }
 
     suspend fun addActive(id: Int): Boolean {
-        return _camsViewModel.addActive(id)
+        return camsViewModel.addActive(id)
     }
 
-    private fun setUIState(context: Context): SettingsUiState {
+    private suspend fun setUIState(context: Context) {
         val sharedPref = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
-
         val layout = sharedPref.getInt("layout", 0)
-        val uiState = SettingsUiState(
-            SettingsUiState.Layout.fromInt(layout)
-        )
-        viewModelScope.launch {
-            _camsViewModel.getAllCamsStream.collect { cams ->
-                _settingsUiState.update {
-                    it.copy(cams = cams)
-                }
+
+        camsViewModel.getAllCamsStream.collect { cams ->
+            _settingsUiState.update {
+                it.copy(
+                    cams = cams,
+                    layout = SettingsUiState.Layout.fromInt(layout)
+                )
             }
         }
-
-        return uiState
     }
 
     private fun saveUIState(context: Context, layout: SettingsUiState.Layout) {

@@ -40,11 +40,10 @@ data class Test(
 @Composable
 fun PtzVisionApp(
     navController: NavHostController = rememberNavController(),
-    windowSize: WindowSizeClass
+    windowSize: WindowSizeClass,
+    settingsViewModel: SettingsViewModel,
+    mainViewModel: MainViewModel
 ) {
-    val mainViewModel = MainViewModel(context = LocalContext.current)
-    val settingsViewModel = SettingsViewModel(context = LocalContext.current)
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background

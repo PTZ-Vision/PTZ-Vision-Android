@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -101,16 +102,23 @@ fun Camera(
                 .padding(16.dp, 8.dp, 8.dp, 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Column {
+            Column(
+                modifier = Modifier.weight(0.5f)
+            ) {
                 Text(
                     text = cam.name,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = cam.ip + ":" + cam.port.toString(),
                     color = MaterialTheme.colorScheme.onSecondaryContainer)
             }
-            Row{
+            Row(
+                modifier = Modifier.weight(0.4f),
+                horizontalArrangement = Arrangement.End
+            ){
                 IconButton(
                     onClick = {
                         isCamActive = !isCamActive
@@ -119,7 +127,11 @@ fun Camera(
                             settingsViewModel.viewModelScope.launch {
                                 isCamActive = settingsViewModel.addActive(cam.id)
                                 if(!isCamActive)
-                                    Toast.makeText(context, "Max. 4 active cams allowed", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Max. 4 active cams allowed",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                             }
                         } else {
                             settingsViewModel.viewModelScope.launch {

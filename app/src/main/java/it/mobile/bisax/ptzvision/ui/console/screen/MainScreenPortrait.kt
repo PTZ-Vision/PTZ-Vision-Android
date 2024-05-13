@@ -1,5 +1,6 @@
 package it.mobile.bisax.ptzvision.ui.console.screen
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,7 +36,8 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 fun MainScreenPortrait(
     mainViewModel: MainViewModel,
     settingsViewModel: SettingsViewModel,
-    windowSize: WindowSizeClass
+    windowSize: WindowSizeClass,
+    context: Context
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
@@ -43,13 +45,16 @@ fun MainScreenPortrait(
     Column(modifier = Modifier.fillMaxSize()) {
         SecondaryCams(
             modifier = Modifier
-                .weight(0.2f)
+                .weight(0.2f),
+            mainViewModel = mainViewModel,
+            context = context
         )
         SelectedCam(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.3f)
-                .padding(0.dp, 0.dp, 0.dp, 10.dp)
+                .padding(0.dp, 0.dp, 0.dp, 10.dp),
+            cam = mainUiState.activeCams[0]
         )
 
         Row (modifier= Modifier
@@ -145,7 +150,8 @@ fun MainScreenPortrait(
         ScenesGrid(
             modifier = Modifier.weight(0.25f),
             windowSize = windowSize,
-            isLandScape = false
+            isLandScape = false,
+            mainViewModel = mainViewModel
         )
 
     }

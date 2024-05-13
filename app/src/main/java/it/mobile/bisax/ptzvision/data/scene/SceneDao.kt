@@ -1,7 +1,6 @@
 package it.mobile.bisax.ptzvision.data.scene
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -16,12 +15,6 @@ interface SceneDao {
     @Update
     suspend fun update(scene: Scene)
 
-    @Delete
-    suspend fun delete(scene: Scene)
-
-    @Query("SELECT * from scene WHERE id = :id")
-    fun getItem(id: Int): Flow<Scene>
-
-    @Query("SELECT * from scene ORDER BY name ASC")
-    fun getAllItems(): Flow<List<Scene>>
+    @Query("SELECT * FROM scene WHERE idCamera=:camId ORDER BY slot ASC")
+    fun getScenesbyCam(camId: Int): Flow<List<Scene>>
 }

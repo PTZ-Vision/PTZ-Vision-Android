@@ -1,6 +1,9 @@
 package it.mobile.bisax.ptzvision.ui.settings.cameraadd
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +37,7 @@ enum class CameraMode {
     MODIFY
 }
 
+@SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun CameraSet(
     settingsViewModel: SettingsViewModel,
@@ -46,6 +50,9 @@ fun CameraSet(
     camPort: Int = 0,
     camActive: Boolean = false
 ) {
+    // lock orientation to vertical
+    (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
     Surface(
         modifier = Modifier.fillMaxSize(),
     ){
@@ -147,13 +154,13 @@ private fun addCamera(
                 Toast.makeText(
                     context,
                     "IP already in use",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                 ).show()
             else if (!isActive) {
                 Toast.makeText(
                     context,
                     "Max. 4 active cams allowed",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                 ).show()
                 onBack()
             }
@@ -161,7 +168,7 @@ private fun addCamera(
                 Toast.makeText(
                     context,
                     "Camera added",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                 ).show()
                 onBack()
             }
@@ -171,7 +178,7 @@ private fun addCamera(
         Toast.makeText(
             context,
             "Please fill all fields",
-            Toast.LENGTH_LONG
+            Toast.LENGTH_SHORT
         ).show()
     }
 }
@@ -193,19 +200,19 @@ private fun saveChanges(
                 Toast.makeText(
                     context,
                     "IP already in use",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                 ).show()
             else if (!updateStatus)
                 Toast.makeText(
                     context,
                     "Max. 4 active cams allowed",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                 ).show()
             else{
                 Toast.makeText(
                     context,
                     "Changes saved",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                 ).show()
                 onBack()
             }
@@ -216,7 +223,7 @@ private fun saveChanges(
         Toast.makeText(
             context,
             "Please fill all fields",
-            Toast.LENGTH_LONG
+            Toast.LENGTH_SHORT
         ).show()
     }
 }
