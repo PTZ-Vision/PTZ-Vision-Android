@@ -54,7 +54,7 @@ fun MainScreenLandscape(
                     modifier = Modifier
                         .weight(0.5f)
                         .fillMaxHeight(),
-                    cam = mainUiState.activeCams.getOrNull(mainUiState.selectedCamSlot)
+                    cam = mainUiState.activeCams.getOrNull(0)
                 )
             }
             Column(modifier = Modifier
@@ -140,7 +140,7 @@ fun MainScreenLandscape(
                     modifier = Modifier
                         .weight(0.5f)
                         .fillMaxHeight(),
-                    cam = mainUiState.activeCams.getOrNull(mainUiState.selectedCamSlot)
+                    cam = mainUiState.activeCams.getOrNull(0)
                 )
             }
         }

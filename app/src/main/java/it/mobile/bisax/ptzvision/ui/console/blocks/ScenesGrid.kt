@@ -15,8 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,36 +38,14 @@ fun ScenesGrid(
     isLandScape: Boolean,
     mainViewModel: MainViewModel
 ) {
-    val mainUiState by mainViewModel.uiState.collectAsState()
-
     val buttons: MutableMap<Int, ButtonData> = mutableMapOf()
 
     for (i in 0 until 9) {
-        val scene = mainUiState.camScenes.find { it.slot == i }
-        if (scene == null) {
-            buttons[i] = ButtonData(
-                label = "Empty",
-                onClick = { },
-                onLongClick = { mainViewModel.addScene(i, mainUiState.activeCams.getOrNull(mainUiState.selectedCamSlot)?.id ?: 0) }
-            )
-            continue
-        }
-        else {
-            buttons[i] = ButtonData(
-                label = scene.name,
-                onClick = {
-                    mainViewModel.sendSceneToDevice(scene)
-                },
-                onLongClick = {
-                    mainViewModel.updateScene(
-                        scene.id,
-                        scene.slot,
-                        "UP ${scene.slot}",
-                        mainUiState.activeCams[mainUiState.selectedCamSlot]?.id ?: 0
-                    )
-                }
-            )
-        }
+        buttons[i] = ButtonData(
+            label = if(i == 0) "Home" else "Scene $i",
+            onClick = { _ -> mainViewModel.goToScene(i) },
+            onLongClick = { _ -> mainViewModel.saveSceneOnCam(i) }
+        )
     }
 
     Column (modifier= modifier

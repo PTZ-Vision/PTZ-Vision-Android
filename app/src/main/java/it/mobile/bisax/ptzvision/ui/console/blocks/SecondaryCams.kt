@@ -29,34 +29,32 @@ fun SecondaryCams(
     val coroutineScope = rememberCoroutineScope()
 
     Row(modifier = modifier) {
-        for (i in 0..3) {
-            if(i != uiState.selectedCamSlot){
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .fillMaxHeight()
-                        .clickable {
-                            if (uiState.activeCams.getOrNull(i) != null) {
-                                coroutineScope.launch {
-                                    mainViewModel.setNewActiveCam(i, uiState.activeCams[i]!!.id)
-                                }
-                            } else {
-                                toast?.cancel()
-                                toast = Toast.makeText(
-                                    context,
-                                    "No camera in slot $i",
-                                    Toast.LENGTH_SHORT
-                                )
-                                toast?.show()
+        for (i in 1..3) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .fillMaxHeight()
+                    .clickable {
+                        if (uiState.activeCams.getOrNull(i) != null) {
+                            coroutineScope.launch {
+                                mainViewModel.setNewActiveCam(i)
                             }
+                        } else {
+                            toast?.cancel()
+                            toast = Toast.makeText(
+                                context,
+                                "No camera in slot $i",
+                                Toast.LENGTH_SHORT
+                            )
+                            toast?.show()
                         }
-                ) {
-                    Text(
-                        text = uiState.activeCams.getOrNull(i)?.name ?: "NO SIGNAL",
-                        color = Color.Red
-                    )
-                }
+                    }
+            ) {
+                Text(
+                    text = uiState.activeCams.getOrNull(i)?.name ?: "NO SIGNAL",
+                    color = Color.Red
+                )
             }
         }
     }
