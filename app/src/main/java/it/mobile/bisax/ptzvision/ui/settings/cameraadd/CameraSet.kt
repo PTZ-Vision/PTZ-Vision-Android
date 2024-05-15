@@ -105,28 +105,17 @@ fun CameraSet(
             }
             Button(
                 onClick = {
-                    if (mode == CameraMode.ADD) {
-                        addCamera(
-                            settingsViewModel = settingsViewModel,
-                            context = context,
-                            onBack = onBack,
-                            name = name,
-                            ip = ip,
-                            port = port,
-                            active = active
-                        )
-                    } else {
-                        saveChanges(
-                            settingsViewModel = settingsViewModel,
-                            context = context,
-                            onBack = onBack,
-                            id = camId,
-                            name = name,
-                            ip = ip,
-                            port = port,
-                            active = active
-                        )
-                    }
+                    setCamera(
+                        settingsViewModel = settingsViewModel,
+                        context = context,
+                        onBack = onBack,
+                        mode = mode,
+                        id = camId,
+                        name = name,
+                        ip = ip,
+                        port = port,
+                        active = active
+                    )
                 },
                 modifier = Modifier.padding(start = 16.dp),
             ){
@@ -138,10 +127,12 @@ fun CameraSet(
     }
 }
 
-private fun addCamera(
+private fun setCamera(
     settingsViewModel: SettingsViewModel,
     context: Context,
     onBack: () -> Unit,
+    mode: CameraMode,
+    id: Int = 0,
     name: String,
     ip: String,
     port: Int,
@@ -149,14 +140,20 @@ private fun addCamera(
 ) {
     if (name.isNotEmpty() && ip.isNotEmpty() && port != 0){
         settingsViewModel.viewModelScope.launch {
-            val isActive = settingsViewModel.insertCam(name, ip, port, active)
-            if (isActive == null)
+            val status =
+                if(mode == CameraMode.ADD) {
+                    settingsViewModel.insertCam(name, ip, port, active)
+                }
+                else {
+                    settingsViewModel.updateCam(id, name, ip, port, active)
+                }
+            if (status == null)
                 Toast.makeText(
                     context,
                     "IP already in use",
                     Toast.LENGTH_SHORT
                 ).show()
-            else if (!isActive) {
+            else if (!status) {
                 Toast.makeText(
                     context,
                     "Max. 4 active cams allowed",
@@ -172,51 +169,6 @@ private fun addCamera(
                 ).show()
                 onBack()
             }
-        }
-    }
-    else{
-        Toast.makeText(
-            context,
-            "Please fill all fields",
-            Toast.LENGTH_SHORT
-        ).show()
-    }
-}
-
-private fun saveChanges(
-    settingsViewModel: SettingsViewModel,
-    context: Context,
-    onBack: () -> Unit,
-    id: Int,
-    name: String,
-    ip: String,
-    port: Int,
-    active: Boolean
-) {
-    if (name.isNotEmpty() && ip.isNotEmpty() && port != 0){
-        settingsViewModel.viewModelScope.launch {
-            val updateStatus = settingsViewModel.updateCam(id, name, ip, port, active)
-            if (updateStatus == null)
-                Toast.makeText(
-                    context,
-                    "IP already in use",
-                    Toast.LENGTH_SHORT
-                ).show()
-            else if (!updateStatus)
-                Toast.makeText(
-                    context,
-                    "Max. 4 active cams allowed",
-                    Toast.LENGTH_SHORT
-                ).show()
-            else{
-                Toast.makeText(
-                    context,
-                    "Changes saved",
-                    Toast.LENGTH_SHORT
-                ).show()
-                onBack()
-            }
-
         }
     }
     else{

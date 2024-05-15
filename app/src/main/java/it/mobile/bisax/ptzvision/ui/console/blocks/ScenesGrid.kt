@@ -1,6 +1,5 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +17,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -41,26 +41,35 @@ fun ScenesGrid(
     mainViewModel: MainViewModel
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
-    Log.d("PTZDSceneS", "ScenesGrid ${mainUiState.activeCams[0]?.id ?: 0} ${mainUiState.camScenes}")
 
     val buttons: MutableMap<Int, ButtonData> = mutableMapOf()
 
     for (i in 0 until 9) {
         val scene = mainUiState.camScenes.find { it.slot == i }
-        Log.d("PTZDScenes${mainUiState.activeCams[0]!!.name}", "Scene ${scene?.slot} \"${scene?.name}\"\t cam: ${scene?.idCamera}")
         if (scene == null) {
             buttons[i] = ButtonData(
                 label = "Empty",
                 onClick = { },
-                onLongClick = { mainViewModel.addScene(i, mainUiState.activeCams[0]?.id ?: 0) }
+                onLongClick = { mainViewModel.addScene(i, mainUiState.activeCams.getOrNull(mainUiState.selectedCamSlot)?.id ?: 0) }
             )
             continue
         }
-        buttons[i] = ButtonData(
-            label = scene.name,
-            onClick = { mainViewModel.sendSceneToDevice(scene) },
-            onLongClick = { mainViewModel.updateScene(scene.id, scene.slot, "Scene ${scene.slot + 1}", mainUiState.activeCams[0]?.id ?: 0) }
-        )
+        else {
+            buttons[i] = ButtonData(
+                label = scene.name,
+                onClick = {
+                    mainViewModel.sendSceneToDevice(scene)
+                },
+                onLongClick = {
+                    mainViewModel.updateScene(
+                        scene.id,
+                        scene.slot,
+                        "UP ${scene.slot}",
+                        mainUiState.activeCams[mainUiState.selectedCamSlot]?.id ?: 0
+                    )
+                }
+            )
+        }
     }
 
     Column (modifier= modifier
@@ -90,14 +99,17 @@ fun ScenesGrid(
                         .weight(0.1f))
                 for (j in 0 until 3) {
                     val index = i * 3 + j
+                    val buttonData = buttons[index]!!
+                    val onClick = rememberUpdatedState(buttonData.onClick)
+                    val onLongClick = rememberUpdatedState(buttonData.onLongClick)
                     Text(
                         text = buttons[index]!!.label,
 
                         modifier = Modifier
                             .pointerInput(Unit) {
                                 detectTapGestures(
-                                    onLongPress = buttons[index]!!.onLongClick,
-                                    onTap = buttons[index]!!.onClick,
+                                    onLongPress = { offset -> onLongClick.value(offset) },
+                                    onTap = { offset -> onClick.value(offset) }
                                 )
                             }
                             .background(if(buttons[index]!!.label != "Empty") Color.Blue else Color.Gray, CircleShape)

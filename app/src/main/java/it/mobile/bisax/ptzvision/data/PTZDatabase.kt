@@ -10,7 +10,7 @@ import it.mobile.bisax.ptzvision.data.preset.Preset
 import it.mobile.bisax.ptzvision.data.scene.Scene
 import it.mobile.bisax.ptzvision.data.scene.SceneDao
 
-@Database(entities = [Scene::class, Cam::class, Preset::class], version = 4, exportSchema = false)
+@Database(entities = [Scene::class, Cam::class, Preset::class], version = 5, exportSchema = false)
 abstract class PTZDatabase : RoomDatabase() {
 
     abstract fun sceneDao(): SceneDao

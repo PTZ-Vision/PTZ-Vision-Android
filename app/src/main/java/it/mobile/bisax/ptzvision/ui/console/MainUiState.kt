@@ -7,5 +7,6 @@ data class MainUiState(
     val isAIEnabled: Boolean,
     val isAutoFocusEnabled: Boolean,
     val activeCams: List<Cam?> = emptyList(),
+    val selectedCamSlot: Int = 0,
     val camScenes: List<Scene> = emptyList(),
 )

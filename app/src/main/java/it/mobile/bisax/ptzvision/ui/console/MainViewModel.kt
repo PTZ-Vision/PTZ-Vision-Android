@@ -6,14 +6,13 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import it.mobile.bisax.ptzvision.data.cam.Cam
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
 import it.mobile.bisax.ptzvision.data.scene.Scene
 import it.mobile.bisax.ptzvision.data.scene.ScenesViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -49,22 +48,16 @@ class MainViewModel(
 
     // TODO: BUG GRAFICO, RESET UI STATE
     suspend fun setNewActiveCam(camSlot: Int, camId: Int) {
-        val newActiveCams = _uiState.value.activeCams.toMutableList()
-        newActiveCams[0] = _uiState.value.activeCams[camSlot]
-        newActiveCams[camSlot] = _uiState.value.activeCams[0]
-
         scenesViewModel.getScenesByCam(camId = camId).collect{ scenes ->
-            _uiState.update {
-                it.copy(
-                    camScenes = scenes,
-                    activeCams = newActiveCams
-                )
-            }
+            _uiState.value = _uiState.value.copy(
+                camScenes = scenes,
+                selectedCamSlot = camSlot
+            )
         }
     }
 
     fun updateScene(sceneId: Int, slot: Int, name: String, camId: Int) {
-        Log.d("PTZD_UPDATE", "Update scene $slot $sceneId $name")
+        Log.d("PTZD_UP", "Updating scene $sceneId")
         viewModelScope.launch {
             scenesViewModel.updateScene(
                 Scene(
@@ -87,8 +80,7 @@ class MainViewModel(
     }
 
     fun addScene(slot: Int, camId: Int) {
-        Log.d("PTZD_ADD", "Add scene $slot $camId")
-
+        Log.d("PTZD_ADD", "Adding scene to camID $camId in slot $slot")
         if(camId == 0)
             return
 
@@ -97,7 +89,7 @@ class MainViewModel(
                 Scene(
                     idCamera = camId,
                     slot = slot,
-                    name = "$camId - $slot",
+                    name = "ADD $slot $camId",
                     pan = Math.random().toFloat(),
                     tilt = Math.random().toFloat(),
                     zoom = Math.random().toFloat(),
@@ -109,13 +101,6 @@ class MainViewModel(
                     focusSpeed = Math.random().toFloat(),
                 )
             )
-            scenesViewModel.getScenesByCam(camId).collect { scenes ->
-                _uiState.update {
-                    it.copy(
-                        camScenes = scenes
-                    )
-                }
-            }
         }
     }
 
@@ -141,16 +126,27 @@ class MainViewModel(
         focusIntensity = posY/maxPos
     }
 
-    private suspend fun setUIState() {
-        val cameras: List<Cam> = camsViewModel.getActiveCamsStream.first()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun setUIState() {
+        viewModelScope.launch {
+            try {
+                camsViewModel.getActiveCamsStream.collect{cams ->
+                    scenesViewModel.getScenesByCam(cams[_uiState.value.selectedCamSlot].id).collect { scenes ->
+                        _uiState.update {
+                            it.copy(
+                                activeCams = cams,
+                                camScenes = scenes
+                            )
+                        }
+                        Log.d("PTZD", "UI State updated $scenes")
+                    }
+                }
 
-        scenesViewModel.getScenesByCam(cameras[0].id).collect { scenes ->
-            _uiState.update {
-                it.copy(
-                    camScenes = scenes,
-                    activeCams = cameras + List(4 - cameras.size) { null }
-                )
+
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
+
 }

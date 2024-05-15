@@ -54,7 +54,7 @@ fun MainScreenPortrait(
                 .fillMaxWidth()
                 .weight(0.3f)
                 .padding(0.dp, 0.dp, 0.dp, 10.dp),
-            cam = mainUiState.activeCams[0]
+            cam = mainUiState.activeCams.getOrNull(mainUiState.selectedCamSlot)
         )
 
         Row (modifier= Modifier
