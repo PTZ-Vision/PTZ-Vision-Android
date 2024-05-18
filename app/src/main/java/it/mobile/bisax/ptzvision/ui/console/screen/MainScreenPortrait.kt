@@ -1,6 +1,8 @@
 package it.mobile.bisax.ptzvision.ui.console.screen
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +34,7 @@ import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
 import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreenPortrait(
     mainViewModel: MainViewModel,
@@ -73,7 +76,8 @@ fun MainScreenPortrait(
                                 60.dp,
                             0.dp
                         ),
-                    colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray)
+                    colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray),
+                    enabled = mainUiState.activeCams.isNotEmpty()
                 ) {
                     Text(text = "AI Tracking")
                 }
@@ -99,7 +103,7 @@ fun MainScreenPortrait(
                     modifier = Modifier
                         .weight(0.5f)
                         .padding(5.dp, 5.dp),
-                    enabled = !(mainUiState.isAIEnabled),
+                    enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
                     colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAutoFocusEnabled) Color.Green else Color.Gray)
                 ) {
                     Text(
@@ -120,8 +124,9 @@ fun MainScreenPortrait(
                 JoyStick(
                     modifier = Modifier
                         .weight(0.5f),
-                    enabled = !(mainUiState.isAIEnabled),
-                    mainViewModel = mainViewModel
+                    enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                    mainViewModel = mainViewModel,
+                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
                 )
 
             SliderBox(
@@ -129,29 +134,33 @@ fun MainScreenPortrait(
                     .weight(0.25f)
                     .padding(15.dp),
                 setPosition = { maxPos, posY -> mainViewModel.setZoomIntensity(maxPos, posY) },
-                enabled = !(mainUiState.isAIEnabled)
+                enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
             )
             SliderBox(
                 modifier = Modifier
                     .weight(0.25f)
                     .padding(15.dp),
                 setPosition = { maxPos, posY -> mainViewModel.setFocusIntensity(maxPos,posY) },
-                enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled)
+                enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
             )
 
             if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
                 JoyStick(
                     modifier = Modifier
                         .weight(0.5f),
-                    enabled = !(mainUiState.isAIEnabled),
-                    mainViewModel = mainViewModel
+                    enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                    mainViewModel = mainViewModel,
+                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
                 )
         }
         ScenesGrid(
             modifier = Modifier.weight(0.25f),
             windowSize = windowSize,
             isLandScape = false,
-            mainViewModel = mainViewModel
+            mainViewModel = mainViewModel,
+            enabled = mainUiState.activeCams.isNotEmpty()
         )
 
     }

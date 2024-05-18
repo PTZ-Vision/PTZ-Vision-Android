@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 fun SettingsSection(
     title: String,
     helper: @Composable () -> Unit = {},
-    children: @Composable () -> Unit
+    children: @Composable () -> Unit = {}
 ) {
     HorizontalDivider()
     Row(
@@ -31,7 +31,7 @@ fun SettingsSection(
             fontSize = 20.sp,
             fontWeight = FontWeight(600),
             modifier = Modifier
-                .padding(16.dp, 16.dp, 0.dp, 16.dp),
+                .padding(16.dp, 16.dp, 0.dp, 8.dp),
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         helper()

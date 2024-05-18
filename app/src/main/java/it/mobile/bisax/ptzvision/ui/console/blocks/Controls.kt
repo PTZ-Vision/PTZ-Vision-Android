@@ -1,5 +1,9 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -27,6 +31,7 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -43,12 +48,14 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import androidx.compose.ui.unit.min as minDp
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun JoyStick(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
     moved: (x: Float, y: Float) -> Unit = { _, _ -> },
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    hapticFeedbackEnabled: Boolean
 ) {
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
@@ -57,6 +64,18 @@ fun JoyStick(
             .padding(15.dp)
     ) {
         val padSize = minDp(maxWidth, maxHeight)
+        val dotSize: Dp = padSize / 3.5f
+        val maxRadius = with(LocalDensity.current) { (padSize / 2).toPx() }
+        val centerPx = with(LocalDensity.current) { ((padSize - dotSize) / 2).toPx() }
+
+        var offsetX by remember { mutableFloatStateOf(centerPx) }
+        var offsetY by remember { mutableFloatStateOf(centerPx) }
+        var radius by remember { mutableFloatStateOf(0f) }
+        var theta by remember { mutableFloatStateOf(0f) }
+
+        var positionX by remember { mutableFloatStateOf(0f) }
+        var positionY by remember { mutableFloatStateOf(0f) }
+
         Box(
             modifier = Modifier
                 .size(padSize)
@@ -69,98 +88,105 @@ fun JoyStick(
                     ), CircleShape
                 )
         ) {
-            val dotSize: Dp = padSize / 3.5f
-            val maxRadius = with(LocalDensity.current) { (padSize / 2).toPx() }
-            val centerX = with(LocalDensity.current) { ((padSize - dotSize) / 2).toPx() }
-            val centerY = with(LocalDensity.current) { ((padSize - dotSize) / 2).toPx() }
-
-            var offsetX by remember { mutableFloatStateOf(centerX) }
-            var offsetY by remember { mutableFloatStateOf(centerY) }
-
-            var radius by remember { mutableFloatStateOf(0f) }
-            var theta by remember { mutableFloatStateOf(0f) }
-
-            var positionX by remember { mutableFloatStateOf(0f) }
-            var positionY by remember { mutableFloatStateOf(0f) }
-
-
+            val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
             Box(
                 modifier = Modifier
                     .offset {
                         IntOffset(
-                            (positionX + centerX).roundToInt(),
-                            (positionY + centerY).roundToInt()
+                            (positionX + centerPx).roundToInt(),
+                            (positionY + centerPx).roundToInt()
                         )
                     }
                     .size(dotSize)
-                    .background(if (enabled) Color.Green else Color(0x88FFFFFF), CircleShape)
-                    .then(
+                    .background(
+                        color = if (enabled) Color.Green else Color(0x88FFFFFF),
+                        shape = CircleShape
+                    )
+                    .then (
                         if (enabled) {
-                            Modifier
-                                .pointerInput(Unit) {
-                                    detectDragGestures(onDragEnd = {
-                                        offsetX = centerX
-                                        offsetY = centerY
-                                        radius = 0f
-                                        theta = 0f
-                                        positionX = 0f
-                                        positionY = 0f
+                            Modifier.pointerInput(Unit) {
+                                detectDragGestures(onDragEnd = {
+                                    vibe.cancel()
+                                    offsetX = centerPx
+                                    offsetY = centerPx
+                                    radius = 0f
+                                    theta = 0f
+                                    positionX = 0f
+                                    positionY = 0f
 
-                                        mainViewModel.setPanTilt(0f, 0f)
-                                    }) { pointerInputChange: PointerInputChange, offset: Offset ->
-                                        val x = offsetX + offset.x - centerX
-                                        val y = offsetY + offset.y - centerY
+                                    mainViewModel.setPanTilt(0f, 0f)
+                                }) { pointerInputChange: PointerInputChange, offset: Offset ->
+                                    val x = offsetX + offset.x - centerPx
+                                    val y = offsetY + offset.y - centerPx
 
-                                        pointerInputChange.consume()
+                                    pointerInputChange.consume()
 
-                                        theta = if (x >= 0 && y >= 0) {
-                                            atan(y / x)
-                                        } else if (x < 0 && y >= 0) {
-                                            PI.toFloat() + atan(y / x)
-                                        } else if (x < 0 && y < 0) {
-                                            -PI.toFloat() + atan(y / x)
-                                        } else {
-                                            atan(y / x)
-                                        }
+                                    theta = if (x >= 0 && y >= 0) {
+                                        atan(y / x)
+                                    } else if (x < 0 && y >= 0) {
+                                        PI.toFloat() + atan(y / x)
+                                    } else if (x < 0 && y < 0) {
+                                        -PI.toFloat() + atan(y / x)
+                                    } else {
+                                        atan(y / x)
+                                    }
 
-                                        radius = sqrt((x.pow(2)) + (y.pow(2)))
+                                    radius = sqrt((x.pow(2)) + (y.pow(2)))
 
-                                        offsetX += offset.x
-                                        offsetY += offset.y
+                                    offsetX += offset.x
+                                    offsetY += offset.y
 
-                                        if (radius > maxRadius) {
-                                            polarToCartesian(maxRadius, theta)
-                                        } else {
-                                            polarToCartesian(radius, theta)
-                                        }.apply {
-                                            positionX = first
-                                            positionY = second
 
-                                            val scaledDistance = radius / maxRadius
-                                            if (radius > maxRadius) {
-                                                polarToCartesian(1f, theta)
-                                            }
-                                            else{
-                                                polarToCartesian(scaledDistance, theta)
-                                            }.apply {
-                                                val posXinSquare = 0.5f*sqrt(2+first.pow(2)-second.pow(2)+2*first*sqrt(2.0f)) - 0.5f*sqrt(2+first.pow(2)-second.pow(2)-2*first*sqrt(2.0f))
-                                                val posYinSquare = 0.5f*sqrt(2-first.pow(2)+second.pow(2)+2*second*sqrt(2.0f)) - 0.5f*sqrt(2-first.pow(2)+second.pow(2)-2*second*sqrt(2.0f))
+                                    val clampedRadius = minOf(radius, maxRadius)
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hapticFeedbackEnabled) {
+                                        vibe.vibrate(
+                                            VibrationEffect.createWaveform(
+                                                longArrayOf(
+                                                    0,
+                                                    ((clampedRadius / maxRadius) * 105).toLong() + 1L
+                                                ),
+                                                intArrayOf(
+                                                    VibrationEffect.EFFECT_TICK,
+                                                    VibrationEffect.EFFECT_TICK
+                                                ),
+                                                0
+                                            )
+                                        )
+                                    }
+                                    polarToCartesian(clampedRadius, theta).apply {
+                                        positionX = first
+                                        positionY = second
 
-                                                mainViewModel.setPanTilt(posXinSquare, -posYinSquare) // negative y because of the inverted y axis in the UI space
-                                            }
+                                        val scaledDistance = clampedRadius / maxRadius
+                                        polarToCartesian(scaledDistance, theta).apply {
+                                            val posXinSquare = 0.5f * sqrt(
+                                                2 + first.pow(2) - second.pow(2) + 2 * first * sqrt(2.0f)
+                                            ) - 0.5f * sqrt(
+                                                2 + first.pow(2) - second.pow(2) - 2 * first * sqrt(2.0f)
+                                            )
+                                            val posYinSquare = 0.5f * sqrt(
+                                                2 - first.pow(2) + second.pow(2) + 2 * second * sqrt(2.0f)
+                                            ) - 0.5f * sqrt(
+                                                2 - first.pow(2) + second.pow(2) - 2 * second * sqrt(2.0f)
+                                            )
+
+                                            mainViewModel.setPanTilt(posXinSquare,-posYinSquare) // negative y because of the inverted y axis in the UI space
                                         }
                                     }
+
                                 }
-                                .onGloballyPositioned { coordinates ->
-                                    moved(
-                                        (coordinates.positionInParent().x - centerX) / maxRadius,
-                                        -(coordinates.positionInParent().y - centerY) / maxRadius
-                                    )
-                                }
-                        } else {
+                            }
+                        }
+                        else{
                             Modifier
                         }
-                    ),
+                    )
+                    .onGloballyPositioned { coordinates ->
+                        moved(
+                            (coordinates.positionInParent().x - centerPx) / maxRadius,
+                            -(coordinates.positionInParent().y - centerPx) / maxRadius
+                        )
+                    }
             )
         }
     }
@@ -174,7 +200,8 @@ fun SliderBox(
     modifier: Modifier = Modifier,
     moved: (y: Float) -> Unit = { _ -> },
     setPosition: (maxPos:Float, posY: Float) -> Unit,
-    enabled: Boolean = false
+    enabled: Boolean = false,
+    hapticFeedbackEnabled: Boolean
 ){
     BoxWithConstraints(
         modifier = modifier
@@ -183,6 +210,7 @@ fun SliderBox(
     ) {
         val sliderHeight = maxHeight
         val sliderWidth = maxHeight*0.3f
+        val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
         Box(
             modifier = Modifier
                 .height(sliderHeight)
@@ -224,6 +252,8 @@ fun SliderBox(
                             Modifier
                                 .pointerInput(Unit) {
                                     detectDragGestures(onDragEnd = {
+                                        vibe.cancel()
+
                                         offsetY = centerY
                                         radius = 0f
                                         theta = 0f
@@ -241,11 +271,25 @@ fun SliderBox(
 
                                         offsetY += offset.y
 
-                                        if (abs(radius) > maxYOffset) {
-                                            polarToCartesian(sign(radius) * maxYOffset, theta)
-                                        } else {
-                                            polarToCartesian(radius, theta)
-                                        }.apply {
+                                        val clampedRadius = sign(radius) * minOf(abs(radius), maxYOffset)
+
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hapticFeedbackEnabled) {
+                                            vibe.vibrate(
+                                                VibrationEffect.createWaveform(
+                                                    longArrayOf(
+                                                        0,
+                                                        ((abs(clampedRadius) / maxYOffset) * 110).toLong() + 1L
+                                                    ),
+                                                    intArrayOf(
+                                                        VibrationEffect.EFFECT_TICK,
+                                                        VibrationEffect.EFFECT_TICK
+                                                    ),
+                                                    0
+                                                )
+                                            )
+                                        }
+
+                                        polarToCartesian(clampedRadius, theta).apply {
                                             val isMax = positionY == second
                                             positionY = second
 

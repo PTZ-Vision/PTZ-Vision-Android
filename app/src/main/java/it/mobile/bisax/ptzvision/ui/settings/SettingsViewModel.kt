@@ -35,6 +35,14 @@ class SettingsViewModel(
         saveUIState(appContext, layout)
     }
 
+    fun toggleHapticFeedback() {
+        _settingsUiState.update { currentState ->
+            currentState.copy(hapticFeedbackEnabled = !currentState.hapticFeedbackEnabled)
+        }
+
+        saveUIState(appContext, settingsUiState.value.layout)
+    }
+
     suspend fun insertCam(name: String, ip: String, port: Int, active: Boolean): Boolean? {
         val cam = Cam(
             name = name,
@@ -87,12 +95,14 @@ class SettingsViewModel(
     private suspend fun setUIState(context: Context) {
         val sharedPref = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
         val layout = sharedPref.getInt("layout", 0)
+        val hapticFeedbackEnabled = sharedPref.getBoolean("hapticFeedbackEnabled", false)
 
         camsViewModel.getAllCamsStream.collect { cams ->
             _settingsUiState.update {
                 it.copy(
                     cams = cams,
-                    layout = SettingsUiState.Layout.fromInt(layout)
+                    layout = SettingsUiState.Layout.fromInt(layout),
+                    hapticFeedbackEnabled = hapticFeedbackEnabled
                 )
             }
         }
@@ -102,6 +112,7 @@ class SettingsViewModel(
         val sharedPref = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
             putInt("layout", layout.layoutID)
+            putBoolean("hapticFeedbackEnabled", settingsUiState.value.hapticFeedbackEnabled)
             apply()
         }
     }

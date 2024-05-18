@@ -36,7 +36,8 @@ fun ScenesGrid(
     modifier: Modifier = Modifier,
     windowSize: WindowSizeClass,
     isLandScape: Boolean,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    enabled: Boolean
 ) {
     val buttons: MutableMap<Int, ButtonData> = mutableMapOf()
 
@@ -82,13 +83,18 @@ fun ScenesGrid(
                         text = buttons[index]!!.label,
 
                         modifier = Modifier
-                            .pointerInput(Unit) {
-                                detectTapGestures(
-                                    onLongPress = { offset -> onLongClick.value(offset) },
-                                    onTap = { offset -> onClick.value(offset) }
-                                )
-                            }
-                            .background(if(buttons[index]!!.label != "Empty") Color.Blue else Color.Gray, CircleShape)
+                            .then(
+                                if(enabled)
+                                    Modifier.pointerInput(Unit) {
+                                        detectTapGestures(
+                                            onLongPress = { offset -> onLongClick.value(offset) },
+                                            onTap = { offset -> onClick.value(offset) }
+                                        )
+                                    }
+                                else
+                                    Modifier
+                            )
+                            .background(if(enabled) Color.Blue else Color.Gray, CircleShape)
                             .weight(0.8f)
                             .padding(10.dp),
                         textAlign = TextAlign.Center
