@@ -3,5 +3,6 @@ package it.mobile.bisax.ptzvision.data.utils
 enum class Protocol {
     NDI,
     VISCA,
-    ONVIF
+    ONVIF,
+    CGI_HTTP
 }

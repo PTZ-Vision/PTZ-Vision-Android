@@ -18,6 +18,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +34,7 @@ import it.mobile.bisax.ptzvision.ui.console.blocks.SelectedCam
 import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
 import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -44,6 +46,8 @@ fun MainScreenPortrait(
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
+
+    val coroutine = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize()) {
         SecondaryCams(
@@ -67,7 +71,11 @@ fun MainScreenPortrait(
         ) {
             val aiBtn = @Composable{modifier:Modifier ->
                 Button(
-                    onClick = { mainViewModel.toggleAI() },
+                    onClick = {
+                        coroutine.launch {
+                            mainViewModel.toggleAI()
+                        }
+                    },
                     modifier = modifier
                         .padding(
                             if(windowSize.widthSizeClass == WindowWidthSizeClass.Compact)
@@ -99,7 +107,11 @@ fun MainScreenPortrait(
                     fontSize = if(windowSize.widthSizeClass == WindowWidthSizeClass.Compact) 15.sp else 20.sp
                 )
                 Button(
-                    onClick = { mainViewModel.toggleAutoFocus() },
+                    onClick = {
+                        coroutine.launch {
+                            mainViewModel.toggleAutoFocus()
+                        }
+                    },
                     modifier = Modifier
                         .weight(0.5f)
                         .padding(5.dp, 5.dp),
@@ -128,12 +140,14 @@ fun MainScreenPortrait(
                     mainViewModel = mainViewModel,
                     hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
                 )
-
             SliderBox(
                 modifier = Modifier
                     .weight(0.25f)
                     .padding(15.dp),
-                setPosition = { maxPos, posY -> mainViewModel.setZoomIntensity(maxPos, posY) },
+                setPosition = { maxPos, posY ->
+                    coroutine.launch {
+                        mainViewModel.setZoomIntensity(maxPos, posY)
+                    } },
                 enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
                 hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
             )
@@ -141,7 +155,10 @@ fun MainScreenPortrait(
                 modifier = Modifier
                     .weight(0.25f)
                     .padding(15.dp),
-                setPosition = { maxPos, posY -> mainViewModel.setFocusIntensity(maxPos,posY) },
+                setPosition = { maxPos, posY ->
+                    coroutine.launch {
+                        mainViewModel.setFocusIntensity(maxPos,posY)
+                    } },
                 enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
                 hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
             )
