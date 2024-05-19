@@ -35,7 +35,7 @@ public class ViscaPTZController implements PTZController, Closeable {
             } else if (tilt > 0) {
                 moveCommand = PanTilt.upLeft(-pan, tilt);
             } else {
-                moveCommand = PanTilt.left(-pan, tilt);
+                moveCommand = PanTilt.left(-pan, 20);
             }
         } else if (pan > 0) {
             if (tilt < 0) {
@@ -43,13 +43,13 @@ public class ViscaPTZController implements PTZController, Closeable {
             } else if (tilt > 0) {
                 moveCommand = PanTilt.upRight(pan, tilt);
             } else {
-                moveCommand = PanTilt.right(pan, tilt);
+                moveCommand = PanTilt.right(pan, 20);
             }
         } else {
             if (tilt < 0) {
-                moveCommand = PanTilt.down(pan, -tilt);
+                moveCommand = PanTilt.down(24, -tilt);
             } else if (tilt > 0) {
-                moveCommand = PanTilt.up(pan, tilt);
+                moveCommand = PanTilt.up(24, tilt);
             } else {
                 moveCommand = PanTilt.stop();
             }
@@ -101,7 +101,6 @@ public class ViscaPTZController implements PTZController, Closeable {
     private Result runCommand(byte[] command) {
         try {
             this.output.write(command);
-            Log.d("ViscaPTZController", "Successfully send command: " + command.toString());
         } catch (IOException e) {
             Log.d("ViscaPTZController", "Failed to send command: " + command.toString());
             return Result.FAILURE;

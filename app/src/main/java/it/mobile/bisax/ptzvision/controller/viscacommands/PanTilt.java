@@ -6,8 +6,8 @@ import it.mobile.bisax.ptzvision.controller.utils.ByteParam;
 import it.mobile.bisax.ptzvision.controller.utils.HexConverter;
 
 public class PanTilt {
-    private static final ByteParam PARAM_TILT_SPEED = new ByteParam("tiltSpeed", 0, 20);
-    private static final ByteParam PARAM_PAN_SPEED = new ByteParam("panSpeed", 0, 24);
+    private static final ByteParam PARAM_TILT_SPEED = new ByteParam("tiltSpeed", 1, 20);
+    private static final ByteParam PARAM_PAN_SPEED = new ByteParam("panSpeed", 1, 24);
     private static final byte[] HEX_MOVEMENT_PREFIX = HexConverter.parseHex("81010601");
 
     public static byte[] up(int tiltSpeed) {

@@ -43,9 +43,11 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.12"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/DEPENDENCIES"
         }
     }
 }
@@ -74,4 +76,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.pedrosg94.root.enconder)
+    implementation(libs.apache.httpcomponents.httpclient)
 }

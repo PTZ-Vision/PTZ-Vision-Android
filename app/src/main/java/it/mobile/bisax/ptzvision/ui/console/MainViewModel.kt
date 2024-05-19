@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import it.mobile.bisax.ptzvision.controller.HttpCgiPTZController
 import it.mobile.bisax.ptzvision.controller.PTZController
 import it.mobile.bisax.ptzvision.controller.ViscaPTZController
 import it.mobile.bisax.ptzvision.controller.utils.MathUtils
@@ -59,7 +60,8 @@ class MainViewModel(
 
         var ptzController : PTZController?
         try{
-            ptzController = ViscaPTZController(newActiveCams[0])
+            // ptzController = ViscaPTZController(newActiveCams[0])
+            ptzController = HttpCgiPTZController(newActiveCams[0])
         } catch(e: Exception) {
             Log.d("MainViewModel", "Error creating PTZController: ${e.message}")
             ptzController = null
