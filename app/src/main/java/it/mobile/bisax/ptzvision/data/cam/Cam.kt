@@ -1,8 +1,13 @@
 package it.mobile.bisax.ptzvision.data.cam
 
+import android.content.Context
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import it.mobile.bisax.ptzvision.controller.PTZController
+import it.mobile.bisax.ptzvision.controller.ViscaPTZController
+import it.mobile.bisax.ptzvision.controller.utils.MathUtils
+import it.mobile.bisax.ptzvision.data.utils.Protocol
 
 @Entity(
     tableName = "cam",

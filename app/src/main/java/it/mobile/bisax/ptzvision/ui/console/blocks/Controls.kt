@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan
@@ -89,6 +91,7 @@ fun JoyStick(
                 )
         ) {
             val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
+            val coroutine = rememberCoroutineScope()
             Box(
                 modifier = Modifier
                     .offset {
@@ -114,7 +117,9 @@ fun JoyStick(
                                     positionX = 0f
                                     positionY = 0f
 
-                                    mainViewModel.setPanTilt(0f, 0f)
+                                    coroutine.launch {
+                                        mainViewModel.setPanTilt(0f, 0f)
+                                    }
                                 }) { pointerInputChange: PointerInputChange, offset: Offset ->
                                     val x = offsetX + offset.x - centerPx
                                     val y = offsetY + offset.y - centerPx
@@ -170,7 +175,12 @@ fun JoyStick(
                                                 2 - first.pow(2) + second.pow(2) - 2 * second * sqrt(2.0f)
                                             )
 
-                                            mainViewModel.setPanTilt(posXinSquare,-posYinSquare) // negative y because of the inverted y axis in the UI space
+                                            coroutine.launch {
+                                                mainViewModel.setPanTilt(
+                                                    posXinSquare,
+                                                    -posYinSquare
+                                                ) // negative y because of the inverted y axis in the UI space
+                                            }
                                         }
                                     }
 

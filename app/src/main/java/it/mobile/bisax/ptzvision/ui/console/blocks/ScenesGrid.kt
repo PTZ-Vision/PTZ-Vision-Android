@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +25,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import kotlinx.coroutines.launch
 
 data class ButtonData(
     val label: String,
@@ -40,12 +42,19 @@ fun ScenesGrid(
     enabled: Boolean
 ) {
     val buttons: MutableMap<Int, ButtonData> = mutableMapOf()
+    val coroutine = rememberCoroutineScope()
 
     for (i in 0 until 9) {
         buttons[i] = ButtonData(
             label = if(i == 0) "Home" else "Scene $i",
-            onClick = { _ -> mainViewModel.goToScene(i) },
-            onLongClick = { _ -> mainViewModel.saveSceneOnCam(i) }
+            onClick = { _ -> coroutine.launch {
+                mainViewModel.goToScene(i)
+            } },
+            onLongClick = { _ ->
+                coroutine.launch {
+                    mainViewModel.saveSceneOnCam(i)
+                }
+            }
         )
     }
 
