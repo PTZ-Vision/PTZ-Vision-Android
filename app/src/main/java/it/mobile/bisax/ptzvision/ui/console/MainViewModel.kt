@@ -28,22 +28,23 @@ class MainViewModel(
         }
     }
 
-    fun getSelectedCam(): Cam {
-        return _uiState.value.activeCams[0]!!
-    }
-
     suspend fun toggleAI() {
         _uiState.update {currentState ->
             currentState.copy(isAIEnabled = !currentState.isAIEnabled)
         }
-        // TODO: send command to camera
+
+        withContext(Dispatchers.IO) {
+            _uiState.value.ptzController?.setAutoTracking(_uiState.value.isAIEnabled)
+        }
     }
 
     suspend fun toggleAutoFocus() {
         _uiState.update {currentState ->
             currentState.copy(isAutoFocusEnabled = !currentState.isAutoFocusEnabled)
         }
-        // TODO: send command to camera
+        withContext(Dispatchers.IO) {
+            _uiState.value.ptzController?.setAutoFocus(_uiState.value.isAutoFocusEnabled)
+        }
     }
 
     fun setNewActiveCam(camSlot: Int) {
@@ -69,11 +70,15 @@ class MainViewModel(
     }
 
     suspend fun goToScene(sceneSlot: Int){
-        //TODO: set position of camera to scene slot
+        withContext(Dispatchers.IO) {
+            _uiState.value.ptzController?.callScene(sceneSlot)
+        }
     }
 
     suspend fun saveSceneOnCam(sceneSlot: Int){
-        //TODO: save current camera position to scene slot
+        withContext(Dispatchers.IO) {
+            _uiState.value.ptzController?.setScene(sceneSlot)
+        }
     }
 
 
