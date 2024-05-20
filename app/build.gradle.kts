@@ -77,4 +77,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.pedrosg94.root.enconder)
     implementation(libs.apache.httpcomponents.httpclient)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.exoplayer.rtsp)
 }

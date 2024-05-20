@@ -19,6 +19,7 @@ public class ViscaPTZController implements PTZController, Closeable {
 
     public ViscaPTZController(Cam cam) throws IOException {
         this.socket = new Socket(cam.getIp(), cam.getPort());
+        //this.socket = new Socket("2.tcp.eu.ngrok.io", 17953);
         this.output = socket.getOutputStream();
     }
     @Override

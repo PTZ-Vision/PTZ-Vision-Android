@@ -8,7 +8,7 @@ import it.mobile.bisax.ptzvision.data.cam.Cam
 import it.mobile.bisax.ptzvision.data.cam.CamDao
 import it.mobile.bisax.ptzvision.data.preset.Preset
 
-@Database(entities = [Cam::class, Preset::class], version = 6, exportSchema = false)
+@Database(entities = [Cam::class, Preset::class], version = 7, exportSchema = false)
 abstract class PTZDatabase : RoomDatabase() {
     abstract fun camDao(): CamDao
 

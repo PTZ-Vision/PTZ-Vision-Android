@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun PortInput(
+    title: String,
     port: Int,
     onPortChange: (Int) -> Unit
 ) {
@@ -40,7 +41,7 @@ fun PortInput(
                 portState = it.text.toIntOrNull() ?: 0
                 onPortChange(portState)
             },
-            label = { Text("Port") },
+            label = { Text(title) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
             modifier = Modifier.fillMaxWidth()
         )

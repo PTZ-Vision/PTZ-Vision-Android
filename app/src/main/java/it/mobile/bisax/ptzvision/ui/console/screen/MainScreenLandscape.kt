@@ -36,7 +36,6 @@ import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
 import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
-import kotlin.coroutines.coroutineContext
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -61,6 +60,7 @@ fun MainScreenLandscape(
                     modifier = Modifier
                         .weight(0.5f)
                         .fillMaxHeight(),
+                    context = context,
                     cam = mainUiState.activeCams.getOrNull(0)
                 )
             }
@@ -158,6 +158,7 @@ fun MainScreenLandscape(
                     modifier = Modifier
                         .weight(0.5f)
                         .fillMaxHeight(),
+                    context = context,
                     cam = mainUiState.activeCams.getOrNull(0)
                 )
             }

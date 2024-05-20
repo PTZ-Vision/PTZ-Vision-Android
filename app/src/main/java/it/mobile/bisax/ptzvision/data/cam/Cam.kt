@@ -1,13 +1,8 @@
 package it.mobile.bisax.ptzvision.data.cam
 
-import android.content.Context
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import it.mobile.bisax.ptzvision.controller.PTZController
-import it.mobile.bisax.ptzvision.controller.ViscaPTZController
-import it.mobile.bisax.ptzvision.controller.utils.MathUtils
-import it.mobile.bisax.ptzvision.data.utils.Protocol
 
 @Entity(
     tableName = "cam",
@@ -19,6 +14,7 @@ data class Cam(
     val name: String,
     val ip: String,
     val port: Int,
+    val streamPort: Int,
     val active: Boolean,
     val main: Boolean = false,
     val autofocus: Boolean = false,

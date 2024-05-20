@@ -61,6 +61,7 @@ fun MainScreenPortrait(
                 .fillMaxWidth()
                 .weight(0.3f)
                 .padding(0.dp, 0.dp, 0.dp, 10.dp),
+            context = context,
             cam = mainUiState.activeCams.getOrNull(0)
         )
 

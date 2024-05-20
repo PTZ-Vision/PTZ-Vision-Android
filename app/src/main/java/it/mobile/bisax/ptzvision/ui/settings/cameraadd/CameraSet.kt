@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import it.mobile.bisax.ptzvision.data.utils.Protocol
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
@@ -48,7 +49,8 @@ fun CameraSet(
     camName: String = "New Camera",
     camIp: String = "",
     camPort: Int = 0,
-    camActive: Boolean = false
+    camActive: Boolean = false,
+    protocol: Protocol = Protocol.VISCA
 ) {
     // lock orientation to vertical
     (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -59,7 +61,9 @@ fun CameraSet(
         var name by remember { mutableStateOf(camName) }
         var ip by remember { mutableStateOf(camIp) }
         var port by remember { mutableIntStateOf(camPort) }
+        var streamPort by remember { mutableIntStateOf(0) }
         var active by remember { mutableStateOf(camActive) }
+        var protocol by remember { mutableStateOf(Protocol.VISCA) }
 
         Column{
             Row(
@@ -89,8 +93,14 @@ fun CameraSet(
             IPAddressInput(ip = ip) {
                 ip = it
             }
-            PortInput(port = port) {
+            PortInput(title="Control Port", port = port) {
                 port = it
+            }
+            PortInput(title="Streaming Port", port = streamPort) {
+                streamPort = it
+            }
+            ProtocolSelection(protocol = protocol) {
+                protocol = it
             }
 
             Row(
@@ -114,6 +124,7 @@ fun CameraSet(
                         name = name,
                         ip = ip,
                         port = port,
+                        streamPort = streamPort,
                         active = active
                     )
                 },
@@ -136,16 +147,17 @@ private fun setCamera(
     name: String,
     ip: String,
     port: Int,
+    streamPort: Int,
     active: Boolean
 ) {
     if (name.isNotEmpty() && ip.isNotEmpty() && port != 0){
         settingsViewModel.viewModelScope.launch {
             val status =
                 if(mode == CameraMode.ADD) {
-                    settingsViewModel.insertCam(name, ip, port, active)
+                    settingsViewModel.insertCam(name, ip, port, streamPort, active)
                 }
                 else {
-                    settingsViewModel.updateCam(id, name, ip, port, active)
+                    settingsViewModel.updateCam(id, name, ip, port, streamPort, active)
                 }
             if (status == null)
                 Toast.makeText(
