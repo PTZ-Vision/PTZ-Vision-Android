@@ -26,11 +26,11 @@ public class ByteParam {
      * @param max  The maximum value of the parameter (&lt;239 &amp; &gt;= min)
      */
     public ByteParam(String name, int min, int max) {
-        if (min < 0 || min > 239) {
-            throw new IllegalArgumentException("Parameter min needs to be within 0…239");
+        if (min < 0 || min > 255) {
+            throw new IllegalArgumentException("Parameter min needs to be within 0…255");
         }
-        if (max < 0 || max > 239) {
-            throw new IllegalArgumentException("Parameter max needs to be within 0…239");
+        if (max < 0 || max > 255) {
+            throw new IllegalArgumentException("Parameter max needs to be within 0…255");
         }
         if (min > max) {
             throw new IllegalArgumentException("Parameter min cannot be greater than max");

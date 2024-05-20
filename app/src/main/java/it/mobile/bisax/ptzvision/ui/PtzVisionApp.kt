@@ -102,7 +102,7 @@ fun PtzVisionApp(
             }
 
             composable(
-                route =  PTZRoutes.CAMERA_EDIT.name + "/{camId}/{camName}/{camIp}/{camPort}/{camActive}"
+                route =  PTZRoutes.CAMERA_EDIT.name + "/{camId}/{camName}/{camIp}/{camPort}/{camStreamPort}/{camActive}"
             ) {
                 CameraSet (
                     settingsViewModel = settingsViewModel,
@@ -115,6 +115,7 @@ fun PtzVisionApp(
                     camName = it.arguments?.getString("camName") ?: "",
                     camIp = it.arguments?.getString("camIp") ?: "",
                     camPort = it.arguments?.getString("camPort")?.toInt() ?: 0,
+                    camStreamPort = it.arguments?.getString("camStreamPort")?.toInt() ?: 0,
                     camActive = it.arguments?.getString("camActive")?.toBoolean() ?: false
                 )
             }
@@ -159,5 +160,5 @@ fun navToCameraEdit(
     navController: NavHostController,
     cam: Cam
 ){
-    navController.navigate(PTZRoutes.CAMERA_EDIT.name + "/${cam.id}/${cam.name}/${cam.ip}/${cam.port}/${cam.active}")
+    navController.navigate(PTZRoutes.CAMERA_EDIT.name + "/${cam.id}/${cam.name}/${cam.ip}/${cam.port}/${cam.streamPort}/${cam.active}")
 }

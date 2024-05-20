@@ -49,6 +49,7 @@ fun CameraSet(
     camName: String = "New Camera",
     camIp: String = "",
     camPort: Int = 0,
+    camStreamPort: Int = 0,
     camActive: Boolean = false,
     protocol: Protocol = Protocol.VISCA
 ) {
@@ -61,7 +62,7 @@ fun CameraSet(
         var name by remember { mutableStateOf(camName) }
         var ip by remember { mutableStateOf(camIp) }
         var port by remember { mutableIntStateOf(camPort) }
-        var streamPort by remember { mutableIntStateOf(0) }
+        var streamPort by remember { mutableIntStateOf(camStreamPort) }
         var active by remember { mutableStateOf(camActive) }
         var protocol by remember { mutableStateOf(Protocol.VISCA) }
 
