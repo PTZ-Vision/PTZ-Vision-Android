@@ -8,7 +8,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import it.mobile.bisax.ptzvision.controller.viscacommands.AutoTracking;
+import it.mobile.bisax.ptzvision.controller.viscacommands.Focus;
 import it.mobile.bisax.ptzvision.controller.viscacommands.PanTilt;
+import it.mobile.bisax.ptzvision.controller.viscacommands.Scene;
 import it.mobile.bisax.ptzvision.controller.viscacommands.Zoom;
 import it.mobile.bisax.ptzvision.data.cam.Cam;
 
@@ -78,15 +80,29 @@ public class ViscaPTZController implements PTZController, Closeable {
     }
 
     @Override
-    public Result focus(int focus) {
-        // TODO: implement this method
-        return Result.NOT_SUPPORTED;
+    public Result focus(float focusf) {
+        int focus = (int) (focusf * 7);
+
+        Log.d("ViscaPTZController", "Focus command: focus=" + focus);
+
+        if (focus<0) {
+            return runCommand(Focus.far(-focus));
+        } else if (focus>0) {
+            return runCommand(Focus.near(focus));
+        } else {
+            return runCommand(Focus.stop());
+        }
     }
 
     @Override
     public Result setAutoFocus(boolean autoFocus) {
-        // TODO: implement this method
-        return Result.NOT_SUPPORTED;
+        Log.d("ViscaPTZController", "AutoFocus command: autoFocus=" + autoFocus);
+
+        if (autoFocus) {
+            return runCommand(Focus.auto());
+        } else {
+            return runCommand(Focus.manual());
+        }
     }
 
     @Override
@@ -96,6 +112,16 @@ public class ViscaPTZController implements PTZController, Closeable {
         } else {
             return runCommand(AutoTracking.off());
         }
+    }
+
+    @Override
+    public Result setScene(int scene) {
+        return runCommand(Scene.set(scene));
+    }
+
+    @Override
+    public Result callScene(int scene) {
+        return runCommand(Scene.call(scene));
     }
 
     private Result runCommand(byte[] command) {

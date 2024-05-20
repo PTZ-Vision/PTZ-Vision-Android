@@ -72,18 +72,47 @@ public class HttpCgiPTZController implements PTZController, Closeable {
     }
 
     @Override
-    public Result focus(int focus) {
-        return Result.NOT_SUPPORTED;
+    public Result focus(float focusf) {
+        int focus = (int) (focusf * 7);
+
+        Log.d("HttpCgiPTZController", "Focus command: focus=" + focus);
+        if(focus < 0){
+            return sendCommand("?ptzcmd=focusout&" + -focus);
+        } else if(focus > 0){
+            return sendCommand("?ptzcmd=focusin&" + focus);
+        } else {
+            return sendCommand("?ptzcmd=focusstop&0");
+        }
     }
 
     @Override
     public Result setAutoFocus(boolean autoFocus) {
-        return Result.NOT_SUPPORTED;
+        Log.d("HttpCgiPTZController", "AutoFocus command: autoFocus=" + autoFocus);
+
+        if (autoFocus) {
+            return sendCommand("?post_image_value&focusmode&2");
+        } else {
+            return sendCommand("?post_image_value&focusmode&0");
+        }
     }
 
     @Override
     public Result setAutoTracking(boolean autoTracking) {
         return Result.NOT_SUPPORTED;
+    }
+
+    @Override
+    public Result setScene(int scene) {
+        Log.d("HttpCgiPTZController", "SetScene command: scene=" + scene);
+
+        return sendCommand("?ptzcmd=posset&" + scene);
+    }
+
+    @Override
+    public Result callScene(int scene) {
+        Log.d("HttpCgiPTZController", "CallScene command: scene=" + scene);
+
+        return sendCommand("?ptzcmd=poscall&" + scene);
     }
 
     private Result sendCommand(String command){
