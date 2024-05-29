@@ -3,6 +3,7 @@ package it.mobile.bisax.ptzvision.ui.console.blocks
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
@@ -118,6 +120,10 @@ fun JoyStick(
                                     positionY = 0f
 
                                     coroutine.launch {
+                                        //Log.d("JoyStick", "Setting pan tilt to 0,0")
+                                        mainViewModel.setPanTilt(0f, 0f)
+                                        delay(100)
+                                        //Log.d("JoyStick", "Setting pan tilt to 0,0 again")
                                         mainViewModel.setPanTilt(0f, 0f)
                                     }
                                 }) { pointerInputChange: PointerInputChange, offset: Offset ->
@@ -176,6 +182,7 @@ fun JoyStick(
                                             )
 
                                             coroutine.launch {
+                                                // Log.d("JoyStick", "Setting pan tilt to $posXinSquare, $posYinSquare")
                                                 mainViewModel.setPanTilt(
                                                     posXinSquare,
                                                     -posYinSquare
