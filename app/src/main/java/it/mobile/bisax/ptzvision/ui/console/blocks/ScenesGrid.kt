@@ -1,5 +1,7 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
+import android.view.Gravity
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -22,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import kotlinx.coroutines.launch
+
 
 data class ButtonData(
     val label: String,
@@ -43,6 +47,7 @@ fun ScenesGrid(
 ) {
     val buttons: MutableMap<Int, ButtonData> = mutableMapOf()
     val coroutine = rememberCoroutineScope()
+    val context = LocalContext.current
 
     for (i in 0 until 9) {
         buttons[i] = ButtonData(
@@ -54,6 +59,15 @@ fun ScenesGrid(
                 coroutine.launch {
                     mainViewModel.saveSceneOnCam(i)
                 }
+                val toast = Toast.makeText(
+                    context,
+                    if (i == 0) "Home scene saved" else "Scene $i saved",
+                    Toast.LENGTH_SHORT
+                )
+                toast.setGravity(Gravity.TOP, 0, 0)
+                toast.show()
+
+                //TODO: Implement vibration/sound on save
             }
         )
     }
@@ -93,7 +107,7 @@ fun ScenesGrid(
 
                         modifier = Modifier
                             .then(
-                                if(enabled)
+                                if (enabled)
                                     Modifier.pointerInput(Unit) {
                                         detectTapGestures(
                                             onLongPress = { offset -> onLongClick.value(offset) },
@@ -103,7 +117,7 @@ fun ScenesGrid(
                                 else
                                     Modifier
                             )
-                            .background(if(enabled) Color.Blue else Color.Gray, CircleShape)
+                            .background(if (enabled) Color.Blue else Color.Gray, CircleShape)
                             .weight(0.8f)
                             .padding(10.dp),
                         textAlign = TextAlign.Center

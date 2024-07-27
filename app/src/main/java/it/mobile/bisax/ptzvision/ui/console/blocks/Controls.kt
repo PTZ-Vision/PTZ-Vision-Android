@@ -3,8 +3,6 @@ package it.mobile.bisax.ptzvision.ui.console.blocks
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -52,7 +50,6 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import androidx.compose.ui.unit.min as minDp
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun JoyStick(
     modifier: Modifier = Modifier,

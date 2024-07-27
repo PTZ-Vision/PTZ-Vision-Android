@@ -1,8 +1,6 @@
 package it.mobile.bisax.ptzvision.ui.console.screen
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,13 +35,13 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreenLandscape(
     mainViewModel: MainViewModel,
     settingsViewModel: SettingsViewModel,
     windowSize: WindowSizeClass,
-    context: Context
+    context: Context,
+    onClick: () -> Unit
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
@@ -71,7 +69,7 @@ fun MainScreenLandscape(
                     modifier = Modifier
                         .weight(0.7f),
                     mainViewModel = mainViewModel,
-                    context = context
+                    onClick = onClick
                 )
                 Row (modifier= Modifier
                     .fillMaxWidth()

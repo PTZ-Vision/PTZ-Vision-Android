@@ -1,7 +1,5 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,10 +20,9 @@ import kotlinx.coroutines.launch
 fun SecondaryCams(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
-    context: Context
+    onClick: () -> Unit
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
-    var toast: Toast? = null
     val coroutineScope = rememberCoroutineScope()
 
     Row(modifier = modifier) {
@@ -40,14 +37,9 @@ fun SecondaryCams(
                             coroutineScope.launch {
                                 mainViewModel.setNewActiveCam(i)
                             }
-                        } else {
-                            toast?.cancel()
-                            toast = Toast.makeText(
-                                context,
-                                "No camera in slot $i",
-                                Toast.LENGTH_SHORT
-                            )
-                            toast?.show()
+                        }
+                        else {
+                            onClick()
                         }
                     }
             ) {
@@ -58,4 +50,5 @@ fun SecondaryCams(
             }
         }
     }
+
 }

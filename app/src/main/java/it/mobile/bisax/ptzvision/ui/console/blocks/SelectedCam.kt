@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player.Listener
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.rtsp.RtspMediaSource
@@ -31,6 +33,13 @@ fun SelectedCam(
     cam: Cam? = null
 ) {
     val player by remember(cam) { mutableStateOf(ExoPlayer.Builder(context).build())}
+    player.addListener(object: Listener{
+        override fun onPlayerError(error: PlaybackException){
+            Log.d("PLAYER", "Error: ${error.message}")
+            player.stop()
+            player.release()
+        }
+    })
     Log.d("PLAYER", "Player: $player")
     if(cam != null) {
         val mediaItem = MediaItem.fromUri("rtsp://${cam.ip}:${cam.streamPort}/2")
@@ -49,6 +58,7 @@ fun SelectedCam(
             player.prepare()
             player.play()
         } catch (e: Exception) {
+            player.release()
             Log.d("SelectedCam", "Error: ${e.message}")
         }
     }

@@ -1,8 +1,7 @@
 package it.mobile.bisax.ptzvision.ui.console.screen
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,25 +35,27 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreenPortrait(
     mainViewModel: MainViewModel,
     settingsViewModel: SettingsViewModel,
     windowSize: WindowSizeClass,
-    context: Context
+    context: Context,
+    onClick: () -> Unit,
 ) {
     val mainUiState by mainViewModel.uiState.collectAsState()
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
 
     val coroutine = rememberCoroutineScope()
 
+
     Column(modifier = Modifier.fillMaxSize()) {
         SecondaryCams(
             modifier = Modifier
                 .weight(0.2f),
             mainViewModel = mainViewModel,
-            context = context
+            onClick = onClick
         )
         SelectedCam(
             modifier = Modifier
@@ -65,12 +66,13 @@ fun MainScreenPortrait(
             cam = mainUiState.activeCams.getOrNull(0)
         )
 
-        Row (modifier= Modifier
-            .height(70.dp)
-            .fillMaxWidth(),
+        Row(
+            modifier = Modifier
+                .height(70.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val aiBtn = @Composable{modifier:Modifier ->
+            val aiBtn = @Composable { modifier: Modifier ->
                 Button(
                     onClick = {
                         coroutine.launch {
@@ -79,24 +81,25 @@ fun MainScreenPortrait(
                     },
                     modifier = modifier
                         .padding(
-                            if(windowSize.widthSizeClass == WindowWidthSizeClass.Compact)
+                            if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact)
                                 25.dp
                             else
                                 60.dp,
                             0.dp
                         ),
-                    colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAIEnabled) Color.Green else Color.Gray),
+                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAIEnabled) Color.Green else Color.Gray),
                     enabled = mainUiState.activeCams.isNotEmpty()
                 ) {
                     Text(text = "AI Tracking")
                 }
             }
 
-            if(settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
+            if (settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
                 aiBtn(Modifier.weight(0.5f))
 
-            Row(modifier = Modifier
-                .weight(0.5f),
+            Row(
+                modifier = Modifier
+                    .weight(0.5f),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -105,7 +108,7 @@ fun MainScreenPortrait(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(0.5f),
                     fontFamily = FontFamily.Monospace,
-                    fontSize = if(windowSize.widthSizeClass == WindowWidthSizeClass.Compact) 15.sp else 20.sp
+                    fontSize = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) 15.sp else 20.sp
                 )
                 Button(
                     onClick = {
@@ -117,7 +120,7 @@ fun MainScreenPortrait(
                         .weight(0.5f)
                         .padding(5.dp, 5.dp),
                     enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
-                    colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAutoFocusEnabled) Color.Green else Color.Gray)
+                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAutoFocusEnabled) Color.Green else Color.Gray)
                 ) {
                     Text(
                         text = "Auto",
@@ -125,15 +128,17 @@ fun MainScreenPortrait(
                     )
                 }
             }
-            if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
+            if (settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
                 aiBtn(Modifier.weight(0.5f))
         }
 
-        Row(modifier = Modifier
-            .fillMaxSize()
-            .weight(0.25f)) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(0.25f)
+        ) {
 
-            if(settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
+            if (settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
                 JoyStick(
                     modifier = Modifier
                         .weight(0.5f),
@@ -148,7 +153,8 @@ fun MainScreenPortrait(
                 setPosition = { maxPos, posY ->
                     coroutine.launch {
                         mainViewModel.setZoomIntensity(maxPos, posY)
-                    } },
+                    }
+                },
                 enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
                 hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
             )
@@ -158,13 +164,14 @@ fun MainScreenPortrait(
                     .padding(15.dp),
                 setPosition = { maxPos, posY ->
                     coroutine.launch {
-                        mainViewModel.setFocusIntensity(maxPos,posY)
-                    } },
+                        mainViewModel.setFocusIntensity(maxPos, posY)
+                    }
+                },
                 enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
                 hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
             )
 
-            if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
+            if (settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
                 JoyStick(
                     modifier = Modifier
                         .weight(0.5f),
@@ -180,6 +187,5 @@ fun MainScreenPortrait(
             mainViewModel = mainViewModel,
             enabled = mainUiState.activeCams.isNotEmpty()
         )
-
     }
 }

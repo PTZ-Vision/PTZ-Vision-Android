@@ -32,11 +32,6 @@ enum class PTZRoutes(@StringRes val route: Int) {
     CAMERA_EDIT(R.string.camera_edit_route)
 }
 
-data class Test(
-    var name: String = "",
-    var flag: Boolean = false
-)
-
 @Composable
 fun PtzVisionApp(
     navController: NavHostController = rememberNavController(),
@@ -125,7 +120,8 @@ fun PtzVisionApp(
                     context = LocalContext.current,
                     windowSize = windowSize,
                     mainViewModel = mainViewModel,
-                    settingsViewModel = settingsViewModel
+                    settingsViewModel = settingsViewModel,
+                    goToSettings = { navToSettings(navController) }
                 )
             }
         }
