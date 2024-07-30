@@ -13,6 +13,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
@@ -33,11 +34,12 @@ fun SelectedCam(
     cam: Cam? = null
 ) {
     val player by remember(cam) { mutableStateOf(ExoPlayer.Builder(context).build())}
+    var streamingError by remember { mutableStateOf(false) }
     player.addListener(object: Listener{
         override fun onPlayerError(error: PlaybackException){
-            Log.d("PLAYER", "Error: ${error.message}")
             player.stop()
             player.release()
+            streamingError = true
         }
     })
     Log.d("PLAYER", "Player: $player")
@@ -62,13 +64,18 @@ fun SelectedCam(
             Log.d("SelectedCam", "Error: ${e.message}")
         }
     }
-
     Box(
         modifier = modifier
             .background(Color(0xFF666666))
     ){
-        if(cam != null)
+        if(cam != null && !streamingError)
             ExoPlayerView(exoPlayer = player)
+        else if (streamingError){
+            Text(
+                text = "Error while streaming",
+                color = Color.White,
+            )
+        }
         else
             Text(
                 text = "Select a camera",
