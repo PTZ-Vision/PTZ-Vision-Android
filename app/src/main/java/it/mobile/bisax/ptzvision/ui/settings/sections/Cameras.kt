@@ -34,7 +34,6 @@ import androidx.lifecycle.viewModelScope
 import it.mobile.bisax.ptzvision.R
 import it.mobile.bisax.ptzvision.data.cam.Cam
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
-import it.mobile.bisax.ptzvision.ui.theme.starColor
 import kotlinx.coroutines.launch
 
 @Composable
@@ -143,12 +142,12 @@ fun Camera(
                         .padding()
                 ){
                     Icon(
-                        painter = if (cam.active)
-                            painterResource(id = R.drawable.star_fill)
+                        painter = painterResource(id = R.drawable.joystick),
+                        contentDescription = "Add to console",
+                        tint = if(isCamActive)
+                            MaterialTheme.colorScheme.onSecondaryContainer
                         else
-                            painterResource(id = R.drawable.star_outline),
-                        contentDescription = "Star",
-                        tint = starColor
+                            MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.3f)
                     )
                 }
                 IconButton(
