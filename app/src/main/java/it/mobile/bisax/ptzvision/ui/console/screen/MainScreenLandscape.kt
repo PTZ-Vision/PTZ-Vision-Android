@@ -1,6 +1,8 @@
 package it.mobile.bisax.ptzvision.ui.console.screen
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +19,8 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +39,7 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MainScreenLandscape(
     mainViewModel: MainViewModel,
@@ -46,6 +51,8 @@ fun MainScreenLandscape(
     val mainUiState by mainViewModel.uiState.collectAsState()
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
     val coroutine = rememberCoroutineScope()
+
+    val cameraEnabled by remember { mutableStateOf(mainUiState.activeCams.isNotEmpty() && mainUiState.ptzController != null) }
 
     Column {
         Row(modifier = Modifier
@@ -83,7 +90,7 @@ fun MainScreenLandscape(
                                     mainViewModel.toggleAI()
 
                                 }},
-                            enabled =  mainUiState.activeCams.isNotEmpty(),
+                            enabled =  cameraEnabled,
                             modifier = Modifier
                                 .weight(0.4f)
                                 .then(
@@ -137,7 +144,7 @@ fun MainScreenLandscape(
                                         Modifier.padding(24.dp, 0.dp)
                                     }
                                 ),
-                            enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                            enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
                             colors = ButtonDefaults.buttonColors(containerColor = if(mainUiState.isAutoFocusEnabled) Color.Green else Color.Gray)
                         ) {
                             Text(
@@ -175,7 +182,7 @@ fun MainScreenLandscape(
                             mainViewModel.setZoomIntensity(maxPos, posY)
                         }
                     },
-                    enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
                     hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
                 )
                 SliderBox(
@@ -186,7 +193,7 @@ fun MainScreenLandscape(
                         coroutine.launch {
                             mainViewModel.setFocusIntensity(maxPos,posY)
                         } },
-                    enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                    enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
                     hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
                 )
             }
@@ -195,7 +202,7 @@ fun MainScreenLandscape(
                 JoyStick(
                     modifier = Modifier
                         .weight(0.3f),
-                    enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
                     mainViewModel = mainViewModel,
                     hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
                 )
@@ -213,7 +220,7 @@ fun MainScreenLandscape(
                 windowSize = windowSize,
                 isLandScape = true,
                 mainViewModel = mainViewModel,
-                enabled = mainUiState.activeCams.isNotEmpty()
+                enabled = cameraEnabled
             )
 
             if(settingsUiState.layout == SettingsUiState.Layout.J_RIGHT) {

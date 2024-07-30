@@ -1,7 +1,10 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
-import android.view.Gravity
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +40,7 @@ data class ButtonData(
     val onLongClick: (Offset) -> Unit,
 )
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun ScenesGrid(
     modifier: Modifier = Modifier,
@@ -48,6 +52,7 @@ fun ScenesGrid(
     val buttons: MutableMap<Int, ButtonData> = mutableMapOf()
     val coroutine = rememberCoroutineScope()
     val context = LocalContext.current
+    val vibrator = context.getSystemService(Vibrator::class.java) as Vibrator
 
     for (i in 0 until 9) {
         buttons[i] = ButtonData(
@@ -64,10 +69,8 @@ fun ScenesGrid(
                     if (i == 0) "Home scene saved" else "Scene $i saved",
                     Toast.LENGTH_SHORT
                 )
-                toast.setGravity(Gravity.TOP, 0, 0)
                 toast.show()
-
-                //TODO: Implement vibration/sound on save
+                    vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
             }
         )
     }

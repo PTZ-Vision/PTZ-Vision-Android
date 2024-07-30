@@ -2,6 +2,8 @@ package it.mobile.bisax.ptzvision.ui.console.screen
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +19,8 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +39,7 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreenPortrait(
@@ -48,6 +53,9 @@ fun MainScreenPortrait(
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
 
     val coroutine = rememberCoroutineScope()
+    val cameraEnabled by remember {
+        mutableStateOf(mainUiState.activeCams.isNotEmpty() && mainUiState.ptzController != null)
+    }
 
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -88,7 +96,7 @@ fun MainScreenPortrait(
                             0.dp
                         ),
                     colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAIEnabled) Color.Green else Color.Gray),
-                    enabled = mainUiState.activeCams.isNotEmpty()
+                    enabled = cameraEnabled
                 ) {
                     Text(text = "AI Tracking")
                 }
@@ -119,7 +127,7 @@ fun MainScreenPortrait(
                     modifier = Modifier
                         .weight(0.5f)
                         .padding(5.dp, 5.dp),
-                    enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
                     colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAutoFocusEnabled) Color.Green else Color.Gray)
                 ) {
                     Text(
@@ -142,7 +150,7 @@ fun MainScreenPortrait(
                 JoyStick(
                     modifier = Modifier
                         .weight(0.5f),
-                    enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
                     mainViewModel = mainViewModel,
                     hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
                 )
@@ -155,7 +163,7 @@ fun MainScreenPortrait(
                         mainViewModel.setZoomIntensity(maxPos, posY)
                     }
                 },
-                enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
                 hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
             )
             SliderBox(
@@ -167,7 +175,7 @@ fun MainScreenPortrait(
                         mainViewModel.setFocusIntensity(maxPos, posY)
                     }
                 },
-                enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
                 hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
             )
 
@@ -175,7 +183,7 @@ fun MainScreenPortrait(
                 JoyStick(
                     modifier = Modifier
                         .weight(0.5f),
-                    enabled = !(mainUiState.isAIEnabled) && mainUiState.activeCams.isNotEmpty(),
+                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
                     mainViewModel = mainViewModel,
                     hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
                 )
@@ -185,7 +193,7 @@ fun MainScreenPortrait(
             windowSize = windowSize,
             isLandScape = false,
             mainViewModel = mainViewModel,
-            enabled = mainUiState.activeCams.isNotEmpty()
+            enabled = cameraEnabled
         )
     }
 }
