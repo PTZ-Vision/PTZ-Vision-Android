@@ -3,10 +3,8 @@ package it.mobile.bisax.ptzvision.ui.console
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import it.mobile.bisax.ptzvision.controller.PTZController
 import it.mobile.bisax.ptzvision.controller.ViscaPTZController
 import it.mobile.bisax.ptzvision.controller.utils.MathUtils
-import it.mobile.bisax.ptzvision.data.cam.Cam
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,24 +46,28 @@ class MainViewModel(
     }
 
     fun setNewActiveCam(camSlot: Int) {
+        // Aggiorna subito le telecamere attive
         val newActiveCams = _uiState.value.activeCams.toMutableList()
         newActiveCams[0] = _uiState.value.activeCams[camSlot]
         newActiveCams[camSlot] = _uiState.value.activeCams[0]
 
-        var ptzController : PTZController? = null
-        try{
-            ptzController = ViscaPTZController(newActiveCams[0])
-            //ptzController = HttpCgiPTZController(newActiveCams[0])
-        } catch(e: Exception) {
-            Log.d("MainViewModel", "Error creating PTZController: ${e.message}")
-            ptzController = null
+        _uiState.update {
+            it.copy(activeCams = newActiveCams)
         }
 
-        _uiState.update {
-            it.copy(
-                activeCams = newActiveCams,
-                ptzController = ptzController
-            )
+        // Creazione asincrona del controller
+        viewModelScope.launch(Dispatchers.IO) {
+            val newController = try {
+                ViscaPTZController(newActiveCams[0])
+            } catch (e: Exception) {
+                Log.d("MainViewModel", "Error creating PTZController: ${e.message}")
+                null
+            }
+
+            // Aggiornamento del controller nello stato dell'UI
+            _uiState.update {
+                it.copy(ptzController = newController)
+            }
         }
     }
 
@@ -113,26 +115,33 @@ class MainViewModel(
 
     private fun setUIState() {
         viewModelScope.launch {
-            camsViewModel.getActiveCamsStream.collect{cams ->
-                var ptzController: PTZController?
-                try{
-                    ptzController = withContext(Dispatchers.IO) { // Move network operation to background thread
-                        ViscaPTZController(cams[0])
-                    }
-                } catch (e: Exception){
-                    Log.d("MainViewModel", "Error creating PTZController: ${e.message}")
-                    ptzController = null
-                }
+            camsViewModel.getActiveCamsStream.collect { cams ->
+                // Aggiorna subito le telecamere attive
                 _uiState.update {
                     it.copy(
                         isAIEnabled = getAIStatus(),
                         isAutoFocusEnabled = getAutoFocusStatus(),
-                        activeCams = cams,
+                        activeCams = cams
+                    )
+                }
+
+                // Creazione asincrona del controller
+                val ptzController = try {
+                    withContext(Dispatchers.IO) {
+                        ViscaPTZController(cams[0])
+                    }
+                } catch (e: Exception) {
+                    Log.d("MainViewModel", "Error creating PTZController: ${e.message}")
+                    null
+                }
+
+                // Aggiornamento del controller nello stato dell'UI
+                _uiState.update {
+                    it.copy(
                         ptzController = ptzController
                     )
                 }
             }
         }
     }
-
 }
