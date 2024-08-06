@@ -19,8 +19,6 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +50,7 @@ fun MainScreenLandscape(
     val settingsUiState by settingsViewModel.settingsUiState.collectAsState()
     val coroutine = rememberCoroutineScope()
 
-    val cameraEnabled by remember { mutableStateOf(mainUiState.activeCams.isNotEmpty() && mainUiState.ptzController != null) }
+    val cameraEnabled = mainUiState.activeCams.isNotEmpty() && mainUiState.ptzController != null
 
     Column {
         Row(modifier = Modifier

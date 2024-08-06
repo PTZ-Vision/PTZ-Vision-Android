@@ -15,6 +15,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -38,6 +41,14 @@ fun MainScreen(
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutine = rememberCoroutineScope()
+
+    val mainUiState by mainViewModel.uiState.collectAsState()
+
+    LaunchedEffect(mainUiState) {
+        if(mainUiState.ptzController == null){
+            mainViewModel.initPTZController()
+        }
+    }
 
     val onClick: () -> Unit = {
         coroutine.launch {
@@ -79,26 +90,9 @@ fun MainScreen(
                 mainViewModel = mainViewModel,
                 settingsViewModel = settingsViewModel,
                 windowSize = windowSize,
-                context = context
-            ){
-                coroutine.launch {
-                    val result = snackbarHostState
-                        .showSnackbar(
-                            message = "No camera assigned",
-                            actionLabel = "Go to Settings",
-                            withDismissAction = true,
-                            duration = SnackbarDuration.Short
-                        )
-                    when (result) {
-                        SnackbarResult.ActionPerformed -> {
-                            goToSettings()
-                        }
-                        SnackbarResult.Dismissed -> {
-                            /* Handle snackbar dismissed */
-                        }
-                    }
-                }
-            }
+                context = context,
+                onClick = onClick
+            )
         }
     }
 }
