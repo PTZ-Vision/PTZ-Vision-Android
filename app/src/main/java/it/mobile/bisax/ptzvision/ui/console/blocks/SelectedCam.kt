@@ -38,19 +38,22 @@ fun SelectedCam(
     var player: ExoPlayer? by remember { mutableStateOf(null) }
     var streamingError by remember(cam) { mutableStateOf(false) }
 
-    LaunchedEffect(cam) {
+    fun resetPlayer() {
         player?.stop()
         player?.release()
         player = null
+        streamingError = false
+    }
+
+    LaunchedEffect(cam) {
+        resetPlayer()
 
         if (cam != null) {
             withContext(Dispatchers.Main) {
                 val newPlayer = ExoPlayer.Builder(context).build()
                 newPlayer.addListener(object : Player.Listener {
                     override fun onPlayerError(error: PlaybackException) {
-                        player?.stop()
-                        player?.release()
-                        player = null
+                        resetPlayer()
                         streamingError = true
                     }
 
@@ -75,20 +78,11 @@ fun SelectedCam(
                 }
             }
         }
-        else{
-            player?.stop()
-            player?.release()
-            player = null
-            streamingError = false
-        }
     }
 
     DisposableEffect(Unit) {
         onDispose {
-            player?.stop()
-            player?.release()
-            player = null
-            streamingError = false
+            resetPlayer()
         }
     }
 
