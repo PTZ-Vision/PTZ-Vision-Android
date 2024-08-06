@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
-import it.mobile.bisax.ptzvision.data.utils.Protocol
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
@@ -50,8 +49,7 @@ fun CameraSet(
     camIp: String = "",
     camPort: Int = 0,
     camStreamPort: Int = 0,
-    camActive: Boolean = false,
-    protocol: Protocol = Protocol.VISCA
+    camActive: Boolean = false
 ) {
     // lock orientation to vertical
     (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -64,7 +62,6 @@ fun CameraSet(
         var port by remember { mutableIntStateOf(camPort) }
         var streamPort by remember { mutableIntStateOf(camStreamPort) }
         var active by remember { mutableStateOf(camActive) }
-        var protocol by remember { mutableStateOf(Protocol.VISCA) }
 
         Column{
             Row(
@@ -99,9 +96,6 @@ fun CameraSet(
             }
             PortInput(title="Streaming Port", port = streamPort) {
                 streamPort = it
-            }
-            ProtocolSelection(protocol = protocol) {
-                protocol = it
             }
 
             Row(
