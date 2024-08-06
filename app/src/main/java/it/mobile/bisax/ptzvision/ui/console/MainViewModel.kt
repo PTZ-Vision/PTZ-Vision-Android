@@ -45,6 +45,28 @@ class MainViewModel(
         }
     }
 
+    fun initPTZController() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val newController = try {
+                ViscaPTZController(_uiState.value.activeCams[0])
+            } catch (e: Exception) {
+                Log.d("MainViewModel", "Error creating PTZController: ${e.message}")
+                null
+            }
+
+            _uiState.update {
+                it.copy(ptzController = newController)
+            }
+        }
+    }
+
+    fun resetPTZController() {
+        (_uiState.value.ptzController as ViscaPTZController?)?.close()
+        _uiState.update {
+            it.copy(ptzController = null)
+        }
+    }
+
     fun setNewActiveCam(camSlot: Int) {
         // Aggiorna subito le telecamere attive
         val newActiveCams = _uiState.value.activeCams.toMutableList()
@@ -55,20 +77,7 @@ class MainViewModel(
             it.copy(activeCams = newActiveCams)
         }
 
-        // Creazione asincrona del controller
-        viewModelScope.launch(Dispatchers.IO) {
-            val newController = try {
-                ViscaPTZController(newActiveCams[0])
-            } catch (e: Exception) {
-                Log.d("MainViewModel", "Error creating PTZController: ${e.message}")
-                null
-            }
-
-            // Aggiornamento del controller nello stato dell'UI
-            _uiState.update {
-                it.copy(ptzController = newController)
-            }
-        }
+        initPTZController()
     }
 
     suspend fun goToScene(sceneSlot: Int){
@@ -121,24 +130,8 @@ class MainViewModel(
                     it.copy(
                         isAIEnabled = getAIStatus(),
                         isAutoFocusEnabled = getAutoFocusStatus(),
-                        activeCams = cams
-                    )
-                }
-
-                // Creazione asincrona del controller
-                val ptzController = try {
-                    withContext(Dispatchers.IO) {
-                        ViscaPTZController(cams[0])
-                    }
-                } catch (e: Exception) {
-                    Log.d("MainViewModel", "Error creating PTZController: ${e.message}")
-                    null
-                }
-
-                // Aggiornamento del controller nello stato dell'UI
-                _uiState.update {
-                    it.copy(
-                        ptzController = ptzController
+                        activeCams = cams,
+                        ptzController = null
                     )
                 }
             }
