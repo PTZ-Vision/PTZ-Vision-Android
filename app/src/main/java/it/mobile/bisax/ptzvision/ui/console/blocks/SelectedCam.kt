@@ -35,10 +35,14 @@ fun SelectedCam(
     context: Context,
     cam: Cam? = null
 ) {
-    var player: ExoPlayer? by remember(cam) { mutableStateOf(null) }
-    var streamingError by remember { mutableStateOf(false) }
+    var player: ExoPlayer? by remember { mutableStateOf(null) }
+    var streamingError by remember(cam) { mutableStateOf(false) }
 
     LaunchedEffect(cam) {
+        player?.stop()
+        player?.release()
+        player = null
+
         if (cam != null) {
             withContext(Dispatchers.Main) {
                 val newPlayer = ExoPlayer.Builder(context).build()
@@ -46,7 +50,12 @@ fun SelectedCam(
                     override fun onPlayerError(error: PlaybackException) {
                         player?.stop()
                         player?.release()
+                        player = null
                         streamingError = true
+                    }
+
+                    override fun onRenderedFirstFrame() {
+                        streamingError = false
                     }
                 })
                 val mediaItem = MediaItem.fromUri("rtsp://${cam.ip}:${cam.streamPort}/live")
@@ -67,6 +76,7 @@ fun SelectedCam(
             }
         }
         else{
+            player?.stop()
             player?.release()
             player = null
             streamingError = false
@@ -77,6 +87,8 @@ fun SelectedCam(
         onDispose {
             player?.stop()
             player?.release()
+            player = null
+            streamingError = false
         }
     }
 
