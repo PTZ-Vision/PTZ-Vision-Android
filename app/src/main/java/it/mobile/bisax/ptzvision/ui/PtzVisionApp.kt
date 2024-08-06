@@ -10,6 +10,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -42,6 +45,18 @@ fun PtzVisionApp(
     settingsViewModel: SettingsViewModel,
     mainViewModel: MainViewModel
 ) {
+    val currentRoute = remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(navController) {
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            currentRoute.value = destination.route
+            if (destination.route != PTZRoutes.CONSOLE.name && mainViewModel.uiState.value.ptzController != null) {
+                mainViewModel.resetPTZController()
+            }
+        }
+    }
+
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -134,30 +149,35 @@ fun PtzVisionApp(
 fun navToConsole(
     navController: NavHostController
 ){
-    navController.navigate(PTZRoutes.CONSOLE.name)
+    if (navController.currentDestination?.route != PTZRoutes.CONSOLE.name)
+        navController.navigate(PTZRoutes.CONSOLE.name)
 }
 
 fun navToGeneral(
     navController: NavHostController
 ){
-    navController.popBackStack()
+    if (navController.currentDestination?.route != PTZRoutes.HOME.name)
+        navController.popBackStack()
 }
 
 fun navToSettings(
     navController: NavHostController
 ){
-    navController.navigate(PTZRoutes.SETTINGS.name)
+    if(navController.currentDestination?.route != PTZRoutes.SETTINGS.name)
+        navController.navigate(PTZRoutes.SETTINGS.name)
 }
 
 fun navToCameraAdd(
     navController: NavHostController
 ){
-    navController.navigate(PTZRoutes.CAMERA_ADD.name)
+    if (navController.currentDestination?.route != PTZRoutes.CAMERA_ADD.name)
+        navController.navigate(PTZRoutes.CAMERA_ADD.name)
 }
 
 fun navToCameraEdit(
     navController: NavHostController,
     cam: Cam
 ){
-    navController.navigate(PTZRoutes.CAMERA_EDIT.name + "/${cam.id}/${cam.name}/${cam.ip}/${cam.port}/${cam.streamPort}/${cam.active}")
+    if (navController.currentDestination?.route != PTZRoutes.CAMERA_EDIT.name)
+        navController.navigate(PTZRoutes.CAMERA_EDIT.name + "/${cam.id}/${cam.name}/${cam.ip}/${cam.port}/${cam.streamPort}/${cam.active}")
 }
