@@ -5,11 +5,7 @@ import it.mobile.bisax.ptzvision.data.cam.Cam
 data class SettingsUiState(
     var layout: Layout = Layout.J_RIGHT,
     var hapticFeedbackEnabled: Boolean = false,
-    var cams: List<Cam> = emptyList(),
-    var currentCamName: String = "",
-    var currentCamIP: String = "",
-    var currentCamPort: Int = 0,
-    var currentCamActive: Boolean = false,
+    var cams: List<Cam> = emptyList()
 ){
     enum class Layout(val layoutID: Int){
         J_RIGHT(0),
