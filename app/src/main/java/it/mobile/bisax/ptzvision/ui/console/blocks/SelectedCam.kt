@@ -21,12 +21,15 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.rtsp.RtspMediaSource
 import androidx.media3.ui.PlayerView
 import it.mobile.bisax.ptzvision.data.cam.Cam
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
+import javax.net.SocketFactory
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -47,35 +50,82 @@ fun SelectedCam(
 
     LaunchedEffect(cam) {
         resetPlayer()
-
         if (cam != null) {
-            withContext(Dispatchers.Main) {
-                val newPlayer = ExoPlayer.Builder(context).build()
-                newPlayer.addListener(object : Player.Listener {
-                    override fun onPlayerError(error: PlaybackException) {
+            val loadControl = DefaultLoadControl
+                .Builder()
+                .setBufferDurationsMs(
+                    500,  // minBufferMs - Set low to reduce latency
+                    1000, // maxBufferMs - Set low to reduce latency
+                    250,  // bufferForPlaybackMs - Quick start
+                    500   // bufferForPlaybackAfterRebufferMs - Quick recovery
+                )
+                .setPrioritizeTimeOverSizeThresholds(true)
+                .build()
+
+            player = ExoPlayer.Builder(context).setLoadControl(loadControl).build()
+            player?.addListener(object : Player.Listener {
+                override fun onPlayerError(error: PlaybackException) {
+                    resetPlayer()
+                    streamingError = true
+                }
+
+                override fun onRenderedFirstFrame() {
+                    streamingError = false
+                }
+
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_ENDED) {
                         resetPlayer()
                         streamingError = true
                     }
-
-                    override fun onRenderedFirstFrame() {
-                        streamingError = false
-                    }
-                })
-                val mediaItem = MediaItem.fromUri("rtsp://${cam.ip}:${cam.streamPort}/live")
-                try {
-                    val rtspMediaSource = RtspMediaSource
-                        .Factory()
-                        .setForceUseRtpTcp(true)
-                        .createMediaSource(mediaItem)
-                    newPlayer.addMediaSource(rtspMediaSource)
-                    newPlayer.prepare()
-                    newPlayer.play()
-                    player = newPlayer
-                } catch (e: Exception) {
-                    newPlayer.release()
-                    Log.d("SelectedCam", "Error: ${e.message}")
-                    streamingError = true
                 }
+            })
+            val mediaItem = MediaItem.fromUri("rtsp://${cam.ip}:${cam.streamPort}/live")
+            try {
+                val rtspMediaSource = RtspMediaSource
+                    .Factory()
+                    .setForceUseRtpTcp(true)
+                    .setSocketFactory(object : SocketFactory() {
+                        private val defaultSocketFactory = getDefault()
+                        override fun createSocket(host: String?, port: Int): Socket {
+                            val socket = defaultSocketFactory.createSocket()
+                            socket.connect(
+                                InetSocketAddress(InetAddress.getByName(host), port),
+                                1000
+                            )
+                            return socket
+                        }
+
+                        override fun createSocket(
+                            host: String?,
+                            port: Int,
+                            localHost: InetAddress?,
+                            localPort: Int
+                        ): Socket {
+                            throw UnsupportedOperationException()
+                        }
+
+                        override fun createSocket(host: InetAddress?, port: Int): Socket {
+                            throw UnsupportedOperationException()
+                        }
+
+                        override fun createSocket(
+                            host: InetAddress?,
+                            port: Int,
+                            localHost: InetAddress?,
+                            localPort: Int
+                        ): Socket {
+                            throw UnsupportedOperationException()
+                        }
+                    })
+                    .createMediaSource(mediaItem)
+                player?.addMediaSource(rtspMediaSource)
+                player?.prepare()
+                player?.play()
+            } catch (e: Exception) {
+                resetPlayer()
+                Log.d("SelectedCam", "Error: ${e.message}")
+                streamingError = true
             }
         }
     }
@@ -91,7 +141,7 @@ fun SelectedCam(
             .background(Color(0xFF666666))
     ) {
         when {
-            cam != null && player != null && !streamingError -> ExoPlayerView(exoPlayer = player!!)
+            cam != null && player != null && !streamingError -> ExoPlayerView(exoPlayer = player)
             streamingError -> Text(text = "Error while streaming", color = Color.White)
             else -> Text(text = "Select a camera", color = Color.White)
         }
@@ -99,14 +149,17 @@ fun SelectedCam(
 }
 
 @Composable
-fun ExoPlayerView(exoPlayer: ExoPlayer) {
-    AndroidView(
-        factory = { context ->
-            PlayerView(context).apply {
-                player = exoPlayer
-                useController = false
-            }
-        },
-        modifier = Modifier.fillMaxSize()
-    )
+fun ExoPlayerView(exoPlayer: ExoPlayer?) {
+    if(exoPlayer != null)
+        AndroidView(
+            factory = { context ->
+                PlayerView(context).apply {
+                    player = exoPlayer
+                    useController = false
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+    else
+        Box(modifier = Modifier.background(Color.Red))
 }
