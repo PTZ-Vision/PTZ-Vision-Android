@@ -54,10 +54,10 @@ fun SelectedCam(
             val loadControl = DefaultLoadControl
                 .Builder()
                 .setBufferDurationsMs(
-                    500,  // minBufferMs - Set low to reduce latency
-                    1000, // maxBufferMs - Set low to reduce latency
-                    250,  // bufferForPlaybackMs - Quick start
-                    500   // bufferForPlaybackAfterRebufferMs - Quick recovery
+                    500,
+                    1000,
+                    250,
+                    500
                 )
                 .setPrioritizeTimeOverSizeThresholds(true)
                 .build()
@@ -141,7 +141,7 @@ fun SelectedCam(
             .background(Color(0xFF666666))
     ) {
         when {
-            cam != null && player != null && !streamingError -> ExoPlayerView(exoPlayer = player)
+            cam != null && player != null && !streamingError -> ExoPlayerView(exoPlayer = player!!)
             streamingError -> Text(text = "Error while streaming", color = Color.White)
             else -> Text(text = "Select a camera", color = Color.White)
         }
@@ -149,17 +149,17 @@ fun SelectedCam(
 }
 
 @Composable
-fun ExoPlayerView(exoPlayer: ExoPlayer?) {
-    if(exoPlayer != null)
-        AndroidView(
-            factory = { context ->
-                PlayerView(context).apply {
-                    player = exoPlayer
-                    useController = false
-                }
-            },
-            modifier = Modifier.fillMaxSize()
-        )
-    else
-        Box(modifier = Modifier.background(Color.Red))
+fun ExoPlayerView(exoPlayer: ExoPlayer) {
+    AndroidView(
+        factory = { context ->
+            PlayerView(context).apply {
+                player = exoPlayer
+                useController = false
+            }
+        },
+        modifier = Modifier.fillMaxSize(),
+        update = { playerView ->
+            playerView.player = exoPlayer
+        }
+    )
 }
