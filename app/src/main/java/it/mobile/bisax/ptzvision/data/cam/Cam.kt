@@ -19,7 +19,6 @@ data class Cam(
     val main: Boolean = false,
     val autofocus: Boolean = false,
     val aiTracking: Boolean = false,
-    val presetId: Int=0,
     val pan: Float = 0f,
     val tilt: Float = 0f,
     val zoom: Float = 0f,
