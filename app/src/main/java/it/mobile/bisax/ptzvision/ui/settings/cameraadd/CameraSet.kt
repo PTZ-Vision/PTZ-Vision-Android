@@ -43,6 +43,9 @@ enum class CameraMode {
     MODIFY
 }
 
+const val VISCA_PORT = 5678
+const val RTSP_PORT = 8554
+
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun CameraSet(
@@ -53,8 +56,8 @@ fun CameraSet(
     camId: Int = 0,
     camName: String = "New Camera",
     camIp: String = "",
-    camPort: Int = 0,
-    camStreamPort: Int = 0,
+    camPort: Int = VISCA_PORT,
+    camStreamPort: Int = RTSP_PORT,
     camActive: Boolean = false
 ) {
     // lock orientation to vertical

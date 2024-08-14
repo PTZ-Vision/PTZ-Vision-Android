@@ -112,7 +112,7 @@ fun Camera(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = cam.ip + ":" + cam.port.toString(),
+                    text = cam.ip,
                     color = MaterialTheme.colorScheme.onSecondaryContainer)
             }
             Row(

@@ -15,7 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -35,8 +34,8 @@ fun IPAddressInput(
                 ipAddressState = it
                 onIpChange(it)
             },
-            label = { Text("IP Address") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+            label = { Text("Hostname or IP Address") },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth(),
         )
         if (!isValidIPAddress(ipAddressState) && ipAddressState.isNotEmpty()) {
@@ -51,12 +50,9 @@ fun IPAddressInput(
 }
 
 fun isValidIPAddress(ipAddress: String): Boolean {
-    val pattern = Regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$")
-    return if(!pattern.matches(ipAddress)){
-        false
-    } else {
-        val parts = ipAddress.split(".")
-        parts.all { it.toInt() in 0..255 }
-    }
+    val validIpAddressRegex = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$".toRegex()
+    val validHostnameRegex = "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$".toRegex()
+
+    return (validHostnameRegex.matches(ipAddress) || validIpAddressRegex.matches(ipAddress))
 }
 
