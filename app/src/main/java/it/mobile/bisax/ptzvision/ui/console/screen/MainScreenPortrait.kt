@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LifecycleOwner
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
 import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
@@ -67,7 +68,8 @@ fun MainScreenPortrait(
                 .weight(0.3f)
                 .padding(0.dp, 0.dp, 0.dp, 10.dp),
             context = context,
-            cam = mainUiState.activeCams.getOrNull(0)
+            cam = mainUiState.activeCams.getOrNull(0),
+            lifecycleOwner = context as LifecycleOwner
         )
 
         Row(

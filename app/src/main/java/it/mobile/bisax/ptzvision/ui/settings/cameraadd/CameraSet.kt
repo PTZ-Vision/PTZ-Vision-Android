@@ -89,7 +89,7 @@ fun CameraSet(
                     )
                 }
                 Text(
-                    text = "Add a Camera",
+                    text =  if(mode == CameraMode.ADD) "Add a Camera" else "Modify a Camera",
                     modifier = Modifier.padding(10.dp, 0.dp, 0.dp, 0.dp),
                     style = androidx.compose.ui.text.TextStyle(fontSize = 24.sp)
                 )
@@ -115,7 +115,7 @@ fun CameraSet(
                     modifier = Modifier.clickable {
                         active = !active
                     }
-                        .border(1.dp, Color.LightGray, RoundedCornerShape(5.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.3f), RoundedCornerShape(5.dp))
                         .padding(10.dp)
                     ,
                 ){

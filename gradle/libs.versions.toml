@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.0"
+agp = "8.5.2"
 kotlin = "1.9.23"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -8,7 +8,6 @@ espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.4"
 activityCompose = "1.9.1"
 composeBom = "2024.06.00"
-material3WindowSizeClass = "1.2.1"
 media3Ui = "1.4.0"
 lifecycleViewmodelCompose = "2.8.4"
 navigationCompose = "2.7.7"
@@ -44,7 +43,6 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-material3-window = { group = "androidx.compose.material3", name = "material3-window-size-class-android", version.ref = "material3WindowSizeClassAndroid" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
-pedrosg94-root-enconder = { group = "com.github.pedroSG94.RootEncoder", name = "library", version = "2.4.5" }
 apache-httpcomponents-httpclient = { group = "org.apache.httpcomponents", name = "httpclient", version = "4.5.14" }
 
 [plugins]
