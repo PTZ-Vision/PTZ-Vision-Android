@@ -169,7 +169,6 @@ fun SelectedCam(
     ) {
         if(cam != null){
             if(player != null && !streamingError){
-                Text(text = "Retry", color = Color.White)
                 ExoPlayerView(exoPlayer = player!!)
             }
             else if(streamingError) {
@@ -193,22 +192,19 @@ fun SelectedCam(
 
 @Composable
 fun ExoPlayerView(exoPlayer: ExoPlayer) {
+    val playerViewRef = remember { mutableStateOf<PlayerView?>(null) }
+
     AndroidView(
         factory = { context ->
-            PlayerView(context).apply {
-                player = exoPlayer
-                useController = false
+            PlayerView(context).also {
+                it.useController = false
+                playerViewRef.value = it
             }
         },
-        modifier = Modifier.fillMaxSize(),
-        update = { playerView ->
-            playerView.player = exoPlayer
-        },
-        onReset = { playerView ->
-            playerView.player = null
-        },
-        onRelease = { playerView ->
-            playerView.player = null
-        }
+        modifier = Modifier.fillMaxSize()
     )
+
+    LaunchedEffect(exoPlayer) {
+        playerViewRef.value?.player = exoPlayer
+    }
 }
