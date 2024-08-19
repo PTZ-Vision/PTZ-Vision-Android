@@ -44,7 +44,8 @@ public class Focus {
         return HexConverter.parseHex("8101040800FF");
     }
 
-
-
+    public static byte[] getAutoFocus() {
+        return HexConverter.parseHex("81090438FF");
+    }
 
 }

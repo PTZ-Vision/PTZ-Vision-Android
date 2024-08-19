@@ -3,6 +3,7 @@ package it.mobile.bisax.ptzvision.ui.console
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import it.mobile.bisax.ptzvision.controller.PTZController
 import it.mobile.bisax.ptzvision.controller.ViscaPTZController
 import it.mobile.bisax.ptzvision.controller.utils.MathUtils
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
@@ -55,7 +56,17 @@ class MainViewModel(
             }
 
             _uiState.update {
-                it.copy(ptzController = newController)
+                it.copy(
+                    ptzController = newController,
+                )
+            }
+
+            _uiState.update {
+                it.copy(
+                    isAIEnabled = getAIStatus(),
+                    zoomLevel = getZoomLevel(),
+                    isAutoFocusEnabled = getAutoFocusStatus()
+                )
             }
         }
     }
@@ -101,25 +112,51 @@ class MainViewModel(
 
     suspend fun setZoomIntensity(maxPos: Float, posY: Float) {
         withContext(Dispatchers.IO) {
-            var zoomIntensity = posY / maxPos
+            val zoomIntensity = posY / maxPos
             _uiState.value.ptzController?.zoom(MathUtils.clampUnit(zoomIntensity))
+
+            // TO FIX: This is a workaround to update the zoom level in the UI
+            var newZoom = getZoomLevel()
+            if (newZoom == 0.0 || newZoom > 30.0) newZoom = _uiState.value.zoomLevel
+            _uiState.update {
+                it.copy(zoomLevel = newZoom)
+            }
         }
     }
 
     suspend fun setFocusIntensity(maxPos: Float, posY: Float) {
         var focusIntensity = posY/maxPos
-
-        //TODO: set focus intensity to camera
+        withContext(Dispatchers.IO) {
+            val focusIntensity = posY / maxPos
+            _uiState.value.ptzController?.focus(MathUtils.clampUnit(focusIntensity))
+        }
     }
 
     private fun getAIStatus(): Boolean {
-        //TODO: get AI status from camera
-        return false;
+        val controller = _uiState.value.ptzController
+        if(controller == null) {
+            Log.e("MainViewModel", "PTZController is null while getting AI status")
+            return false
+        }
+        return controller.getAutoTracking()?.second ?: false
     }
 
     private fun getAutoFocusStatus(): Boolean {
-        //TODO: get AutoFocus status from camera
-        return false;
+        val controller = _uiState.value.ptzController
+        if(controller == null) {
+            Log.e("MainViewModel", "PTZController is null while getting AutoFocus status")
+            return false
+        }
+        return controller.getAutoFocus()?.second ?: false
+    }
+
+    private fun getZoomLevel(): Double {
+        val controller = _uiState.value.ptzController
+        if(controller == null) {
+            Log.e("MainViewModel", "PTZController is null while getting Zoom level")
+            return 1.0
+        }
+        return controller.getZoom()?.second ?: 0.0
     }
 
     private fun setUIState() {
@@ -129,6 +166,7 @@ class MainViewModel(
                 _uiState.update {
                     it.copy(
                         isAIEnabled = getAIStatus(),
+                        zoomLevel = getZoomLevel(),
                         isAutoFocusEnabled = getAutoFocusStatus(),
                         activeCams = cams,
                         ptzController = null

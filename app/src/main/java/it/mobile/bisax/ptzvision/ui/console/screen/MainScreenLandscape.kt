@@ -123,7 +123,7 @@ fun MainScreenLandscape(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "10.5x",
+                            text = mainUiState.zoomLevel.toString()+"x",
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(0.5f),
                             fontFamily = FontFamily.Monospace,

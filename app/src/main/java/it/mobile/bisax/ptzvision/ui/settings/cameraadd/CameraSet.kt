@@ -44,7 +44,7 @@ enum class CameraMode {
 }
 
 const val VISCA_PORT = 5678
-const val RTSP_PORT = 8554
+const val RTSP_PORT = 554
 
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable

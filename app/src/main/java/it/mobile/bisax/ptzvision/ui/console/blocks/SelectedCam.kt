@@ -85,7 +85,7 @@ fun SelectedCam(
                 }
             }
         })
-        val mediaItem = MediaItem.fromUri("rtsp://${currentCam.ip}:${currentCam.streamPort}/live")
+        val mediaItem = MediaItem.fromUri("rtsp://${currentCam.ip}:${currentCam.streamPort}/2")
         try {
             val rtspMediaSource = RtspMediaSource
                 .Factory()

@@ -1,12 +1,16 @@
 package it.mobile.bisax.ptzvision.controller;
 
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Arrays;
 
+import it.mobile.bisax.ptzvision.controller.utils.HexConverter;
 import it.mobile.bisax.ptzvision.controller.viscacommands.AutoTracking;
 import it.mobile.bisax.ptzvision.controller.viscacommands.Focus;
 import it.mobile.bisax.ptzvision.controller.viscacommands.PanTilt;
@@ -21,7 +25,6 @@ public class ViscaPTZController implements PTZController, Closeable {
 
     public ViscaPTZController(Cam cam) throws IOException {
         this.socket = new Socket(cam.getIp(), cam.getPort());
-        //this.socket = new Socket("2.tcp.eu.ngrok.io", 17953);
         this.output = socket.getOutputStream();
     }
     @Override
@@ -125,14 +128,78 @@ public class ViscaPTZController implements PTZController, Closeable {
         return runCommand(Scene.call(scene));
     }
 
+    @Override
+    public Pair<Result, Boolean> getAutoFocus() {
+        Pair<Result, Object> result = runCommandWithResponse(Focus.getAutoFocus());
+        if (result.first == Result.SUCCESS) {
+            return new Pair<>(Result.SUCCESS, result.second.equals("905002FF"));
+        } else {
+            return new Pair<>(Result.FAILURE, false);
+        }
+    }
+
+    @Override
+    public Pair<Result, Boolean> getAutoTracking() {
+        /*Pair <Result, Object> result = runCommandWithResponse(AutoTracking.get());
+        if (result.first == Result.SUCCESS) {
+            return new Pair<>(Result.SUCCESS, result.second.equals("905002FF"));
+        } else {
+            return new Pair<>(Result.FAILURE, false);
+        }*/
+        return new Pair<>(Result.NOT_SUPPORTED, null);
+    }
+
+    @Override
+    public Pair<Result, Double> getZoom() {
+        Pair<Result, Object> result = runCommandWithResponse(Zoom.get());
+        if (result.first == Result.SUCCESS && result.second != null) {
+            String response = (String) result.second;
+            if (response.length() != 14) {
+                return new Pair<>(Result.FAILURE, 0.0);
+            }
+            String zoom = ""+response.charAt(5)+response.charAt(7)+response.charAt(9)+response.charAt(11);
+            int zoomHex = Integer.parseInt(zoom, 16);
+            double zoomValue = zoomHex / 16384.0 * 29.0 + 1.0;
+            zoomValue = Math.round(zoomValue * 100.0) / 100.0;
+            return new Pair<>(Result.SUCCESS, zoomValue);
+        } else {
+            return new Pair<>(Result.FAILURE, 0.0);
+        }
+    }
+
     private Result runCommand(byte[] command) {
         try {
             this.output.write(command);
         } catch (IOException e) {
-            Log.d("ViscaPTZController", "Failed to send command: " + command.toString());
+            Log.e("ViscaPTZController", "Failed to send command: " + HexConverter.parseHex(command));
             return Result.FAILURE;
         }
         return Result.SUCCESS;
+    }
+
+    private String readResponse() {
+        try {
+            InputStream input = this.socket.getInputStream();
+            byte[] response = new byte[1024];
+            int bytesRead = input.read(response);
+            if (bytesRead == -1) return null;
+            String responseString = HexConverter.parseHex(Arrays.copyOf(response, bytesRead));
+            Log.d("ViscaPTZController", "Response: " + responseString);
+            return responseString;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private Pair<Result, Object> runCommandWithResponse(byte[] command) {
+        Result result = runCommand(command);
+
+        if (result == Result.SUCCESS) {
+            return new Pair<>(Result.SUCCESS, readResponse());
+        } else {
+            Log.e("ViscaPTZController", "Failed to run command with response: " + HexConverter.parseHex(command));
+            return new Pair<>(Result.FAILURE, null);
+        }
     }
 
     @Override

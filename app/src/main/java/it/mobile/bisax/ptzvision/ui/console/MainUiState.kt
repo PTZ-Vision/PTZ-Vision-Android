@@ -7,5 +7,6 @@ data class MainUiState(
     val isAIEnabled: Boolean = false,
     val isAutoFocusEnabled: Boolean = false,
     val activeCams: List<Cam?> = emptyList(),
+    val zoomLevel: Double = 0.0,
     val ptzController: PTZController? = null
 )

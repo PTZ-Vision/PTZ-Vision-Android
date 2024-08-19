@@ -9,4 +9,9 @@ public class AutoTracking {
     public static byte[] off() {
         return HexConverter.parseHex("810A115403FF");
     }
+
+    public static byte[] get() {
+        // TO FIX: This is not the correct command
+        return HexConverter.parseHex("810A1154FF");
+    }
 }

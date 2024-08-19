@@ -3,6 +3,7 @@ package it.mobile.bisax.ptzvision.ui.console.blocks
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,24 @@ import kotlin.math.sign
 import kotlin.math.sin
 import kotlin.math.sqrt
 import androidx.compose.ui.unit.min as minDp
+
+
+fun createVibration(vibePercentage: Float): VibrationEffect? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
+    val loopMs = 100
+
+    val timings = LongArray(loopMs)
+    val amplitudes = IntArray(loopMs)
+
+    for(i in 0..<loopMs){
+        timings[i] = 1
+        amplitudes[i] = ((1 + sin(i.toDouble() / 50 * PI)) * vibePercentage / 2 * 255).toInt()
+    }
+
+    return VibrationEffect.createWaveform(
+        timings, amplitudes, -1
+    )
+}
 
 @Composable
 fun JoyStick(
@@ -108,7 +127,6 @@ fun JoyStick(
                         if (enabled) {
                             Modifier.pointerInput(Unit) {
                                 detectDragGestures(onDragEnd = {
-                                    vibe.cancel()
                                     offsetX = centerPx
                                     offsetY = centerPx
                                     radius = 0f
@@ -119,9 +137,11 @@ fun JoyStick(
                                     coroutine.launch {
                                         //Log.d("JoyStick", "Setting pan tilt to 0,0")
                                         mainViewModel.setPanTilt(0f, 0f)
+                                        vibe.cancel()
                                         delay(100)
                                         //Log.d("JoyStick", "Setting pan tilt to 0,0 again")
                                         mainViewModel.setPanTilt(0f, 0f)
+                                        vibe.cancel()
                                     }
                                 }) { pointerInputChange: PointerInputChange, offset: Offset ->
                                     val x = offsetX + offset.x - centerPx
@@ -146,20 +166,11 @@ fun JoyStick(
 
 
                                     val clampedRadius = minOf(radius, maxRadius)
+                                    val vibePercentage = clampedRadius/maxRadius
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hapticFeedbackEnabled) {
-                                        vibe.vibrate(
-                                            VibrationEffect.createWaveform(
-                                                longArrayOf(
-                                                    0,
-                                                    ((clampedRadius / maxRadius) * 105).toLong() + 1L
-                                                ),
-                                                intArrayOf(
-                                                    VibrationEffect.EFFECT_TICK,
-                                                    VibrationEffect.EFFECT_TICK
-                                                ),
-                                                0
-                                            )
-                                        )
+                                        vibe.cancel()
+                                        if ((vibePercentage*24).toInt() > 0)
+                                            vibe.vibrate(createVibration(vibePercentage))
                                     }
                                     polarToCartesian(clampedRadius, theta).apply {
                                         positionX = first
@@ -286,21 +297,11 @@ fun SliderBox(
                                         offsetY += offset.y
 
                                         val clampedRadius = sign(radius) * minOf(abs(radius), maxYOffset)
-
+                                        val vibePercentage = abs(clampedRadius/maxYOffset)
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hapticFeedbackEnabled) {
-                                            vibe.vibrate(
-                                                VibrationEffect.createWaveform(
-                                                    longArrayOf(
-                                                        0,
-                                                        ((abs(clampedRadius) / maxYOffset) * 110).toLong() + 1L
-                                                    ),
-                                                    intArrayOf(
-                                                        VibrationEffect.EFFECT_TICK,
-                                                        VibrationEffect.EFFECT_TICK
-                                                    ),
-                                                    0
-                                                )
-                                            )
+                                            vibe.cancel()
+                                            if ((vibePercentage*7).toInt() > 0)
+                                                vibe.vibrate(createVibration(vibePercentage))
                                         }
 
                                         polarToCartesian(clampedRadius, theta).apply {

@@ -110,7 +110,7 @@ fun MainScreenPortrait(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "1x",
+                    text = mainUiState.zoomLevel.toString()+"x",
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(0.5f),
                     fontFamily = FontFamily.Monospace,

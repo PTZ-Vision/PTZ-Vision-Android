@@ -53,4 +53,12 @@ public class HexConverter {
         }
         throw new NumberFormatException("not a hexadecimal digit: \"" + (char) ch + "\" = " + ch);
     }
+
+    public static String parseHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) {
+            sb.append(String.format("%02X", b));
+        }
+        return sb.toString();
+    }
 }

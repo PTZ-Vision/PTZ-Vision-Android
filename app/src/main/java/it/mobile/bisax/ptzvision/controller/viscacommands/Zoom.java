@@ -52,4 +52,8 @@ public class Zoom {
         return buffer.array();
     }
 
+    public static byte[] get() {
+        return HexConverter.parseHex("81090447FF");
+    }
+
 }
