@@ -25,7 +25,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -191,7 +190,8 @@ fun MainScreenLandscape(
                         }
                     },
                     enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
-                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
+                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
+                    updateStatus = { mainViewModel.updateZoomLevel()}
                 )
                 SliderBox(
                     modifier = Modifier
@@ -202,7 +202,8 @@ fun MainScreenLandscape(
                             mainViewModel.setFocusIntensity(maxPos,posY)
                         } },
                     enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
-                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
+                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
+                    updateStatus = {}
                 )
             }
 

@@ -3,7 +3,6 @@ package it.mobile.bisax.ptzvision.ui.console.blocks
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -225,6 +226,7 @@ fun SliderBox(
     modifier: Modifier = Modifier,
     moved: (y: Float) -> Unit = { _ -> },
     setPosition: (maxPos:Float, posY: Float) -> Unit,
+    updateStatus: suspend () -> Unit,
     enabled: Boolean = false,
     hapticFeedbackEnabled: Boolean
 ){
@@ -261,6 +263,21 @@ fun SliderBox(
             var theta by remember { mutableFloatStateOf(0f) }
 
             var positionY by remember { mutableFloatStateOf(0f) }
+
+            LaunchedEffect(positionY) {
+                while (true) {
+                    if (positionY == 0f) {
+                        updateStatus() // Box al centro
+                        delay(1000L) // Delay di 1000ms
+                    } else {
+                        //updateStatus() // Box fuori dalla posizione di equilibrio
+                        //delay(50L) // Delay di 50ms
+                        // await for the updateStatus
+                        val x = async { updateStatus() }
+                        x.await()
+                    }
+                }
+            }
 
             Box(
                 modifier = Modifier

@@ -168,7 +168,8 @@ fun MainScreenPortrait(
                     }
                 },
                 enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
-                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
+                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
+                updateStatus = {mainViewModel.updateZoomLevel()}
             )
             SliderBox(
                 modifier = Modifier
@@ -180,7 +181,8 @@ fun MainScreenPortrait(
                     }
                 },
                 enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
-                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
+                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
+                updateStatus = {}
             )
 
             if (settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)

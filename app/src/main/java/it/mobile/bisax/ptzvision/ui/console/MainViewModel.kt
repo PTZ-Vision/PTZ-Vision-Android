@@ -3,11 +3,13 @@ package it.mobile.bisax.ptzvision.ui.console
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import it.mobile.bisax.ptzvision.controller.PTZController
 import it.mobile.bisax.ptzvision.controller.ViscaPTZController
 import it.mobile.bisax.ptzvision.controller.utils.MathUtils
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -128,7 +130,6 @@ class MainViewModel(
     }
 
     suspend fun setFocusIntensity(maxPos: Float, posY: Float) {
-        var focusIntensity = posY/maxPos
         withContext(Dispatchers.IO) {
             val focusIntensity = posY / maxPos
             _uiState.value.ptzController?.focus(MathUtils.clampUnit(focusIntensity))
@@ -159,7 +160,21 @@ class MainViewModel(
             Log.e("MainViewModel", "PTZController is null while getting Zoom level")
             return 1.0
         }
-        return controller.getZoom()?.second ?: 0.0
+        return controller.getZoom()?.second ?: 1.0
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    suspend fun updateZoomLevel() {
+        val x = GlobalScope.async {
+            withContext(Dispatchers.IO) {
+                val zoom = getZoomLevel()
+                if(zoom == 0.0 || zoom > 30.0) return@withContext
+                _uiState.update {
+                    it.copy(zoomLevel = zoom)
+                }
+            }
+        }
+        x.await()
     }
 
     private fun setUIState() {
