@@ -2,6 +2,8 @@ package it.mobile.bisax.ptzvision.ui.console.screen
 
 import android.content.Context
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -83,13 +86,16 @@ fun MainScreenLandscape(
                     .weight(0.3f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val vibe = context.getSystemService(Vibrator::class.java) as Vibrator
+
                     val aiBtn = @Composable {
                         Button(
                             onClick = {
                                 coroutine.launch {
                                     mainViewModel.toggleAI()
-
-                                }},
+                                }
+                                vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+                            },
                             enabled =  cameraEnabled,
                             modifier = Modifier
                                 .weight(0.4f)
@@ -134,6 +140,7 @@ fun MainScreenLandscape(
                                 coroutine.launch {
                                     mainViewModel.toggleAutoFocus()
                                 }
+                                vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
                             },
                             modifier = Modifier
                                 .weight(0.5f)

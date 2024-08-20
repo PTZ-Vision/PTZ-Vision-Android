@@ -44,6 +44,7 @@ androidx-material3-window = { group = "androidx.compose.material3", name = "mate
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 apache-httpcomponents-httpclient = { group = "org.apache.httpcomponents", name = "httpclient", version = "4.5.14" }
+coil-compose = { group = "io.coil-kt", name="coil-compose", version = "2.4.0" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

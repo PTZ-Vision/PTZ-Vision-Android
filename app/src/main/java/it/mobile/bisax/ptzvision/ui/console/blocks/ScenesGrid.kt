@@ -52,14 +52,18 @@ fun ScenesGrid(
     val buttons: MutableMap<Int, ButtonData> = mutableMapOf()
     val coroutine = rememberCoroutineScope()
     val context = LocalContext.current
-    val vibrator = context.getSystemService(Vibrator::class.java) as Vibrator
+    val vibe = context.getSystemService(Vibrator::class.java) as Vibrator
 
     for (i in 0 until 9) {
         buttons[i] = ButtonData(
             label = if(i == 0) "Home" else "Scene $i",
-            onClick = { _ -> coroutine.launch {
-                mainViewModel.goToScene(i)
-            } },
+            onClick = { _ ->
+                coroutine.launch {
+                    mainViewModel.goToScene(i)
+                }
+
+                vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+            },
             onLongClick = { _ ->
                 coroutine.launch {
                     mainViewModel.saveSceneOnCam(i)
@@ -70,7 +74,7 @@ fun ScenesGrid(
                     Toast.LENGTH_SHORT
                 )
                 toast.show()
-                    vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+                vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
             }
         )
     }

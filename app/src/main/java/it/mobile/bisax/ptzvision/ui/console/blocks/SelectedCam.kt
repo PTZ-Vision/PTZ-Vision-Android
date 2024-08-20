@@ -4,8 +4,12 @@ import android.content.Context
 import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -129,7 +134,7 @@ fun SelectedCam(
             player?.play()
         } catch (e: Exception) {
             resetPlayer()
-            Log.d("SelectedCam", "Error: ${e.message}")
+            Log.e("SelectedCam", "Error: ${e.message}")
             streamingError = true
         }
     }
@@ -172,15 +177,29 @@ fun SelectedCam(
                 ExoPlayerView(exoPlayer = player!!)
             }
             else if(streamingError) {
-                Text(text = "Error while streaming", color = Color.White)
+                Column (
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ){
+                    Text(text = "Error while streaming", color = Color.White)
 
-                Button(onClick = { initPlayer(cam) }) {
-                    Text(text = "Retry", color = Color.White)
+                    Button(onClick = { initPlayer(cam) }) {
+                        Text(text = "Reconnect", color = Color.White)
+                    }
                 }
             }
             else{
-                Button(onClick = { initPlayer(cam) }) {
-                    Text(text = "Retry", color = Color.White)
+                Column (
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ){
+                    Text(text = "Streaming disconnected", color = Color.White)
+
+                    Button(onClick = { initPlayer(cam) }) {
+                        Text(text = "Reconnect", color = Color.White)
+                    }
                 }
             }
         }

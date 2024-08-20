@@ -3,6 +3,8 @@ package it.mobile.bisax.ptzvision.ui.console.screen
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -78,12 +80,15 @@ fun MainScreenPortrait(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val vibe = context.getSystemService(Vibrator::class.java) as Vibrator
+
             val aiBtn = @Composable { modifier: Modifier ->
                 Button(
                     onClick = {
                         coroutine.launch {
                             mainViewModel.toggleAI()
                         }
+                        vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
                     },
                     modifier = modifier
                         .padding(
@@ -121,6 +126,7 @@ fun MainScreenPortrait(
                         coroutine.launch {
                             mainViewModel.toggleAutoFocus()
                         }
+                        vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
                     },
                     modifier = Modifier
                         .weight(0.5f)

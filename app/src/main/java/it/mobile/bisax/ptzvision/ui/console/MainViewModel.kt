@@ -85,7 +85,10 @@ class MainViewModel(
         newActiveCams[camSlot] = _uiState.value.activeCams[0]
 
         _uiState.update {
-            it.copy(activeCams = newActiveCams)
+            it.copy(
+                activeCams = newActiveCams,
+                ptzController = null
+            )
         }
 
         initPTZController()
