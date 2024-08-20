@@ -3,38 +3,30 @@ package it.mobile.bisax.ptzvision.controller;
 import android.util.Log;
 import android.util.Pair;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 
 import it.mobile.bisax.ptzvision.data.cam.Cam;
 
 public class HttpCgiPTZController implements PTZController, Closeable {
     private final String ptzUrl;
     private final String paramUrl;
-    private final CloseableHttpClient connection;
     public HttpCgiPTZController(Cam cam) {
         ptzUrl = "http://" + cam.getIp() + "/cgi-bin/ptz.cgi";
         paramUrl = "http://" + cam.getIp() + "/cgi-bin/param.cgi";
 
         Log.d("HttpCgiPTZController", "PTZ URL: " + ptzUrl);
         Log.d("HttpCgiPTZController", "Param URL: " + paramUrl);
-
-        connection = HttpClients.createDefault();
     }
-
 
     @Override
     public Result move(float panf, float tiltf) {
@@ -162,27 +154,35 @@ public class HttpCgiPTZController implements PTZController, Closeable {
         return sendCommand(command, false);
     }
     private  Result sendCommand(String command, boolean isPost){
-        HttpRequestBase request;
-        if (isPost) {
-            request = new HttpPost(ptzUrl + command);
-        } else {
-            request = new HttpGet(ptzUrl + command);
-        }
 
         try {
-            connection.execute(request);
-        } catch (IOException e) {
+            URL url = new URL(ptzUrl + command);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod(isPost ? "POST" : "GET");
+            connection.connect();
+            connection.disconnect();
+        } catch (Exception e) {
             Log.e("HttpCgiPTZController", "Failed to send command", e);
             return Result.FAILURE;
         }
-
         return Result.SUCCESS;
     }
 
     private Pair<Result, String> getResponse(String command, String key){
         try {
-            CloseableHttpResponse response = connection.execute(new HttpGet(paramUrl + command));
-            String responseString = response.getEntity().toString();
+            URL url = new URL(paramUrl + command);
+            Log.d("HttpCgiPTZController", "GetResponse command: " + url);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+            Scanner scanner = new Scanner(new InputStreamReader(connection.getInputStream()));
+            String responseString = scanner.useDelimiter("\\A").next();
+            scanner.close();
+            connection.disconnect();
+            if (responseString == null) {
+                return Pair.create(Result.FAILURE, null);
+            }
+            Log.d("HttpCgiPTZController", "GetResponse response: " + responseString);
             return Pair.create(Result.SUCCESS, extractValue(responseString, key));
         } catch (IOException e) {
             return Pair.create(Result.FAILURE, null);
@@ -200,6 +200,6 @@ public class HttpCgiPTZController implements PTZController, Closeable {
 
     @Override
     public void close() throws IOException {
-        connection.close();
+
     }
 }
