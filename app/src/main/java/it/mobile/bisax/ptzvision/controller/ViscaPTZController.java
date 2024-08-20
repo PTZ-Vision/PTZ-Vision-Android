@@ -21,9 +21,11 @@ import it.mobile.bisax.ptzvision.data.cam.Cam;
 public class ViscaPTZController implements PTZController, Closeable {
     private final Socket socket;
     private final OutputStream output;
+    private final Cam cam;
 
 
     public ViscaPTZController(Cam cam) throws IOException {
+        this.cam = cam;
         this.socket = new Socket(cam.getIp(), cam.getPort());
         this.output = socket.getOutputStream();
     }
@@ -140,13 +142,12 @@ public class ViscaPTZController implements PTZController, Closeable {
 
     @Override
     public Pair<Result, Boolean> getAutoTracking() {
-        /*Pair <Result, Object> result = runCommandWithResponse(AutoTracking.get());
-        if (result.first == Result.SUCCESS) {
-            return new Pair<>(Result.SUCCESS, result.second.equals("905002FF"));
-        } else {
-            return new Pair<>(Result.FAILURE, false);
-        }*/
-        return new Pair<>(Result.NOT_SUPPORTED, null);
+        // NOT SUPPORTED
+        try (HttpCgiPTZController tmp = new HttpCgiPTZController(cam)) {
+            return tmp.getAutoTracking();
+        } catch (Exception e) {
+            return new Pair<>(Result.NOT_SUPPORTED, null);
+        }
     }
 
     @Override
