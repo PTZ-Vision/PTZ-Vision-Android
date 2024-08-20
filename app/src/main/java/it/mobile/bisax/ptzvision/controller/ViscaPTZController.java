@@ -132,11 +132,11 @@ public class ViscaPTZController implements PTZController, Closeable {
 
     @Override
     public Pair<Result, Boolean> getAutoFocus() {
-        Pair<Result, Object> result = runCommandWithResponse(Focus.getAutoFocus());
-        if (result.first == Result.SUCCESS) {
-            return new Pair<>(Result.SUCCESS, result.second.equals("905002FF"));
-        } else {
-            return new Pair<>(Result.FAILURE, false);
+        // HARD TO IMPLEMENT
+        try (HttpCgiPTZController tmp = new HttpCgiPTZController(cam)) {
+            return tmp.getAutoFocus();
+        } catch (Exception e) {
+            return new Pair<>(Result.NOT_SUPPORTED, null);
         }
     }
 
