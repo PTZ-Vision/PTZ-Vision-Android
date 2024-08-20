@@ -8,7 +8,7 @@ import it.mobile.bisax.ptzvision.controller.utils.MultiByteParam;
 
 public class Focus {
     private static final ByteParam PARAM_FOCUS_SPEED = new ByteParam("focusSpeed", 0, 7);
-    private static final byte[] HEX_FOCUS_PREFIX = HexConverter.parseHex("810104");
+    private static final byte[] HEX_FOCUS_PREFIX = HexConverter.parseHex("81010408");
 
     public static byte[] far() {
         return HexConverter.parseHex("8101040802FF");
