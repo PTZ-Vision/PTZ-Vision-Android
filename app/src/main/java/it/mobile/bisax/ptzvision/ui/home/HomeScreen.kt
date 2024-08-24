@@ -141,10 +141,10 @@ fun PageButtons(
                 }
             ),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            disabledContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+            disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
         ),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -186,7 +186,7 @@ fun PageButtons(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = MaterialTheme.colorScheme.onSecondary,
             disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+            disabledContentColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
         ),
         shape = RoundedCornerShape(20.dp)
     ) {

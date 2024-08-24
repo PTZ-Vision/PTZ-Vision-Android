@@ -7,10 +7,13 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +32,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.request.ImageRequest
@@ -77,65 +81,71 @@ fun SecondaryCams(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                if (uiState.activeCams.getOrNull(i) != null) {
-                    LaunchedEffect(uiState.activeCams[i]) {
-                        while (true) {
-                            try {
-                                val loader = ImageLoader(context)
-                                val request = ImageRequest.Builder(context)
-                                    .data("http://${uiState.activeCams[i]!!.ip}/snapshot.jpg?time=${System.currentTimeMillis()}")
-                                    .build()
+                Box(modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f), contentAlignment = Alignment.Center) {
+                    if (uiState.activeCams.getOrNull(i) != null) {
+                        LaunchedEffect(uiState.activeCams[i]) {
+                            while (true) {
+                                try {
+                                    val loader = ImageLoader(context)
+                                    val request = ImageRequest.Builder(context)
+                                        .data("http://${uiState.activeCams[i]!!.ip}:${uiState.activeCams[i]!!.httpPort}/snapshot.jpg?time=${System.currentTimeMillis()}")
+                                        .build()
 
-                                val result = (loader.execute(request) as SuccessResult).drawable
-                                val bitmap = (result as? android.graphics.drawable.BitmapDrawable)?.bitmap
+                                    val result = (loader.execute(request) as SuccessResult).drawable
+                                    val bitmap =
+                                        (result as? android.graphics.drawable.BitmapDrawable)?.bitmap
 
-                                if (bitmap != null) {
-                                    currentImage = bitmap.asImageBitmap()
-                                    errorOccurred = false // Nessun errore, immagine caricata correttamente
-                                } else {
-                                    errorOccurred = true // Se non riesce a caricare l'immagine
+                                    if (bitmap != null) {
+                                        currentImage = bitmap.asImageBitmap()
+                                        errorOccurred =
+                                            false // Nessun errore, immagine caricata correttamente
+                                    } else {
+                                        errorOccurred = true // Se non riesce a caricare l'immagine
+                                    }
+                                } catch (e: Exception) {
+                                    errorOccurred = true // Imposta errore se la richiesta fallisce
                                 }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                errorOccurred = true // Imposta errore se la richiesta fallisce
+                                delay(5000L) // 5 secondi di attesa
                             }
-                            delay(5000L) // 5 secondi di attesa
                         }
-                    }
-
-                    Crossfade(targetState = currentImage) { image ->
-                        if (!errorOccurred && image != null) {
-                            Image(
-                                bitmap = image,
-                                contentDescription = null,
-                                contentScale = ContentScale.Fit,
-                            )
-                        } else {
-                            Image(
-                                painter = painterResource(id = R.drawable.videocam_on), // Fallback image
-                                contentDescription = "Fallback Camera Image",
-                                colorFilter = ColorFilter.tint(Color(0xFF00FFFF)),
-                                modifier = Modifier.size(50.dp)
-                            )
+                        Crossfade(
+                            targetState = currentImage,
+                            modifier = Modifier
+                        ) { image ->
+                            if (!errorOccurred && image != null) {
+                                Image(
+                                    bitmap = image,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Fit,
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.videocam_on), // Fallback image
+                                    contentDescription = "Fallback Camera Image",
+                                    colorFilter = ColorFilter.tint(Color(0xFF00FFFF)),
+                                    modifier = Modifier.size(50.dp)
+                                )
+                            }
                         }
+                    } else {
+                        Image(
+                            painter = painterResource(id = R.drawable.videocam_off),
+                            contentDescription = "No Camera",
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
+                            modifier = Modifier.size(50.dp)
+                        )
                     }
-
-                    Text(
-                        text = uiState.activeCams.getOrNull(i)?.name ?: "No Name",
-                        color = Color.White
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.videocam_off),
-                        contentDescription = "No Camera",
-                        colorFilter = ColorFilter.tint(Color.White),
-                        modifier = Modifier.size(50.dp)
-                    )
-                    Text(
-                        text = "No camera",
-                        color = Color.White
-                    )
                 }
+
+                Text(
+                    text = uiState.activeCams.getOrNull(i)?.name ?: "No Camera",
+                    color = if (uiState.activeCams.getOrNull(i) != null) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(vertical = 2.dp)
+                )
             }
         }
     }

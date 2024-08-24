@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -60,18 +61,19 @@ fun MainScreenPortrait(
     Column(modifier = Modifier.fillMaxSize()) {
         SecondaryCams(
             modifier = Modifier
-                .weight(0.2f),
+                .weight(0.15f),
             mainViewModel = mainViewModel,
             onClick = onClick
         )
         SelectedCam(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.3f)
+                .weight(0.35f)
                 .padding(0.dp, 0.dp, 0.dp, 10.dp),
             context = context,
             cam = mainUiState.activeCams.getOrNull(0),
-            lifecycleOwner = context as LifecycleOwner
+            lifecycleOwner = context as LifecycleOwner,
+            mainViewModel = mainViewModel
         )
 
         Row(
@@ -98,7 +100,7 @@ fun MainScreenPortrait(
                                 60.dp,
                             0.dp
                         ),
-                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAIEnabled) Color.Green else Color.Gray),
+                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAIEnabled) MaterialTheme.colorScheme.primary else Color.Gray),
                     enabled = cameraEnabled
                 ) {
                     Text(text = "AI Tracking")
@@ -132,7 +134,7 @@ fun MainScreenPortrait(
                         .weight(0.5f)
                         .padding(5.dp, 5.dp),
                     enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
-                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAutoFocusEnabled) Color.Green else Color.Gray)
+                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAutoFocusEnabled) MaterialTheme.colorScheme.primary else Color.Gray)
                 ) {
                     Text(
                         text = "Auto",
@@ -147,57 +149,96 @@ fun MainScreenPortrait(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .weight(0.25f)
+                .weight(0.3f)
         ) {
+            val joystickWithLabel = @Composable { modifier: Modifier ->
+                Column(
+                    modifier = modifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    JoyStick(
+                        modifier = Modifier
+                            .weight(0.85f)
+                            .padding(10.dp, 0.dp, 10.dp, 10.dp),
+                        enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
+                        mainViewModel = mainViewModel,
+                        hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
+                    )
+                    Text(
+                        text = "Pan & Tilt",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(bottom = 5.dp)
+                            .weight(0.15f),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 15.sp
+                    )
+                }
+            }
+
+            val sliderWithLabel = @Composable { modifier: Modifier, label: String, enabled: Boolean, updateStatus: suspend () -> Unit, onDrag: suspend (maxPos: Float, posY: Float) -> Unit  ->
+                Column(
+                    modifier = modifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    SliderBox(
+                        modifier = Modifier
+                            .weight(0.85f)
+                            .padding(10.dp, 0.dp, 10.dp, 10.dp),
+                        setPosition = { maxPos, posY ->
+                            coroutine.launch {
+                                if(mainUiState.ptzController != null)
+                                    onDrag(maxPos, posY)
+                            }
+                        },
+                        enabled = enabled,
+                        hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
+                        updateStatus = updateStatus,
+                    )
+                    Text(
+                        text = label,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(bottom = 5.dp)
+                            .weight(0.15f),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 15.sp
+                    )
+                }
+            }
 
             if (settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
-                JoyStick(
-                    modifier = Modifier
-                        .weight(0.5f),
-                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
-                    mainViewModel = mainViewModel,
-                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
-                )
-            SliderBox(
-                modifier = Modifier
-                    .weight(0.25f)
-                    .padding(15.dp),
-                setPosition = { maxPos, posY ->
-                    coroutine.launch {
-                        mainViewModel.setZoomIntensity(maxPos, posY)
-                    }
-                },
-                enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
-                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
-                updateStatus = {mainViewModel.updateZoomLevel()}
-            )
-            SliderBox(
-                modifier = Modifier
-                    .weight(0.25f)
-                    .padding(15.dp),
-                setPosition = { maxPos, posY ->
-                    coroutine.launch {
-                        mainViewModel.setFocusIntensity(maxPos, posY)
-                    }
-                },
-                enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
-                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
-                updateStatus = {}
-            )
+                joystickWithLabel(Modifier.weight(0.5f))
+
+            sliderWithLabel(
+                Modifier.weight(0.25f),
+                "Zoom",
+                !(mainUiState.isAIEnabled) && cameraEnabled,
+                {
+                    if(mainUiState.ptzController != null)
+                        mainViewModel.updateZoomLevel()
+                }
+            ) { maxPos, posY ->
+                mainViewModel.setZoomIntensity(maxPos, posY)
+            }
+            sliderWithLabel(
+                Modifier.weight(0.25f),
+                "Focus",
+                !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
+                {}
+            ) { maxPos, posY ->
+                mainViewModel.setFocusIntensity(maxPos, posY)
+            }
 
             if (settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
-                JoyStick(
-                    modifier = Modifier
-                        .weight(0.5f),
-                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
-                    mainViewModel = mainViewModel,
-                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
-                )
+                joystickWithLabel(Modifier.weight(0.5f))
+
         }
         ScenesGrid(
-            modifier = Modifier.weight(0.25f),
-            windowSize = windowSize,
-            isLandScape = false,
+            modifier = Modifier.weight(0.30f)
+                .padding(top = 20.dp),
             mainViewModel = mainViewModel,
             enabled = cameraEnabled
         )

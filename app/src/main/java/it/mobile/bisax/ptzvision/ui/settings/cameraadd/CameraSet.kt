@@ -5,17 +5,15 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.widget.Toast
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +43,7 @@ enum class CameraMode {
 
 const val VISCA_PORT = 5678
 const val RTSP_PORT = 554
+const val HTTP_PORT = 80
 
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
@@ -56,8 +55,9 @@ fun CameraSet(
     camId: Int = 0,
     camName: String = "New Camera",
     camIp: String = "",
-    camPort: Int = VISCA_PORT,
+    camControlPort: Int = VISCA_PORT,
     camStreamPort: Int = RTSP_PORT,
+    camHttpPort: Int = HTTP_PORT,
     camActive: Boolean = false
 ) {
     // lock orientation to vertical
@@ -65,14 +65,15 @@ fun CameraSet(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-    ){
+    ) {
         var name by remember { mutableStateOf(camName) }
         var ip by remember { mutableStateOf(camIp) }
-        var port by remember { mutableIntStateOf(camPort) }
+        var controlPort by remember { mutableIntStateOf(camControlPort) }
         var streamPort by remember { mutableIntStateOf(camStreamPort) }
+        var httpPort by remember { mutableIntStateOf(camHttpPort) }
         var active by remember { mutableStateOf(camActive) }
 
-        Column{
+        Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -89,7 +90,7 @@ fun CameraSet(
                     )
                 }
                 Text(
-                    text =  if(mode == CameraMode.ADD) "Add a Camera" else "Modify a Camera",
+                    text = if (mode == CameraMode.ADD) "Add a Camera" else "Modify a Camera",
                     modifier = Modifier.padding(10.dp, 0.dp, 0.dp, 0.dp),
                     style = androidx.compose.ui.text.TextStyle(fontSize = 24.sp)
                 )
@@ -100,35 +101,50 @@ fun CameraSet(
             IPAddressInput(ip = ip) {
                 ip = it
             }
-            PortInput(title="Control Port", port = port) {
-                port = it
+            PortInput(title = "Control Port", port = controlPort) {
+                controlPort = it
             }
-            PortInput(title="Streaming Port", port = streamPort) {
+            PortInput(title = "Streaming Port", port = streamPort) {
                 streamPort = it
             }
+            PortInput(title = "HTTP Port", port = httpPort) {
+                httpPort = it
+            }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(16.dp)
-            ){
-                Row(
-                    modifier = Modifier.clickable {
-                        active = !active
-                    }
-                        .border(1.dp, MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.3f), RoundedCornerShape(5.dp))
-                        .padding(10.dp)
-                    ,
-                ){
-                    Icon(
-                        painter = painterResource(id = R.drawable.joystick),
-                        contentDescription = "Add to console",
-                        tint = if(active)
-                            Color.Yellow
+            Button(
+                onClick = {
+                    active = !active
+                },
+                modifier = Modifier.padding(16.dp),
+                colors = ButtonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer.let {
+                        if(!active)
+                            it.copy(alpha = 0.5f)
                         else
-                            MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.3f)
-                    )
-                    Text(text = if(!active) "Add to Console" else "Remove from console", modifier = Modifier.padding(start = 8.dp))
-                }
+                            it
+                    },
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer.let {
+                        if(!active)
+                            it.copy(alpha = 0.5f)
+                        else
+                            it
+                    },
+                    disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                    disabledContentColor = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.5f),
+                )
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.joystick),
+                    contentDescription = "Add to console",
+                    tint = if (active)
+                        Color.Yellow
+                    else
+                        MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.3f)
+                )
+                Text(
+                    text = if (!active) "Add to Console" else "Remove from console",
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
             Button(
                 onClick = {
@@ -140,15 +156,16 @@ fun CameraSet(
                         id = camId,
                         name = name,
                         ip = ip,
-                        port = port,
+                        controlPort = controlPort,
                         streamPort = streamPort,
+                        httpPort = httpPort,
                         active = active
                     )
                 },
                 modifier = Modifier.padding(start = 16.dp),
-            ){
+            ) {
                 Text(
-                    text = if(mode == CameraMode.ADD) "Add Camera" else "Save Changes"
+                    text = if (mode == CameraMode.ADD) "Add Camera" else "Save Changes"
                 )
             }
         }
@@ -163,18 +180,18 @@ private fun setCamera(
     id: Int = 0,
     name: String,
     ip: String,
-    port: Int,
+    controlPort: Int,
     streamPort: Int,
+    httpPort: Int,
     active: Boolean
 ) {
-    if (name.isNotEmpty() && ip.isNotEmpty() && port != 0){
+    if (name.isNotEmpty() && ip.isNotEmpty() && controlPort != 0) {
         settingsViewModel.viewModelScope.launch {
             val status =
-                if(mode == CameraMode.ADD) {
-                    settingsViewModel.insertCam(name, ip, port, streamPort, active)
-                }
-                else {
-                    settingsViewModel.updateCam(id, name, ip, port, streamPort, active)
+                if (mode == CameraMode.ADD) {
+                    settingsViewModel.insertCam(name, ip, controlPort, streamPort, httpPort, active)
+                } else {
+                    settingsViewModel.updateCam(id, name, ip, controlPort, streamPort, httpPort, active)
                 }
             if (status == null)
                 Toast.makeText(
@@ -189,8 +206,7 @@ private fun setCamera(
                     Toast.LENGTH_SHORT
                 ).show()
                 onBack()
-            }
-            else{
+            } else {
                 Toast.makeText(
                     context,
                     "Camera added",
@@ -199,8 +215,7 @@ private fun setCamera(
                 onBack()
             }
         }
-    }
-    else{
+    } else {
         Toast.makeText(
             context,
             "Please fill all fields",

@@ -11,10 +11,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,9 +35,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
+import it.mobile.bisax.ptzvision.R
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -60,7 +62,7 @@ fun createVibration(vibePercentage: Float): VibrationEffect? {
     val timings = LongArray(loopMs)
     val amplitudes = IntArray(loopMs)
 
-    for(i in 0..<loopMs){
+    for (i in 0..<loopMs) {
         timings[i] = 1
         amplitudes[i] = ((1 + sin(i.toDouble() / 50 * PI)) * vibePercentage / 2 * 255).toInt()
     }
@@ -82,7 +84,6 @@ fun JoyStick(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxSize()
-            .padding(15.dp)
     ) {
         val padSize = minDp(maxWidth, maxHeight)
         val dotSize: Dp = padSize / 3.5f
@@ -102,8 +103,8 @@ fun JoyStick(
                 .size(padSize)
                 .background(
                     Brush.radialGradient(
-                        0.0f to Color.Gray,
-                        1f to Color.DarkGray,
+                        0.0f to MaterialTheme.colorScheme.secondaryContainer,
+                        1f to MaterialTheme.colorScheme.onSecondary,
                         radius = 600.0f,
                         tileMode = TileMode.Repeated
                     ), CircleShape
@@ -121,10 +122,13 @@ fun JoyStick(
                     }
                     .size(dotSize)
                     .background(
-                        color = if (enabled) Color.Green else Color(0x88FFFFFF),
-                        shape = CircleShape
+                        if (enabled)
+                            MaterialTheme.colorScheme.tertiary
+                        else
+                            Color(0x88FFFFFF),
+                        CircleShape
                     )
-                    .then (
+                    .then(
                         if (enabled) {
                             Modifier.pointerInput(Unit) {
                                 detectDragGestures(onDragEnd = {
@@ -136,11 +140,9 @@ fun JoyStick(
                                     positionY = 0f
 
                                     coroutine.launch {
-                                        //Log.d("JoyStick", "Setting pan tilt to 0,0")
                                         mainViewModel.setPanTilt(0f, 0f)
                                         vibe.cancel()
                                         delay(100)
-                                        //Log.d("JoyStick", "Setting pan tilt to 0,0 again")
                                         mainViewModel.setPanTilt(0f, 0f)
                                         vibe.cancel()
                                     }
@@ -167,10 +169,10 @@ fun JoyStick(
 
 
                                     val clampedRadius = minOf(radius, maxRadius)
-                                    val vibePercentage = clampedRadius/maxRadius
+                                    val vibePercentage = clampedRadius / maxRadius
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hapticFeedbackEnabled) {
                                         vibe.cancel()
-                                        if ((vibePercentage*24).toInt() > 0)
+                                        if ((vibePercentage * 24).toInt() > 0)
                                             vibe.vibrate(createVibration(vibePercentage))
                                     }
                                     polarToCartesian(clampedRadius, theta).apply {
@@ -180,18 +182,25 @@ fun JoyStick(
                                         val scaledDistance = clampedRadius / maxRadius
                                         polarToCartesian(scaledDistance, theta).apply {
                                             val posXinSquare = 0.5f * sqrt(
-                                                2 + first.pow(2) - second.pow(2) + 2 * first * sqrt(2.0f)
+                                                2 + first.pow(2) - second.pow(2) + 2 * first * sqrt(
+                                                    2.0f
+                                                )
                                             ) - 0.5f * sqrt(
-                                                2 + first.pow(2) - second.pow(2) - 2 * first * sqrt(2.0f)
+                                                2 + first.pow(2) - second.pow(2) - 2 * first * sqrt(
+                                                    2.0f
+                                                )
                                             )
                                             val posYinSquare = 0.5f * sqrt(
-                                                2 - first.pow(2) + second.pow(2) + 2 * second * sqrt(2.0f)
+                                                2 - first.pow(2) + second.pow(2) + 2 * second * sqrt(
+                                                    2.0f
+                                                )
                                             ) - 0.5f * sqrt(
-                                                2 - first.pow(2) + second.pow(2) - 2 * second * sqrt(2.0f)
+                                                2 - first.pow(2) + second.pow(2) - 2 * second * sqrt(
+                                                    2.0f
+                                                )
                                             )
 
                                             coroutine.launch {
-                                                // Log.d("JoyStick", "Setting pan tilt to $posXinSquare, $posYinSquare")
                                                 mainViewModel.setPanTilt(
                                                     posXinSquare,
                                                     -posYinSquare
@@ -202,8 +211,7 @@ fun JoyStick(
 
                                 }
                             }
-                        }
-                        else{
+                        } else {
                             Modifier
                         }
                     )
@@ -212,8 +220,15 @@ fun JoyStick(
                             (coordinates.positionInParent().x - centerPx) / maxRadius,
                             -(coordinates.positionInParent().y - centerPx) / maxRadius
                         )
-                    }
-            )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.joystick_arrows),
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onTertiary
+                )
+            }
         }
     }
 }
@@ -225,18 +240,18 @@ private fun polarToCartesian(radius: Float, theta: Float): Pair<Float, Float> =
 fun SliderBox(
     modifier: Modifier = Modifier,
     moved: (y: Float) -> Unit = { _ -> },
-    setPosition: (maxPos:Float, posY: Float) -> Unit,
+    setPosition: (maxPos: Float, posY: Float) -> Unit,
     updateStatus: suspend () -> Unit,
     enabled: Boolean = false,
     hapticFeedbackEnabled: Boolean
-){
+) {
     BoxWithConstraints(
         modifier = modifier
             .fillMaxHeight(),
         contentAlignment = Alignment.Center
     ) {
         val sliderHeight = maxHeight
-        val sliderWidth = maxHeight*0.3f
+        val sliderWidth = maxHeight * 0.3f
         val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
         Box(
             modifier = Modifier
@@ -244,8 +259,8 @@ fun SliderBox(
                 .width(sliderWidth)
                 .background(
                     Brush.radialGradient(
-                        0.0f to Color.Gray,
-                        1f to Color.DarkGray,
+                        0.0f to MaterialTheme.colorScheme.secondaryContainer,
+                        1f to MaterialTheme.colorScheme.onSecondary,
                         radius = 600.0f,
                         tileMode = TileMode.Repeated
                     ), CircleShape
@@ -288,7 +303,13 @@ fun SliderBox(
                         )
                     }
                     .size(dotSize)
-                    .background(if (enabled) Color.Green else Color(0x88FFFFFF), CircleShape)
+                    .background(
+                        if (enabled)
+                            MaterialTheme.colorScheme.tertiary
+                        else
+                            Color(0x88FFFFFF),
+                        CircleShape
+                    )
                     .then(
                         if (enabled) {
                             Modifier
@@ -313,11 +334,12 @@ fun SliderBox(
 
                                         offsetY += offset.y
 
-                                        val clampedRadius = sign(radius) * minOf(abs(radius), maxYOffset)
-                                        val vibePercentage = abs(clampedRadius/maxYOffset)
+                                        val clampedRadius =
+                                            sign(radius) * minOf(abs(radius), maxYOffset)
+                                        val vibePercentage = abs(clampedRadius / maxYOffset)
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hapticFeedbackEnabled) {
                                             vibe.cancel()
-                                            if ((vibePercentage*7).toInt() > 0)
+                                            if ((vibePercentage * 7).toInt() > 0)
                                                 vibe.vibrate(createVibration(vibePercentage))
                                         }
 
@@ -343,7 +365,14 @@ fun SliderBox(
                             Modifier
                         }
                     ),
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.slider_arrows),
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onTertiary
+                )
+            }
         }
     }
 }

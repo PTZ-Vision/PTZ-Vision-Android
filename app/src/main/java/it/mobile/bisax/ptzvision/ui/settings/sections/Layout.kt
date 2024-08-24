@@ -69,10 +69,10 @@ fun Layout(
                     selected = isSelectedItem(textToEnableState),
                     onClick = null,
                     colors = RadioButtonColors(
-                        selectedColor = MaterialTheme.colorScheme.secondary,
-                        unselectedColor = MaterialTheme.colorScheme.tertiary,
-                        disabledSelectedColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                        disabledUnselectedColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+                        selectedColor = MaterialTheme.colorScheme.primary,
+                        unselectedColor = MaterialTheme.colorScheme.secondary,
+                        disabledSelectedColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        disabledUnselectedColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                     )
                 )
             }
