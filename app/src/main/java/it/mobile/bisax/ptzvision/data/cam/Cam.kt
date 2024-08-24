@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "cam",
-    indices = [Index(value = ["ip"], unique = true)],
+    indices = [Index(value = ["ip", "port", "streamPort"], unique = true)],
 )
 data class Cam(
     @PrimaryKey(autoGenerate = true)

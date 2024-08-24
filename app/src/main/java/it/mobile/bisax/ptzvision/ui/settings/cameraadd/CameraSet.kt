@@ -179,7 +179,7 @@ private fun setCamera(
             if (status == null)
                 Toast.makeText(
                     context,
-                    "IP already in use",
+                    "IP & ports combination already in use",
                     Toast.LENGTH_SHORT
                 ).show()
             else if (!status) {

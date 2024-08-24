@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import it.mobile.bisax.ptzvision.data.cam.Cam
 import it.mobile.bisax.ptzvision.data.cam.CamDao
 
-@Database(entities = [Cam::class], version = 8, exportSchema = false)
+@Database(entities = [Cam::class], version = 9, exportSchema = false)
 abstract class PTZDatabase : RoomDatabase() {
     abstract fun camDao(): CamDao
 
