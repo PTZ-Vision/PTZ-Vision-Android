@@ -3,10 +3,8 @@ package it.mobile.bisax.ptzvision.controller;
 import android.util.Log;
 import android.util.Pair;
 
-
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -14,15 +12,14 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import it.mobile.bisax.ptzvision.data.cam.Cam;
 
 public class HttpCgiPTZController implements PTZController, Closeable {
     private final String ptzUrl;
     private final String paramUrl;
     public HttpCgiPTZController(Cam cam) {
-        ptzUrl = "http://" + cam.getIp() + "/cgi-bin/ptz.cgi";
-        paramUrl = "http://" + cam.getIp() + "/cgi-bin/param.cgi";
+        ptzUrl = "http://" + cam.getIp() + ":" + cam.getHttpPort() + "/cgi-bin/ptz.cgi";
+        paramUrl = "http://" + cam.getIp() + ":" + cam.getHttpPort() + "/cgi-bin/param.cgi";
 
         Log.d("HttpCgiPTZController", "PTZ URL: " + ptzUrl);
         Log.d("HttpCgiPTZController", "Param URL: " + paramUrl);
@@ -138,6 +135,7 @@ public class HttpCgiPTZController implements PTZController, Closeable {
         Log.d("HttpCgiPTZController", "GetAutoTracking command");
 
         Pair <Result, String> response = getResponse("?get_image_conf", "autotrack");
+        Log.d("HttpCgiPTZController", "GetAutoTracking response: " + response);
         if (response.first == Result.SUCCESS) {
             return Pair.create(Result.SUCCESS, response.second.equals("1"));
         } else {
