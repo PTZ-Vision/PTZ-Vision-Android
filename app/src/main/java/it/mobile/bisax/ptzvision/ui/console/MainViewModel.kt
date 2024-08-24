@@ -63,6 +63,9 @@ class MainViewModel(
                 )
             }
 
+            if(newController == null)
+                return@launch
+
             _uiState.update {
                 it.copy(
                     isAIEnabled = getAIStatus(),
