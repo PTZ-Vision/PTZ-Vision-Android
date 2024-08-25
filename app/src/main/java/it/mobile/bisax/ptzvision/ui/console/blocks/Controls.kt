@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import it.mobile.bisax.ptzvision.R
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -240,7 +242,7 @@ private fun SliderBox(
     modifier: Modifier = Modifier,
     moved: (y: Float) -> Unit = { _ -> },
     setPosition: suspend (maxPos: Float, posY: Float) -> Unit,
-    updateStatus: suspend () -> Unit,
+    updateStatus: (suspend () -> Unit)? = null,
     enabled: Boolean = false,
     hapticFeedbackEnabled: Boolean
 ) {
@@ -281,17 +283,17 @@ private fun SliderBox(
             val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
             val coroutine = rememberCoroutineScope()
 
-//            LaunchedEffect(positionY) {
-//                while (true) {
-//                    if (positionY == 0f) {
-//                        updateStatus() // Box al centro
-//                        delay(1000L) // Delay di 1000ms
-//                    } else {
-//                        val x = async { updateStatus() }
-//                        x.await()
-//                    }
-//                }
-//            }
+            LaunchedEffect(positionY) {
+                while (updateStatus != null) {
+                    if (positionY == 0f) {
+                        updateStatus() // Box al centro
+                        delay(1000L) // Delay di 1000ms
+                    } else {
+                        val x = async { updateStatus() }
+                        x.await()
+                    }
+                }
+            }
 
             Box(
                 modifier = Modifier
@@ -414,9 +416,6 @@ fun FocusSlider(
         modifier = modifier,
         setPosition = { maxPos, posY ->
             mainViewModel.setFocusIntensity(maxPos, posY)
-        },
-        updateStatus = {
-//            mainViewModel.updateZoomLevel()
         },
         hapticFeedbackEnabled = hapticFeedbackEnabled,
         enabled = enabled
