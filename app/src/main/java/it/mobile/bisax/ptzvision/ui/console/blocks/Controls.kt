@@ -114,6 +114,27 @@ fun JoyStick(
             val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
             val coroutine = rememberCoroutineScope()
 
+
+
+            LaunchedEffect(enabled){
+                if(!enabled){
+                    offsetX = centerPx
+                    offsetY = centerPx
+                    radius = 0f
+                    theta = 0f
+                    positionX = 0f
+                    positionY = 0f
+
+                    coroutine.launch {
+                        mainViewModel.setPanTilt(0f, 0f)
+                        vibe.cancel()
+                        delay(100)
+                        mainViewModel.setPanTilt(0f, 0f)
+                        vibe.cancel()
+                    }
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .offset {
@@ -296,6 +317,23 @@ private fun SliderBox(
                 }
             }
 
+            LaunchedEffect(enabled){
+                if(!enabled){
+                    offsetY = centerY
+                    radius = 0f
+                    theta = 0f
+                    positionY = 0f
+
+                    coroutine.launch {
+                        setPosition(1f, 0f)
+                        vibe.cancel()
+                        delay(100)
+                        setPosition(1f, 0f)
+                        vibe.cancel()
+                    }
+                }
+            }
+
             Box(
                 modifier = Modifier
                     .offset {
@@ -355,7 +393,7 @@ private fun SliderBox(
                                             positionY = second
 
                                             if (!isMax) {
-                                                coroutine.launch{
+                                                coroutine.launch {
                                                     setPosition(
                                                         sliderHeight.toPx() / 2 - dotSize.toPx() / 2,
                                                         -positionY
