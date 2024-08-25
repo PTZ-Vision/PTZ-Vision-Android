@@ -135,7 +135,6 @@ public class HttpCgiPTZController implements PTZController, Closeable {
         Log.d("HttpCgiPTZController", "GetAutoTracking command");
 
         Pair <Result, String> response = getResponse("?get_image_conf", "autotrack");
-        Log.d("HttpCgiPTZController", "GetAutoTracking response: " + response);
         if (response.first == Result.SUCCESS) {
             return Pair.create(Result.SUCCESS, response.second.equals("1"));
         } else {

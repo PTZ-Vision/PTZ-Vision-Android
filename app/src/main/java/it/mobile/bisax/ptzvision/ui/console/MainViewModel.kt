@@ -8,8 +8,6 @@ import it.mobile.bisax.ptzvision.controller.utils.MathUtils
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -168,16 +166,13 @@ class MainViewModel(
 
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun updateZoomLevel() {
-        val x = GlobalScope.async {
-            withContext(Dispatchers.IO) {
-                val zoom = getZoomLevel()
-                if(zoom == 0.0 || zoom > 30.0) return@withContext
-                _uiState.update {
-                    it.copy(zoomLevel = zoom)
-                }
+        withContext(Dispatchers.IO) {
+            val zoom = getZoomLevel()
+            if(zoom == 0.0 || zoom > 30.0) return@withContext
+            _uiState.update {
+                it.copy(zoomLevel = zoom)
             }
         }
-        x.await()
     }
 
     private fun setUIState() {

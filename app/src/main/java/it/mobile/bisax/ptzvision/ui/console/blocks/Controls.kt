@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +39,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import it.mobile.bisax.ptzvision.R
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.PI
@@ -112,6 +110,7 @@ fun JoyStick(
         ) {
             val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
             val coroutine = rememberCoroutineScope()
+
             Box(
                 modifier = Modifier
                     .offset {
@@ -237,22 +236,35 @@ private fun polarToCartesian(radius: Float, theta: Float): Pair<Float, Float> =
     Pair(radius * cos(theta), radius * sin(theta))
 
 @Composable
-fun SliderBox(
+private fun SliderBox(
     modifier: Modifier = Modifier,
     moved: (y: Float) -> Unit = { _ -> },
-    setPosition: (maxPos: Float, posY: Float) -> Unit,
+    setPosition: suspend (maxPos: Float, posY: Float) -> Unit,
     updateStatus: suspend () -> Unit,
     enabled: Boolean = false,
     hapticFeedbackEnabled: Boolean
 ) {
     BoxWithConstraints(
+        contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxHeight(),
-        contentAlignment = Alignment.Center
     ) {
         val sliderHeight = maxHeight
         val sliderWidth = maxHeight * 0.3f
-        val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
+
+        val dotSize: Dp = sliderWidth * 0.8f
+        val maxYOffset =
+            with(LocalDensity.current) { (sliderHeight / 2).toPx() - (dotSize / 2).toPx() }
+        val centerX = with(LocalDensity.current) { ((sliderWidth - dotSize) / 2).toPx() }
+        val centerY = with(LocalDensity.current) { ((sliderHeight - dotSize) / 2).toPx() }
+
+        var offsetY by remember { mutableFloatStateOf(centerY) }
+
+        var radius by remember { mutableFloatStateOf(0f) }
+        var theta by remember { mutableFloatStateOf(0f) }
+
+        var positionY by remember { mutableFloatStateOf(0f) }
+
         Box(
             modifier = Modifier
                 .height(sliderHeight)
@@ -266,33 +278,20 @@ fun SliderBox(
                     ), CircleShape
                 )
         ) {
-            val dotSize: Dp = sliderWidth * 0.8f
-            val maxYOffset =
-                with(LocalDensity.current) { (sliderHeight / 2).toPx() - (dotSize / 2).toPx() }
-            val centerX = with(LocalDensity.current) { ((sliderWidth - dotSize) / 2).toPx() }
-            val centerY = with(LocalDensity.current) { ((sliderHeight - dotSize) / 2).toPx() }
+            val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
+            val coroutine = rememberCoroutineScope()
 
-            var offsetY by remember { mutableFloatStateOf(centerY) }
-
-            var radius by remember { mutableFloatStateOf(0f) }
-            var theta by remember { mutableFloatStateOf(0f) }
-
-            var positionY by remember { mutableFloatStateOf(0f) }
-
-            LaunchedEffect(positionY) {
-                while (true) {
-                    if (positionY == 0f) {
-                        updateStatus() // Box al centro
-                        delay(1000L) // Delay di 1000ms
-                    } else {
-                        //updateStatus() // Box fuori dalla posizione di equilibrio
-                        //delay(50L) // Delay di 50ms
-                        // await for the updateStatus
-                        val x = async { updateStatus() }
-                        x.await()
-                    }
-                }
-            }
+//            LaunchedEffect(positionY) {
+//                while (true) {
+//                    if (positionY == 0f) {
+//                        updateStatus() // Box al centro
+//                        delay(1000L) // Delay di 1000ms
+//                    } else {
+//                        val x = async { updateStatus() }
+//                        x.await()
+//                    }
+//                }
+//            }
 
             Box(
                 modifier = Modifier
@@ -315,14 +314,19 @@ fun SliderBox(
                             Modifier
                                 .pointerInput(Unit) {
                                     detectDragGestures(onDragEnd = {
-                                        vibe.cancel()
-
                                         offsetY = centerY
                                         radius = 0f
                                         theta = 0f
                                         positionY = 0f
 
-                                        setPosition(1f, 0f)
+                                        coroutine.launch {
+                                            setPosition(1f, 0f)
+                                            vibe.cancel()
+                                            delay(100)
+                                            setPosition(1f, 0f)
+                                            vibe.cancel()
+                                        }
+
                                     }) { pointerInputChange: PointerInputChange, offset: Offset ->
                                         val y = offsetY + offset.y - centerY
 
@@ -348,10 +352,12 @@ fun SliderBox(
                                             positionY = second
 
                                             if (!isMax) {
-                                                setPosition(
-                                                    sliderHeight.toPx() / 2 - dotSize.toPx() / 2,
-                                                    -positionY
-                                                )
+                                                coroutine.launch{
+                                                    setPosition(
+                                                        sliderHeight.toPx() / 2 - dotSize.toPx() / 2,
+                                                        -positionY
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -375,4 +381,44 @@ fun SliderBox(
             }
         }
     }
+}
+
+@Composable
+fun ZoomSlider(
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel,
+    enabled: Boolean = false,
+    hapticFeedbackEnabled: Boolean
+) {
+    SliderBox(
+        modifier = modifier,
+        setPosition = { maxPos, posY ->
+            mainViewModel.setZoomIntensity(maxPos, posY)
+        },
+        updateStatus = {
+            mainViewModel.updateZoomLevel()
+        },
+        hapticFeedbackEnabled = hapticFeedbackEnabled,
+        enabled = enabled
+    )
+}
+
+@Composable
+fun FocusSlider(
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel,
+    enabled: Boolean = false,
+    hapticFeedbackEnabled: Boolean
+) {
+    SliderBox(
+        modifier = modifier,
+        setPosition = { maxPos, posY ->
+            mainViewModel.setFocusIntensity(maxPos, posY)
+        },
+        updateStatus = {
+//            mainViewModel.updateZoomLevel()
+        },
+        hapticFeedbackEnabled = hapticFeedbackEnabled,
+        enabled = enabled
+    )
 }

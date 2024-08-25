@@ -32,11 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LifecycleOwner
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import it.mobile.bisax.ptzvision.ui.console.blocks.FocusSlider
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
 import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
 import it.mobile.bisax.ptzvision.ui.console.blocks.SecondaryCams
 import it.mobile.bisax.ptzvision.ui.console.blocks.SelectedCam
-import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
+import it.mobile.bisax.ptzvision.ui.console.blocks.ZoomSlider
 import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -187,42 +188,6 @@ fun MainScreenLandscape(
                 .fillMaxSize()
                 .weight(0.5f)
         ) {
-            val sliderWithLabel = @Composable { modifier: Modifier,
-                                                label: String,
-                                                enabled: Boolean,
-                                                updateStatus: suspend () -> Unit,
-                                                onDrag: suspend (maxPos: Float, posY: Float) -> Unit
-                ->
-                Column(
-                    modifier = modifier,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    SliderBox(
-                        modifier = Modifier
-                            .weight(0.85f)
-                            .padding(top = 10.dp),
-                        setPosition = { maxPos, posY ->
-                            coroutine.launch {
-                                if(mainUiState.ptzController != null)
-                                    onDrag(maxPos, posY)
-                            }
-                        },
-                        enabled = enabled,
-                        hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
-                        updateStatus = updateStatus,
-                    )
-                    Text(
-                        text = label,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .weight(0.15f),
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 15.sp
-                    )
-                }
-            }
-
             val joystick = @Composable { modifier: Modifier ->
                 Column(
                     modifier = modifier,
@@ -250,27 +215,51 @@ fun MainScreenLandscape(
             }
 
             val sliders = @Composable {
-                sliderWithLabel(
-                    Modifier
-                        .weight(0.15f),
-                    "Zoom",
-                    !(mainUiState.isAIEnabled) && cameraEnabled,
-                    {
-                        if(mainUiState.ptzController != null)
-                            mainViewModel.updateZoomLevel()
-                    }
-                ) { maxPos, posY ->
-                    mainViewModel.setZoomIntensity(maxPos, posY)
+                Column(
+                    modifier = Modifier.weight(0.15f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    ZoomSlider(
+                        mainViewModel = mainViewModel,
+                        hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
+                        enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
+                        modifier = Modifier
+                            .weight(0.85f)
+                            .padding(top = 10.dp),
+                    )
+                    Text(
+                        text = "Zoom",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .weight(0.15f),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 15.sp
+                    )
                 }
-                sliderWithLabel(
-                    Modifier
-                        .weight(0.15f),
-                    "Focus",
-                    !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
-                    {}
-                ) { maxPos, posY ->
-                    mainViewModel.setFocusIntensity(maxPos, posY)
+
+                Column(
+                    modifier = Modifier.weight(0.15f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    FocusSlider(
+                        mainViewModel = mainViewModel,
+                        hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
+                        enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
+                        modifier = Modifier
+                            .weight(0.85f)
+                            .padding(top = 10.dp),
+                    )
                 }
+                Text(
+                    text = "Focus",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .weight(0.15f),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 15.sp
+                )
             }
 
             if (settingsUiState.layout == SettingsUiState.Layout.J_LEFT) {
@@ -282,7 +271,8 @@ fun MainScreenLandscape(
             }
 
             ScenesGrid(
-                modifier = Modifier.weight(0.45f)
+                modifier = Modifier
+                    .weight(0.45f)
                     .padding(top = 10.dp),
                 mainViewModel = mainViewModel,
                 enabled = cameraEnabled
