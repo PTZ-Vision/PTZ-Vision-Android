@@ -95,10 +95,7 @@ fun MainScreenPortrait(
                     },
                     modifier = modifier
                         .padding(
-                            if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact)
-                                25.dp
-                            else
-                                60.dp,
+                            15.dp,
                             0.dp
                         ),
                     colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAIEnabled) MaterialTheme.colorScheme.primary else Color.Gray),
@@ -133,12 +130,12 @@ fun MainScreenPortrait(
                     },
                     modifier = Modifier
                         .weight(0.5f)
-                        .padding(5.dp, 5.dp),
+                        .padding(10.dp, 5.dp),
                     enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
                     colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAutoFocusEnabled) MaterialTheme.colorScheme.primary else Color.Gray)
                 ) {
                     Text(
-                        text = "Auto",
+                        text = "AF",
                         textAlign = TextAlign.Center,
                     )
                 }
@@ -193,6 +190,7 @@ fun MainScreenPortrait(
                     modifier = Modifier
                         .weight(0.85f)
                         .padding(10.dp, 0.dp, 10.dp, 10.dp),
+                    controller = mainUiState.ptzController
                 )
                 Text(
                     text = "Zoom",

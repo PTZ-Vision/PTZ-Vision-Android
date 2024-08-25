@@ -39,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import it.mobile.bisax.ptzvision.R
+import it.mobile.bisax.ptzvision.controller.PTZController
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -284,7 +285,7 @@ private fun SliderBox(
             val coroutine = rememberCoroutineScope()
 
             LaunchedEffect(positionY) {
-                while (updateStatus != null) {
+                while (updateStatus != null ) {
                     if (positionY == 0f) {
                         updateStatus() // Box al centro
                         delay(1000L) // Delay di 1000ms
@@ -390,7 +391,8 @@ fun ZoomSlider(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
     enabled: Boolean = false,
-    hapticFeedbackEnabled: Boolean
+    hapticFeedbackEnabled: Boolean,
+    controller: PTZController?
 ) {
     SliderBox(
         modifier = modifier,
@@ -398,7 +400,8 @@ fun ZoomSlider(
             mainViewModel.setZoomIntensity(maxPos, posY)
         },
         updateStatus = {
-            mainViewModel.updateZoomLevel()
+            if(controller != null)
+                mainViewModel.updateZoomLevel()
         },
         hapticFeedbackEnabled = hapticFeedbackEnabled,
         enabled = enabled

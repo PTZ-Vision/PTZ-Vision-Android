@@ -152,7 +152,7 @@ fun MainScreenLandscape(
                                 .weight(0.5f)
                                 .then(
                                     if (windowSize.widthSizeClass <= WindowWidthSizeClass.Medium) {
-                                        Modifier.padding(15.dp, 5.dp)
+                                        Modifier.padding(20.dp, 5.dp)
                                     } else {
                                         Modifier.padding(24.dp, 0.dp)
                                     }
@@ -161,7 +161,7 @@ fun MainScreenLandscape(
                             colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAutoFocusEnabled) MaterialTheme.colorScheme.primary else Color.Gray)
                         ) {
                             Text(
-                                text = "Auto",
+                                text = "AF",
                                 textAlign = TextAlign.Center,
                             )
                         }
@@ -227,6 +227,7 @@ fun MainScreenLandscape(
                         modifier = Modifier
                             .weight(0.85f)
                             .padding(top = 10.dp),
+                        controller = mainUiState.ptzController
                     )
                     Text(
                         text = "Zoom",
@@ -251,15 +252,15 @@ fun MainScreenLandscape(
                             .weight(0.85f)
                             .padding(top = 10.dp),
                     )
+                    Text(
+                        text = "Focus",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .weight(0.15f),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 15.sp
+                    )
                 }
-                Text(
-                    text = "Focus",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .weight(0.15f),
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 15.sp
-                )
             }
 
             if (settingsUiState.layout == SettingsUiState.Layout.J_LEFT) {
