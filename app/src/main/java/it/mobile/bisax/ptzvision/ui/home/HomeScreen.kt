@@ -26,9 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import it.mobile.bisax.ptzvision.R
 
 @SuppressLint("SourceLockedOrientationActivity")
@@ -53,30 +51,14 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.icon),
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Icon",
-                modifier = Modifier.size(100.dp)
-            )
-            Text(
-                text = "PTZ Vision",
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 40.sp,
-                modifier = Modifier
-                    .then(
-                        if (windowSize.heightSizeClass > WindowHeightSizeClass.Compact) {
-                            Modifier.padding(0.dp, 0.dp, 0.dp, 30.dp)
-                        } else {
-                            Modifier.padding(0.dp, 0.dp, 0.dp, 10.dp)
-                        }
-                    )
+                modifier = Modifier.size(200.dp)
             )
         }
 
         if (isLandscape) {
             Row(
-//            verticalArrangement = Arrangement.SpaceEvenly,
-//            horizontalAlignment = Alignment.CenterHorizontally,
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
