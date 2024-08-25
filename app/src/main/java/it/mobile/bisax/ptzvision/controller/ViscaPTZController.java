@@ -22,6 +22,8 @@ public class ViscaPTZController implements PTZController, Closeable {
     private final Socket socket;
     private final OutputStream output;
     private final Cam cam;
+    
+    private final boolean DEBUG = false;
 
 
     public ViscaPTZController(Cam cam) throws IOException {
@@ -34,7 +36,7 @@ public class ViscaPTZController implements PTZController, Closeable {
         int pan = (int) (panf * 24);
         int tilt = (int) (tiltf * 20);
 
-        Log.d("ViscaPTZController", "Move command: pan=" + pan + ", tilt=" + tilt);
+        if(DEBUG) Log.d("ViscaPTZController", "Move command: pan=" + pan + ", tilt=" + tilt);
 
         byte[] moveCommand;
         if (pan < 0) {
@@ -70,7 +72,7 @@ public class ViscaPTZController implements PTZController, Closeable {
     public Result zoom(float zoomf) {
         int zoom = (int) (zoomf * 7);
 
-        Log.d("ViscaPTZController", "Zoom command: zoom=" + zoom);
+        if(DEBUG) Log.d("ViscaPTZController", "Zoom command: zoom=" + zoom);
 
         byte[] zoomCommand;
 
@@ -89,7 +91,7 @@ public class ViscaPTZController implements PTZController, Closeable {
     public Result focus(float focusf) {
         int focus = (int) (focusf * 7);
 
-        Log.d("ViscaPTZController", "Focus command: focus=" + focus);
+        if(DEBUG) Log.d("ViscaPTZController", "Focus command: focus=" + focus);
 
         if (focus<0) {
             return runCommand(Focus.far(-focus));
@@ -102,7 +104,7 @@ public class ViscaPTZController implements PTZController, Closeable {
 
     @Override
     public Result setAutoFocus(boolean autoFocus) {
-        Log.d("ViscaPTZController", "AutoFocus command: autoFocus=" + autoFocus);
+        if(DEBUG) Log.d("ViscaPTZController", "AutoFocus command: autoFocus=" + autoFocus);
 
         if (autoFocus) {
             return runCommand(Focus.auto());
@@ -185,7 +187,7 @@ public class ViscaPTZController implements PTZController, Closeable {
             int bytesRead = input.read(response);
             if (bytesRead == -1) return null;
             String responseString = HexConverter.parseHex(Arrays.copyOf(response, bytesRead));
-            Log.d("ViscaPTZController", "Response: " + responseString);
+            if(DEBUG) Log.d("ViscaPTZController", "Response: " + responseString);
             return responseString;
         } catch (IOException e) {
             return null;
