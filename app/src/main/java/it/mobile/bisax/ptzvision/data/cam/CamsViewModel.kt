@@ -63,4 +63,10 @@ class CamsViewModel(context: Context) : ViewModel() {
             }
         }
     }
+
+    suspend fun countActiveCams() : Int {
+        return withContext(Dispatchers.IO){
+            repository.countActiveCams()
+        }
+    }
 }

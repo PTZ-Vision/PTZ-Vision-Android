@@ -22,4 +22,6 @@ class CamsRepository(private val camDao: CamDao) {
     suspend fun addActive(id: Int): Boolean {
         return camDao.addActive(id) > 0
     }
+
+    suspend fun countActiveCams() : Int = camDao.countActiveCams()
 }

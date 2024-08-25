@@ -114,6 +114,7 @@ fun CameraSet(
             Button(
                 onClick = {
                     active = !active
+                    settingsViewModel
                 },
                 modifier = Modifier.padding(16.dp),
                 colors = ButtonColors(
@@ -191,8 +192,15 @@ private fun setCamera(
                 if (mode == CameraMode.ADD) {
                     settingsViewModel.insertCam(name, ip, controlPort, streamPort, httpPort, active)
                 } else {
-                    settingsViewModel.updateCam(id, name, ip, controlPort, streamPort, httpPort, active)
+                    val countActive = settingsViewModel.countActiveCams()
+                    if (countActive>=4) {
+                        settingsViewModel.updateCam(id, name, ip, controlPort, streamPort, httpPort, false)
+                        false
+                    } else {
+                        settingsViewModel.updateCam(id, name, ip, controlPort, streamPort, httpPort, active);
+                    }
                 }
+
             if (status == null)
                 Toast.makeText(
                     context,

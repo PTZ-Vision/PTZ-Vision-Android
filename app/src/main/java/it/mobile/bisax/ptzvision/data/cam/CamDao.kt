@@ -36,4 +36,7 @@ interface CamDao {
 
     @Query("UPDATE cam SET active = 1 WHERE id = :id AND (SELECT COUNT(*) FROM cam WHERE active = 1) < 4")
     suspend fun addActive(id: Int): Int
+
+    @Query("SELECT COUNT(*) FROM cam WHERE active = 1")
+    suspend fun countActiveCams(): Int
 }

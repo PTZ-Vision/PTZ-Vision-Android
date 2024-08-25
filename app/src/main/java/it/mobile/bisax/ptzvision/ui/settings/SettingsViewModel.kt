@@ -6,11 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import it.mobile.bisax.ptzvision.data.cam.Cam
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingsViewModel(
     context: Context,
@@ -119,5 +121,9 @@ class SettingsViewModel(
             putBoolean("hapticFeedbackEnabled", settingsUiState.value.hapticFeedbackEnabled)
             apply()
         }
+    }
+
+    suspend fun countActiveCams() : Int {
+        return camsViewModel.countActiveCams()
     }
 }
