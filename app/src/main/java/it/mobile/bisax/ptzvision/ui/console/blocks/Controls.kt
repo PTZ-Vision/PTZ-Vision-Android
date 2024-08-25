@@ -58,7 +58,7 @@ import androidx.compose.ui.unit.min as minDp
 
 fun createVibration(vibePercentage: Float): VibrationEffect? {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
-    val loopMs = 100
+    val loopMs = 101
 
     val timings = LongArray(loopMs)
     val amplitudes = IntArray(loopMs)
@@ -69,7 +69,7 @@ fun createVibration(vibePercentage: Float): VibrationEffect? {
     }
 
     return VibrationEffect.createWaveform(
-        timings, amplitudes, -1
+        timings, amplitudes, loopMs-1
     )
 }
 
