@@ -48,7 +48,7 @@ fun Camera(
     var isCamActive = cam.active
 
     // AlertDialog
-    when{
+    when {
         openAlertDialog.value -> AlertDialog(
             title = {
                 Text(text = "Elimina telecamera")
@@ -56,7 +56,7 @@ fun Camera(
             text = {
                 val text = buildAnnotatedString {
                     append("Vuoi eliminare la telecamera ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)){
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append(cam.name)
                     }
                     append("?")
@@ -94,7 +94,7 @@ fun Camera(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp, 0.dp, 16.dp, 16.dp)
-    ){
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -113,12 +113,13 @@ fun Camera(
                 )
                 Text(
                     text = cam.ip,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer)
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
             }
             Row(
                 modifier = Modifier.weight(0.4f),
                 horizontalArrangement = Arrangement.End
-            ){
+            ) {
                 IconButton(
                     onClick = {
                         isCamActive = !isCamActive
@@ -126,7 +127,7 @@ fun Camera(
                         if (isCamActive) {
                             settingsViewModel.viewModelScope.launch {
                                 isCamActive = settingsViewModel.addActive(cam.id)
-                                if(!isCamActive)
+                                if (!isCamActive)
                                     Toast.makeText(
                                         context,
                                         "Max. 4 active cams allowed",
@@ -141,14 +142,14 @@ fun Camera(
                     },
                     modifier = Modifier
                         .padding()
-                ){
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.joystick),
                         contentDescription = "Add to console",
-                        tint = if(isCamActive)
+                        tint = if (isCamActive)
                             Color.Yellow
                         else
-                            MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.3f)
+                            MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.4f)
                     )
                 }
                 IconButton(
@@ -166,7 +167,7 @@ fun Camera(
                     Icon(
                         painter = painterResource(id = R.drawable.trashbin),
                         contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                            tint = MaterialTheme.colorScheme.error
                     )
                 }
             }
@@ -177,15 +178,21 @@ fun Camera(
 @Composable
 fun CameraAddBtn(
     onAddClick: () -> Unit
-){
+) {
     TextButton(
-        onClick =onAddClick,
-        modifier=Modifier.padding(16.dp,0.dp)
-    ){
+        onClick = onAddClick,
+        modifier = Modifier
+            .padding(16.dp, 0.dp)
+    ) {
         Icon(
             Icons.Default.Add,
             contentDescription = "Add",
+            tint = MaterialTheme.colorScheme.secondary
         )
-        Text("Add", fontSize = 18.sp)
+        Text(
+            text = "Add",
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.secondary
+        )
     }
 }

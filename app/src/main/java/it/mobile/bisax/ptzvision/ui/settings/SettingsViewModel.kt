@@ -43,12 +43,13 @@ class SettingsViewModel(
         saveUIState(appContext, settingsUiState.value.layout)
     }
 
-    suspend fun insertCam(name: String, ip: String, port: Int, streamPort: Int, active: Boolean): Boolean? {
+    suspend fun insertCam(name: String, ip: String, controlPort: Int, streamPort: Int, httpPort: Int, active: Boolean): Boolean? {
         val cam = Cam(
             name = name,
             ip = ip,
-            port = port,
+            controlPort = controlPort,
             streamPort = streamPort,
+            httpPort = httpPort,
             active = false
         )
 
@@ -63,13 +64,14 @@ class SettingsViewModel(
         return true
     }
 
-    suspend fun updateCam(id: Int, name: String, ip: String, port: Int, streamPort: Int, active: Boolean): Boolean? {
+    suspend fun updateCam(id: Int, name: String, ip: String, controlPort: Int, streamPort: Int, httpPort: Int, active: Boolean): Boolean? {
         val cam = Cam(
             id = id,
             name = name,
             ip = ip,
-            port = port,
+            controlPort = controlPort,
             streamPort = streamPort,
+            httpPort = httpPort,
             active = active
         )
 

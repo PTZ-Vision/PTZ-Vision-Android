@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -31,11 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LifecycleOwner
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import it.mobile.bisax.ptzvision.ui.console.blocks.FocusSlider
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
 import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
 import it.mobile.bisax.ptzvision.ui.console.blocks.SecondaryCams
 import it.mobile.bisax.ptzvision.ui.console.blocks.SelectedCam
-import it.mobile.bisax.ptzvision.ui.console.blocks.SliderBox
+import it.mobile.bisax.ptzvision.ui.console.blocks.ZoomSlider
 import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -60,18 +62,19 @@ fun MainScreenPortrait(
     Column(modifier = Modifier.fillMaxSize()) {
         SecondaryCams(
             modifier = Modifier
-                .weight(0.2f),
+                .weight(0.15f),
             mainViewModel = mainViewModel,
             onClick = onClick
         )
         SelectedCam(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.3f)
+                .weight(0.35f)
                 .padding(0.dp, 0.dp, 0.dp, 10.dp),
             context = context,
             cam = mainUiState.activeCams.getOrNull(0),
-            lifecycleOwner = context as LifecycleOwner
+            lifecycleOwner = context as LifecycleOwner,
+            mainViewModel = mainViewModel
         )
 
         Row(
@@ -92,13 +95,10 @@ fun MainScreenPortrait(
                     },
                     modifier = modifier
                         .padding(
-                            if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact)
-                                25.dp
-                            else
-                                60.dp,
+                            15.dp,
                             0.dp
                         ),
-                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAIEnabled) Color.Green else Color.Gray),
+                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAIEnabled) MaterialTheme.colorScheme.primary else Color.Gray),
                     enabled = cameraEnabled
                 ) {
                     Text(text = "AI Tracking")
@@ -130,12 +130,12 @@ fun MainScreenPortrait(
                     },
                     modifier = Modifier
                         .weight(0.5f)
-                        .padding(5.dp, 5.dp),
+                        .padding(10.dp, 5.dp),
                     enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
-                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAutoFocusEnabled) Color.Green else Color.Gray)
+                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAutoFocusEnabled) MaterialTheme.colorScheme.primary else Color.Gray)
                 ) {
                     Text(
-                        text = "Auto",
+                        text = "AF",
                         textAlign = TextAlign.Center,
                     )
                 }
@@ -147,57 +147,93 @@ fun MainScreenPortrait(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .weight(0.25f)
+                .weight(0.3f)
         ) {
+            val joystickWithLabel = @Composable { modifier: Modifier ->
+                Column(
+                    modifier = modifier,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    JoyStick(
+                        modifier = Modifier
+                            .weight(0.85f)
+                            .padding(10.dp, 0.dp, 10.dp, 10.dp),
+                        enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
+                        mainViewModel = mainViewModel,
+                        hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
+                    )
+                    Text(
+                        text = "Pan & Tilt",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(bottom = 5.dp)
+                            .weight(0.15f),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 15.sp
+                    )
+                }
+            }
 
             if (settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
-                JoyStick(
-                    modifier = Modifier
-                        .weight(0.5f),
-                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
+                joystickWithLabel(Modifier.weight(0.5f))
+
+            Column(
+                modifier = Modifier.weight(0.25f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                ZoomSlider(
                     mainViewModel = mainViewModel,
-                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
+                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
+                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
+                    modifier = Modifier
+                        .weight(0.85f)
+                        .padding(10.dp, 0.dp, 10.dp, 10.dp),
+                    controller = mainUiState.ptzController
                 )
-            SliderBox(
-                modifier = Modifier
-                    .weight(0.25f)
-                    .padding(15.dp),
-                setPosition = { maxPos, posY ->
-                    coroutine.launch {
-                        mainViewModel.setZoomIntensity(maxPos, posY)
-                    }
-                },
-                enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
-                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
-                updateStatus = {mainViewModel.updateZoomLevel()}
-            )
-            SliderBox(
-                modifier = Modifier
-                    .weight(0.25f)
-                    .padding(15.dp),
-                setPosition = { maxPos, posY ->
-                    coroutine.launch {
-                        mainViewModel.setFocusIntensity(maxPos, posY)
-                    }
-                },
-                enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
-                hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
-                updateStatus = {}
-            )
+                Text(
+                    text = "Zoom",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(bottom = 5.dp)
+                        .weight(0.15f),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 15.sp
+                )
+            }
+            Column(
+                modifier = Modifier.weight(0.25f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                FocusSlider(
+                    mainViewModel = mainViewModel,
+                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled,
+                    enabled = !(mainUiState.isAutoFocusEnabled || mainUiState.isAIEnabled) && cameraEnabled,
+                    modifier = Modifier
+                        .weight(0.85f)
+                        .padding(10.dp, 0.dp, 10.dp, 10.dp),
+                )
+                Text(
+                    text = "Focus",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(bottom = 5.dp)
+                        .weight(0.15f),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 15.sp
+                )
+            }
 
             if (settingsUiState.layout == SettingsUiState.Layout.J_RIGHT)
-                JoyStick(
-                    modifier = Modifier
-                        .weight(0.5f),
-                    enabled = !(mainUiState.isAIEnabled) && cameraEnabled,
-                    mainViewModel = mainViewModel,
-                    hapticFeedbackEnabled = settingsUiState.hapticFeedbackEnabled
-                )
+                joystickWithLabel(Modifier.weight(0.5f))
+
         }
         ScenesGrid(
-            modifier = Modifier.weight(0.25f),
-            windowSize = windowSize,
-            isLandScape = false,
+            modifier = Modifier
+                .weight(0.30f)
+                .padding(top = 20.dp),
             mainViewModel = mainViewModel,
             enabled = cameraEnabled
         )

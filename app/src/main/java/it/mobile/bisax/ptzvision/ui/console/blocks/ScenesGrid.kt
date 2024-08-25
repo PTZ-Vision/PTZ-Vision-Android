@@ -6,19 +6,17 @@ import android.os.Vibrator
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -44,19 +42,17 @@ data class ButtonData(
 @Composable
 fun ScenesGrid(
     modifier: Modifier = Modifier,
-    windowSize: WindowSizeClass,
-    isLandScape: Boolean,
     mainViewModel: MainViewModel,
     enabled: Boolean
 ) {
-    val buttons: MutableMap<Int, ButtonData> = mutableMapOf()
+    val boxes: MutableMap<Int, ButtonData> = mutableMapOf()
     val coroutine = rememberCoroutineScope()
     val context = LocalContext.current
     val vibe = context.getSystemService(Vibrator::class.java) as Vibrator
 
     for (i in 0 until 9) {
-        buttons[i] = ButtonData(
-            label = if(i == 0) "Home" else "Scene $i",
+        boxes[i] = ButtonData(
+            label = if (i == 0) "Home" else "Scene $i",
             onClick = { _ ->
                 coroutine.launch {
                     mainViewModel.goToScene(i)
@@ -79,39 +75,27 @@ fun ScenesGrid(
         )
     }
 
-    Column (modifier= modifier
-        .fillMaxSize()
-        .padding(
-            0.dp,
-            if (!isLandScape || windowSize.heightSizeClass <= WindowHeightSizeClass.Compact)
-                0.dp
-            else
-                40.dp
-        ),
+    Column(
+        modifier = modifier
+            .fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
-        // 3 rows of 3 buttons
         for (i in 0 until 3) {
-            Row (
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(0.dp, 5.dp)
-                    .weight(0.8f),
+                    .weight(0.33333f),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Spacer(
-                    Modifier
-                        .width(0.dp)
-                        .weight(0.1f))
                 for (j in 0 until 3) {
                     val index = i * 3 + j
-                    val buttonData = buttons[index]!!
-                    val onClick = rememberUpdatedState(buttonData.onClick)
-                    val onLongClick = rememberUpdatedState(buttonData.onLongClick)
-                    Text(
-                        text = buttons[index]!!.label,
+                    val boxData = boxes[index]!!
+                    val onClick = rememberUpdatedState(boxData.onClick)
+                    val onLongClick = rememberUpdatedState(boxData.onLongClick)
 
+                    Box(
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .then(
                                 if (enabled)
@@ -124,15 +108,20 @@ fun ScenesGrid(
                                 else
                                     Modifier
                             )
-                            .background(if (enabled) Color.Blue else Color.Gray, CircleShape)
-                            .weight(0.8f)
-                            .padding(10.dp),
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(
-                        Modifier
-                            .width(0.dp)
-                            .weight(0.1f))
+                            .background(if (enabled) MaterialTheme.colorScheme.tertiaryContainer else Color.Gray)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.surface
+                            )
+                            .weight(0.33333f)
+                            .fillMaxSize()
+                    ) {
+                        Text(
+                            text = boxes[index]!!.label,
+                            textAlign = TextAlign.Center,
+                            color = if (enabled) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSecondary
+                        )
+                    }
                 }
             }
         }

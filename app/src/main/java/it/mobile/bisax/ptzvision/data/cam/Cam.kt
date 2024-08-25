@@ -6,15 +6,16 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "cam",
-    indices = [Index(value = ["ip"], unique = true)],
+    indices = [Index(value = ["ip", "controlPort", "streamPort", "httpPort"], unique = true)],
 )
 data class Cam(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val name: String,
     val ip: String,
-    val port: Int,
+    val controlPort: Int,
     val streamPort: Int,
+    val httpPort: Int,
     val active: Boolean,
     val main: Boolean = false,
     val autofocus: Boolean = false,
