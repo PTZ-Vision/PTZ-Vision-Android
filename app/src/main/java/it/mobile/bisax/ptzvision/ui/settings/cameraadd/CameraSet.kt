@@ -114,7 +114,6 @@ fun CameraSet(
             Button(
                 onClick = {
                     active = !active
-                    settingsViewModel
                 },
                 modifier = Modifier.padding(16.dp),
                 colors = ButtonColors(
@@ -197,7 +196,7 @@ private fun setCamera(
                         settingsViewModel.updateCam(id, name, ip, controlPort, streamPort, httpPort, false)
                         false
                     } else {
-                        settingsViewModel.updateCam(id, name, ip, controlPort, streamPort, httpPort, active);
+                        settingsViewModel.updateCam(id, name, ip, controlPort, streamPort, httpPort, active)
                     }
                 }
 
@@ -217,7 +216,7 @@ private fun setCamera(
             } else {
                 Toast.makeText(
                     context,
-                    "Camera added",
+                    "Camera ${if (mode == CameraMode.ADD) "added" else "modified"}",
                     Toast.LENGTH_SHORT
                 ).show()
                 onBack()
