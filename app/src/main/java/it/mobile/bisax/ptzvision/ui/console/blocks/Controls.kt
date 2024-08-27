@@ -69,7 +69,7 @@ fun createVibration(vibePercentage: Float): VibrationEffect? {
     }
 
     return VibrationEffect.createWaveform(
-        timings, amplitudes, loopMs-1
+        timings, amplitudes, loopMs - 1
     )
 }
 
@@ -116,8 +116,8 @@ fun JoyStick(
 
 
 
-            LaunchedEffect(enabled){
-                if(!enabled){
+            LaunchedEffect(enabled) {
+                if (!enabled) {
                     offsetX = centerPx
                     offsetY = centerPx
                     radius = 0f
@@ -305,8 +305,8 @@ private fun SliderBox(
             val vibe = LocalContext.current.getSystemService(Vibrator::class.java) as Vibrator
             val coroutine = rememberCoroutineScope()
 
-            LaunchedEffect(positionY) {
-                while (updateStatus != null ) {
+            LaunchedEffect(positionY, updateStatus) {
+                while (updateStatus != null) {
                     if (positionY == 0f) {
                         updateStatus() // Box al centro
                         delay(1000L) // Delay di 1000ms
@@ -317,8 +317,8 @@ private fun SliderBox(
                 }
             }
 
-            LaunchedEffect(enabled){
-                if(!enabled){
+            LaunchedEffect(enabled) {
+                if (!enabled) {
                     offsetY = centerY
                     radius = 0f
                     theta = 0f
@@ -437,9 +437,12 @@ fun ZoomSlider(
         setPosition = { maxPos, posY ->
             mainViewModel.setZoomIntensity(maxPos, posY)
         },
-        updateStatus = {
-            if(controller != null)
+        updateStatus = if (controller != null) {
+            {
                 mainViewModel.updateZoomLevel()
+            }
+        } else {
+            null
         },
         hapticFeedbackEnabled = hapticFeedbackEnabled,
         enabled = enabled

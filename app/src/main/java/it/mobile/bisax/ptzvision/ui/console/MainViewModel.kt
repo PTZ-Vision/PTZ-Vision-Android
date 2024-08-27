@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import it.mobile.bisax.ptzvision.controller.ViscaPTZController
 import it.mobile.bisax.ptzvision.controller.utils.MathUtils
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,10 +63,15 @@ class MainViewModel(
             if(newController == null)
                 return@launch
 
+            var zoom = getZoomLevel()
+            if (zoom == 0.0 || zoom > 30.0) {
+                zoom = _uiState.value.zoomLevel
+            }
+
             _uiState.update {
                 it.copy(
                     isAIEnabled = getAIStatus(),
-                    zoomLevel = getZoomLevel(),
+                    zoomLevel = zoom,
                     isAutoFocusEnabled = getAutoFocusStatus()
                 )
             }
@@ -159,16 +163,17 @@ class MainViewModel(
         val controller = _uiState.value.ptzController
         if(controller == null) {
             Log.e("MainViewModel", "PTZController is null while getting Zoom level")
-            return 1.0
+            return _uiState.value.zoomLevel
         }
-        return controller.getZoom()?.second ?: 1.0
+        return controller.getZoom()?.second ?: 0.0
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     suspend fun updateZoomLevel() {
         withContext(Dispatchers.IO) {
             val zoom = getZoomLevel()
-            if(zoom == 0.0 || zoom > 30.0) return@withContext
+            if(zoom == 0.0 || zoom > 30.0)
+                return@withContext
+
             _uiState.update {
                 it.copy(zoomLevel = zoom)
             }
@@ -177,12 +182,17 @@ class MainViewModel(
 
     private fun setUIState() {
         viewModelScope.launch {
+            var zoom = getZoomLevel()
+            if (zoom == 0.0 || zoom > 30.0) {
+                zoom = _uiState.value.zoomLevel
+            }
+
             camsViewModel.getActiveCamsStream.collect { cams ->
                 // Aggiorna subito le telecamere attive
                 _uiState.update {
                     it.copy(
                         isAIEnabled = getAIStatus(),
-                        zoomLevel = getZoomLevel(),
+                        zoomLevel = zoom,
                         isAutoFocusEnabled = getAutoFocusStatus(),
                         activeCams = cams,
                         ptzController = null

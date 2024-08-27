@@ -179,7 +179,6 @@ public class HttpCgiPTZController implements PTZController, Closeable {
             if (responseString == null) {
                 return Pair.create(Result.FAILURE, null);
             }
-            Log.d("HttpCgiPTZController", "GetResponse response: " + responseString);
             return Pair.create(Result.SUCCESS, extractValue(responseString, key));
         } catch (IOException e) {
             return Pair.create(Result.FAILURE, null);
