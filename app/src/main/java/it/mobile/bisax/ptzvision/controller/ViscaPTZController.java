@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import it.mobile.bisax.ptzvision.controller.utils.HexConverter;
 import it.mobile.bisax.ptzvision.controller.viscacommands.AutoTracking;
@@ -157,10 +159,12 @@ public class ViscaPTZController implements PTZController, Closeable {
         Pair<Result, Object> result = runCommandWithResponse(Zoom.get());
         if (result.first == Result.SUCCESS && result.second != null) {
             String response = (String) result.second;
-            if (response.length() != 14) {
+            String pattern = ".*90500([0-9A-F])0([0-9A-F])0([0-9A-F])0([0-9A-F])FF.*";
+            Matcher matcher = Pattern.compile(pattern).matcher(response);
+            if (!matcher.find()) {
                 return new Pair<>(Result.FAILURE, 0.0);
             }
-            String zoom = ""+response.charAt(5)+response.charAt(7)+response.charAt(9)+response.charAt(11);
+            String zoom = matcher.group(1)+matcher.group(2)+matcher.group(3)+matcher.group(4);
             int zoomHex = Integer.parseInt(zoom, 16);
             double zoomValue = zoomHex / 16384.0 * 29.0 + 1.0;
             zoomValue = Math.round(zoomValue * 100.0) / 100.0;
