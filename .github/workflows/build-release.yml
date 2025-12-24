@@ -1,0 +1,55 @@
+name: Build and Release APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      - name: Rename APK
+        run: mv app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/PTZVision.apk
+
+      - name: Delete existing release
+        run: |
+          gh release delete latest --yes || true
+
+      - name: Delete existing tag
+        run: |
+          git push origin :refs/tags/latest || true
+
+      - name: Create Release
+        run: |
+          gh release create latest \
+            --title "PTZ Vision - Latest Build" \
+            --notes "Ultima build automatica dell'applicazione PTZ Vision." \
+            --latest \
+            app/build/outputs/apk/release/PTZVision.apk
+
