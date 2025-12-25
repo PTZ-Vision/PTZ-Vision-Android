@@ -56,7 +56,7 @@ jobs:
         run: |
           gh release create latest \
             --title "PTZ Vision - Latest Build" \
-            --notes "Ultima build automatica dell'applicazione PTZ Vision." \
+            --notes "Latest PTZ Vision build (through GitHub Actions)" \
             --latest \
             app/build/outputs/apk/release/PTZVision.apk
 
