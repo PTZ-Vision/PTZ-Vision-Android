@@ -1,5 +1,5 @@
 # PTZ Vision
-
+![MIT](https://badgen.net/github/license/PTZ-Vision/PTZ-Vision-Android)
 ![PTZ Vision Logo](./app/logo.svg)
 
 ## A remote controller for your PTZ cameras
