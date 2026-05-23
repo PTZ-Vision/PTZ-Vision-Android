@@ -3,7 +3,6 @@ package it.mobile.bisax.ptzvision.ui.console.zerocopy
 import android.util.Log
 import android.view.Surface
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 class RtspClientAdapter(
     private val scope: CoroutineScope,
@@ -45,11 +44,7 @@ class RtspClientAdapter(
     }
 
     fun stop() {
-        extractor?.let { extractor ->
-            scope.launch {
-                extractor.stop()
-            }
-        }
+        extractor?.stop()
         extractor = null
         decoder?.release()
         decoder = null

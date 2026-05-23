@@ -13,7 +13,6 @@ import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -40,8 +39,8 @@ class RtspNalExtractor(
         }
     }
 
-    suspend fun stop() {
-        job?.cancelAndJoin()
+    fun stop() {
+        job?.cancel()
         job = null
         closeSocket()
     }
