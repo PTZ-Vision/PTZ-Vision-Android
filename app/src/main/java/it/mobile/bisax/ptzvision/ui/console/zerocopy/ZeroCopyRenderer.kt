@@ -3,6 +3,8 @@ package it.mobile.bisax.ptzvision.ui.console.zerocopy
 import android.graphics.SurfaceTexture
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
+import android.os.Handler
+import android.os.Looper
 import android.view.Surface
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -52,7 +54,11 @@ class ZeroCopyRenderer(
         texCoordHandle = GLES20.glGetAttribLocation(program, "aTexCoord")
         textureHandle = GLES20.glGetUniformLocation(program, "sTexture")
 
-        surface?.let(onSurfaceReady)
+        surface?.let { readySurface ->
+            Handler(Looper.getMainLooper()).post {
+                onSurfaceReady(readySurface)
+            }
+        }
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {

@@ -109,9 +109,10 @@ class RtspStreamManager(
         if (released) {
             return
         }
-        onError(error)
         reconnectJob?.cancel()
         val delayMs = backoffMs
+        Log.w(TAG, "RTSP error, retrying in ${delayMs}ms", error)
+        onError(error)
         backoffMs = (backoffMs * 2).coerceAtMost(MAX_BACKOFF_MS)
         reconnectJob = scope.launch {
             delay(delayMs)

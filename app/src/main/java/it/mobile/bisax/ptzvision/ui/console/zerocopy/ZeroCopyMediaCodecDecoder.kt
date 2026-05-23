@@ -9,6 +9,7 @@ import java.nio.ByteBuffer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -82,7 +83,7 @@ class ZeroCopyMediaCodecDecoder(
         codec = null
     }
 
-    private fun drainOutput() {
+    private suspend fun drainOutput() {
         val codec = codec ?: return
         val bufferInfo = MediaCodec.BufferInfo()
         try {
@@ -97,6 +98,9 @@ class ZeroCopyMediaCodecDecoder(
                             onFirstFrame()
                         }
                     }
+                    outputIndex == MediaCodec.INFO_TRY_AGAIN_LATER -> {
+                        delay(IDLE_DELAY_MS)
+                    }
                     outputIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
                         // Ignore
                     }
@@ -110,5 +114,6 @@ class ZeroCopyMediaCodecDecoder(
     private companion object {
         const val INPUT_TIMEOUT_US = 10_000L
         const val OUTPUT_TIMEOUT_US = 10_000L
+        const val IDLE_DELAY_MS = 5L
     }
 }

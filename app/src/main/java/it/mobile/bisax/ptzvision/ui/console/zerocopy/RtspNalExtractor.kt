@@ -1,7 +1,9 @@
 package it.mobile.bisax.ptzvision.ui.console.zerocopy
 
 import android.net.Uri
+import android.os.SystemClock
 import android.util.Base64
+import android.util.Log
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
@@ -28,6 +30,7 @@ class RtspNalExtractor(
     private var job: Job? = null
     private var socket: Socket? = null
     private var fuBuffer: ByteArrayOutputStream? = null
+    private var lastTimeoutLogMs = 0L
 
     fun start() {
         job?.cancel()
@@ -152,7 +155,10 @@ class RtspNalExtractor(
         while (true) {
             val byte = input.read()
             if (byte == -1) {
-                return if (buffer.size() == 0) null else buffer.toString(StandardCharsets.UTF_8.name())
+                if (buffer.size() == 0) {
+                    return null
+                }
+                throw IOException("Unexpected EOF while reading RTSP line")
             }
             if (byte == '\n'.code) {
                 break
@@ -202,6 +208,11 @@ class RtspNalExtractor(
             } catch (_: SocketTimeoutException) {
                 if (job?.isActive != true) {
                     break
+                }
+                val now = SystemClock.elapsedRealtime()
+                if (now - lastTimeoutLogMs > TIMEOUT_LOG_INTERVAL_MS) {
+                    Log.v(TAG, "RTSP read timed out; waiting for data")
+                    lastTimeoutLogMs = now
                 }
             }
         }
@@ -381,6 +392,8 @@ class RtspNalExtractor(
         const val DEFAULT_RTSP_PORT = 554
         const val CONNECT_TIMEOUT_MS = 3000
         const val READ_TIMEOUT_MS = 1000
+        const val TIMEOUT_LOG_INTERVAL_MS = 5_000L
+        const val TAG = "RtspNalExtractor"
         const val RTP_CHANNEL = 0
         const val INTERLEAVED_MAGIC = 0x24
         const val RTP_HEADER_SIZE = 12

@@ -69,11 +69,12 @@ fun SelectedCam(
     }
 
     fun handleTierError(error: Throwable) {
-        Log.w(TAG, "RTSP tier error, switching fallback state", error)
         if (streamTier == StreamTier.PRIMARY) {
+            Log.w(TAG, "PRIMARY tier failed, falling back to FALLBACK", error)
             streamTier = StreamTier.FALLBACK
             streamStatus = StreamStatus.LOADING
         } else {
+            Log.w(TAG, "FALLBACK tier failed, setting ERROR state", error)
             streamStatus = StreamStatus.ERROR
         }
     }
@@ -122,7 +123,7 @@ fun SelectedCam(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(text = "Streaming disconnected", color = Color.White)
+                        Text(text = "Streaming paused", color = Color.White)
                         ReconnectButton {
                             restartStream()
                             mainViewModel.resetPTZController()
