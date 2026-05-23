@@ -13,6 +13,7 @@ import androidx.media3.exoplayer.rtsp.RtspMediaSource
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.util.concurrent.atomic.AtomicLong
 import javax.net.SocketFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -30,14 +31,14 @@ class RtspStreamManager(
     private var reconnectJob: Job? = null
     private var currentUrl: String? = null
     private var currentSurfaceView: SurfaceView? = null
-    private var backoffMs = INITIAL_BACKOFF_MS
+    private val backoffMs = AtomicLong(INITIAL_BACKOFF_MS)
     private var released = false
 
     fun start(rtspUrl: String, surfaceView: SurfaceView) {
         released = false
         currentUrl = rtspUrl
         currentSurfaceView = surfaceView
-        backoffMs = INITIAL_BACKOFF_MS
+        backoffMs.set(INITIAL_BACKOFF_MS)
         reconnectJob?.cancel()
         createPlayer(rtspUrl, surfaceView)
     }
@@ -57,6 +58,7 @@ class RtspStreamManager(
     private fun createPlayer(rtspUrl: String, surfaceView: SurfaceView) {
         player?.release()
 
+        // Slightly larger buffers keep fallback playback stable on weak networks.
         val loadControl = DefaultLoadControl
             .Builder()
             .setBufferDurationsMs(
@@ -110,10 +112,11 @@ class RtspStreamManager(
             return
         }
         reconnectJob?.cancel()
-        val delayMs = backoffMs
+        val delayMs = backoffMs.getAndUpdate { current ->
+            (current * 2).coerceAtMost(MAX_BACKOFF_MS)
+        }
         Log.w(TAG, "RTSP error, retrying in ${delayMs}ms", error)
         onError(error)
-        backoffMs = (backoffMs * 2).coerceAtMost(MAX_BACKOFF_MS)
         reconnectJob = scope.launch {
             delay(delayMs)
             val url = currentUrl

@@ -47,6 +47,11 @@ private enum class StreamStatus {
     ERROR
 }
 
+private data class StreamState(
+    val tier: StreamTier,
+    val status: StreamStatus
+)
+
 @Composable
 fun SelectedCam(
     modifier: Modifier = Modifier,
@@ -55,27 +60,29 @@ fun SelectedCam(
     cam: Cam? = null,
     mainViewModel: MainViewModel
 ) {
-    var streamTier by remember(cam) { mutableStateOf(StreamTier.PRIMARY) }
-    var streamStatus by remember(cam) { mutableStateOf(StreamStatus.LOADING) }
+    var streamState by remember(cam) {
+        mutableStateOf(StreamState(StreamTier.PRIMARY, StreamStatus.LOADING))
+    }
     var restartToken by remember(cam) { mutableStateOf(0) }
     var isPaused by remember { mutableStateOf(false) }
+
+    val streamTier = streamState.tier
+    val streamStatus = streamState.status
 
     val rtspUrl = cam?.let { "rtsp://${it.ip}:${it.streamPort}/2" }
 
     fun restartStream() {
-        streamTier = StreamTier.PRIMARY
-        streamStatus = StreamStatus.LOADING
+        streamState = StreamState(StreamTier.PRIMARY, StreamStatus.LOADING)
         restartToken += 1
     }
 
     fun handleTierError(error: Throwable) {
         if (streamTier == StreamTier.PRIMARY) {
             Log.w(TAG, "PRIMARY tier failed, falling back to FALLBACK", error)
-            streamTier = StreamTier.FALLBACK
-            streamStatus = StreamStatus.LOADING
+            streamState = StreamState(StreamTier.FALLBACK, StreamStatus.LOADING)
         } else {
             Log.w(TAG, "FALLBACK tier failed, setting ERROR state", error)
-            streamStatus = StreamStatus.ERROR
+            streamState = streamState.copy(status = StreamStatus.ERROR)
         }
     }
 
@@ -149,7 +156,7 @@ fun SelectedCam(
                                             rtspUrl = rtspUrl,
                                             modifier = Modifier.fillMaxSize(),
                                             onFirstFrame = {
-                                                streamStatus = StreamStatus.PLAYING
+                                                streamState = streamState.copy(status = StreamStatus.PLAYING)
                                             },
                                             onError = ::handleTierError
                                         )
@@ -158,10 +165,10 @@ fun SelectedCam(
                                             rtspUrl = rtspUrl,
                                             modifier = Modifier.fillMaxSize(),
                                             onPlaying = {
-                                                streamStatus = StreamStatus.PLAYING
+                                                streamState = streamState.copy(status = StreamStatus.PLAYING)
                                             },
                                             onError = {
-                                                streamStatus = StreamStatus.ERROR
+                                                streamState = streamState.copy(status = StreamStatus.ERROR)
                                             }
                                         )
                                     }

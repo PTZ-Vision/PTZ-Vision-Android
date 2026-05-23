@@ -28,7 +28,9 @@ class RtspNalExtractor(
     private val onError: (Throwable) -> Unit
 ) {
     private var job: Job? = null
+    @Volatile
     private var socket: Socket? = null
+    private val socketLock = Any()
     private var fuBuffer: ByteArrayOutputStream? = null
     private var lastTimeoutLogMs = 0L
 
@@ -69,7 +71,9 @@ class RtspNalExtractor(
         }
         socket.tcpNoDelay = true
         socket.soTimeout = READ_TIMEOUT_MS
-        this.socket = socket
+        synchronized(socketLock) {
+            this.socket = socket
+        }
 
         val input = BufferedInputStream(socket.getInputStream())
         val output = BufferedOutputStream(socket.getOutputStream())
@@ -352,12 +356,14 @@ class RtspNalExtractor(
     }
 
     private fun closeSocket() {
-        try {
-            socket?.close()
-        } catch (_: IOException) {
-            // Ignore
-        } finally {
-            socket = null
+        synchronized(socketLock) {
+            try {
+                socket?.close()
+            } catch (_: IOException) {
+                // Ignore
+            } finally {
+                socket = null
+            }
         }
     }
 

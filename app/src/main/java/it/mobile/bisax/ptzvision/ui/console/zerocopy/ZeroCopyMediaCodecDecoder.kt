@@ -4,6 +4,7 @@ import android.media.MediaCodec
 import android.media.MediaFormat
 import android.os.Build
 import android.os.SystemClock
+import android.util.Log
 import android.view.Surface
 import java.nio.ByteBuffer
 import kotlinx.coroutines.CoroutineScope
@@ -65,6 +66,7 @@ class ZeroCopyMediaCodecDecoder(
                 )
             }
         } catch (exception: IllegalStateException) {
+            Log.w(TAG, "MediaCodec input queue failed", exception)
             onError(exception)
         }
     }
@@ -107,11 +109,13 @@ class ZeroCopyMediaCodecDecoder(
                 }
             }
         } catch (exception: IllegalStateException) {
+            Log.w(TAG, "MediaCodec output drain failed", exception)
             onError(exception)
         }
     }
 
     private companion object {
+        const val TAG = "ZeroCopyMediaCodec"
         const val INPUT_TIMEOUT_US = 10_000L
         const val OUTPUT_TIMEOUT_US = 10_000L
         const val IDLE_DELAY_MS = 5L

@@ -15,6 +15,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import android.view.Surface
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Composable
 fun ZeroCopyVideoPreview(
@@ -38,13 +39,18 @@ fun ZeroCopyVideoPreview(
 
     var viewRef by remember { mutableStateOf<ZeroCopyGLSurfaceView?>(null) }
     var surface by remember { mutableStateOf<Surface?>(null) }
+    val isActive = remember { AtomicBoolean(true) }
 
     AndroidView(
         factory = { context ->
             ZeroCopyGLSurfaceView(context).also { view ->
                 viewRef = view
                 view.setOnSurfaceReadyListener { newSurface ->
-                    surface = newSurface
+                    if (isActive.get()) {
+                        surface = newSurface
+                    } else {
+                        newSurface.release()
+                    }
                 }
             }
         },
@@ -76,7 +82,9 @@ fun ZeroCopyVideoPreview(
     }
 
     DisposableEffect(rtspUrl) {
+        isActive.set(true)
         onDispose {
+            isActive.set(false)
             adapter.stop()
             surface?.release()
             surface = null
