@@ -103,7 +103,6 @@ class ZeroCopyRenderer(
     fun release() {
         surfaceTexture?.release()
         surfaceTexture = null
-        surface?.release()
         surface = null
     }
 

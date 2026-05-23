@@ -86,7 +86,7 @@ class RtspStreamManager(
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_ENDED) {
-                    scheduleReconnect(IllegalStateException("RTSP stream ended"))
+                    scheduleReconnect(IllegalStateException("RTSP stream ended unexpectedly"))
                 }
             }
         })
@@ -115,10 +115,9 @@ class RtspStreamManager(
         backoffMs = (backoffMs * 2).coerceAtMost(MAX_BACKOFF_MS)
         reconnectJob = scope.launch {
             delay(delayMs)
-            if (released) return@launch
             val url = currentUrl
             val surface = currentSurfaceView
-            if (url != null && surface != null) {
+            if (!released && url != null && surface != null) {
                 createPlayer(url, surface)
             }
         }

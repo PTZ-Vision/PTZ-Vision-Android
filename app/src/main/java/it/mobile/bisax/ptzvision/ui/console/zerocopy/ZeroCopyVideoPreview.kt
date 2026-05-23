@@ -78,8 +78,9 @@ fun ZeroCopyVideoPreview(
     DisposableEffect(rtspUrl) {
         onDispose {
             adapter.stop()
-            viewRef?.release()
+            surface?.release()
             surface = null
+            viewRef?.release()
         }
     }
 }

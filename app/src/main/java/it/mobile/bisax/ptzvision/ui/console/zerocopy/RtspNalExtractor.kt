@@ -59,7 +59,11 @@ class RtspNalExtractor(
         val baseUrl = "rtsp://$host:$port$path"
 
         val socket = Socket()
-        socket.connect(InetSocketAddress(host, port), CONNECT_TIMEOUT_MS)
+        try {
+            socket.connect(InetSocketAddress(host, port), CONNECT_TIMEOUT_MS)
+        } catch (exception: IOException) {
+            throw IOException("RTSP connection failed: ${exception.message}", exception)
+        }
         socket.tcpNoDelay = true
         socket.soTimeout = READ_TIMEOUT_MS
         this.socket = socket
@@ -196,7 +200,9 @@ class RtspNalExtractor(
                     }
                 }
             } catch (_: SocketTimeoutException) {
-                // Allow coroutine cancellation checks on idle connections.
+                if (job?.isActive != true) {
+                    break
+                }
             }
         }
     }
