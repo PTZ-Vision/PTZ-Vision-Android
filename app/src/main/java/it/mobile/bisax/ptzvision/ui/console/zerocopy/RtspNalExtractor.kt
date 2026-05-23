@@ -9,6 +9,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.SocketTimeoutException
 import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +61,7 @@ class RtspNalExtractor(
         val socket = Socket()
         socket.connect(InetSocketAddress(host, port), CONNECT_TIMEOUT_MS)
         socket.tcpNoDelay = true
+        socket.soTimeout = READ_TIMEOUT_MS
         this.socket = socket
 
         val input = BufferedInputStream(socket.getInputStream())
@@ -160,37 +162,41 @@ class RtspNalExtractor(
 
     private fun readInterleavedStream(input: InputStream) {
         while (job?.isActive == true) {
-            val firstByte = input.read()
-            if (firstByte == -1) {
-                throw IOException("RTSP stream closed")
-            }
-            if (firstByte == INTERLEAVED_MAGIC) {
-                val channel = input.read()
-                val lengthHigh = input.read()
-                val lengthLow = input.read()
-                if (lengthHigh == -1 || lengthLow == -1) {
+            try {
+                val firstByte = input.read()
+                if (firstByte == -1) {
                     throw IOException("RTSP stream closed")
                 }
-                val length = (lengthHigh shl 8) or lengthLow
-                if (length <= 0) continue
-                val payload = readExactBytes(input, length)
-                if (channel == RTP_CHANNEL) {
-                    handleRtpPacket(payload)
+                if (firstByte == INTERLEAVED_MAGIC) {
+                    val channel = input.read()
+                    val lengthHigh = input.read()
+                    val lengthLow = input.read()
+                    if (lengthHigh == -1 || lengthLow == -1) {
+                        throw IOException("RTSP stream closed")
+                    }
+                    val length = (lengthHigh shl 8) or lengthLow
+                    if (length <= 0) continue
+                    val payload = readExactBytes(input, length)
+                    if (channel == RTP_CHANNEL) {
+                        handleRtpPacket(payload)
+                    }
+                } else {
+                    val lineBuffer = ByteArrayOutputStream()
+                    lineBuffer.write(firstByte)
+                    while (true) {
+                        val byte = input.read()
+                        if (byte == -1) break
+                        lineBuffer.write(byte)
+                        if (byte == '\n'.code) break
+                    }
+                    // Skip remaining RTSP headers
+                    while (true) {
+                        val line = readLine(input) ?: break
+                        if (line.isEmpty()) break
+                    }
                 }
-            } else {
-                val lineBuffer = ByteArrayOutputStream()
-                lineBuffer.write(firstByte)
-                while (true) {
-                    val byte = input.read()
-                    if (byte == -1) break
-                    lineBuffer.write(byte)
-                    if (byte == '\n'.code) break
-                }
-                // Skip remaining RTSP headers
-                while (true) {
-                    val line = readLine(input) ?: break
-                    if (line.isEmpty()) break
-                }
+            } catch (_: SocketTimeoutException) {
+                // Allow coroutine cancellation checks on idle connections.
             }
         }
     }
@@ -316,11 +322,10 @@ class RtspNalExtractor(
                     }
                 }
                 inVideo && line.startsWith("a=framesize:") -> {
-                    val sizePart = line.substringAfter(' ').trim()
-                    val parts = sizePart.split('-')
-                    if (parts.size == 2) {
-                        width = parts[0].toIntOrNull() ?: width
-                        height = parts[1].toIntOrNull() ?: height
+                    val match = Regex("a=framesize:\\d+\\s+(\\d+)-(\\d+)").find(line)
+                    if (match != null) {
+                        width = match.groupValues.getOrNull(1)?.toIntOrNull() ?: width
+                        height = match.groupValues.getOrNull(2)?.toIntOrNull() ?: height
                     }
                 }
             }
@@ -369,6 +374,7 @@ class RtspNalExtractor(
     private companion object {
         const val DEFAULT_RTSP_PORT = 554
         const val CONNECT_TIMEOUT_MS = 3000
+        const val READ_TIMEOUT_MS = 1000
         const val RTP_CHANNEL = 0
         const val INTERLEAVED_MAGIC = 0x24
         const val RTP_HEADER_SIZE = 12

@@ -1,6 +1,7 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,7 +68,8 @@ fun SelectedCam(
         restartToken += 1
     }
 
-    fun handleTierError(_: Throwable) {
+    fun handleTierError(error: Throwable) {
+        Log.w(TAG, "RTSP tier error, switching fallback state", error)
         if (streamTier == StreamTier.PRIMARY) {
             streamTier = StreamTier.FALLBACK
             streamStatus = StreamStatus.LOADING
@@ -217,3 +219,5 @@ fun ReconnectButton(
         Text(text = "Reconnect", color = MaterialTheme.colorScheme.onPrimary)
     }
 }
+
+private const val TAG = "SelectedCam"

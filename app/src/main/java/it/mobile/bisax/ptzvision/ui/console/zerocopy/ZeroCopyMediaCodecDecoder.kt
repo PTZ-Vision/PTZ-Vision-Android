@@ -9,6 +9,7 @@ import java.nio.ByteBuffer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -86,6 +87,7 @@ class ZeroCopyMediaCodecDecoder(
         val bufferInfo = MediaCodec.BufferInfo()
         try {
             while (isActive) {
+                ensureActive()
                 val outputIndex = codec.dequeueOutputBuffer(bufferInfo, OUTPUT_TIMEOUT_US)
                 when {
                     outputIndex >= 0 -> {

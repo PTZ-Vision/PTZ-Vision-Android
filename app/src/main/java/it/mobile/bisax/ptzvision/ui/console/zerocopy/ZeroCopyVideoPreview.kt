@@ -2,6 +2,7 @@ package it.mobile.bisax.ptzvision.ui.console.zerocopy
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -13,6 +14,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import android.view.Surface
 
 @Composable
 fun ZeroCopyVideoPreview(
@@ -35,24 +37,29 @@ fun ZeroCopyVideoPreview(
     }
 
     var viewRef by remember { mutableStateOf<ZeroCopyGLSurfaceView?>(null) }
+    var surface by remember { mutableStateOf<Surface?>(null) }
 
     AndroidView(
         factory = { context ->
             ZeroCopyGLSurfaceView(context).also { view ->
                 viewRef = view
-                view.setOnSurfaceReadyListener { surface ->
-                    adapter.start(rtspUrl, surface)
+                view.setOnSurfaceReadyListener { newSurface ->
+                    surface = newSurface
                 }
             }
         },
         modifier = modifier,
         update = { view ->
             viewRef = view
-            view.setOnSurfaceReadyListener { surface ->
-                adapter.start(rtspUrl, surface)
-            }
         }
     )
+
+    LaunchedEffect(rtspUrl, surface) {
+        val readySurface = surface
+        if (readySurface != null) {
+            adapter.start(rtspUrl, readySurface)
+        }
+    }
 
     DisposableEffect(lifecycleOwner, viewRef) {
         val observer = LifecycleEventObserver { _, event ->
@@ -72,6 +79,7 @@ fun ZeroCopyVideoPreview(
         onDispose {
             adapter.stop()
             viewRef?.release()
+            surface = null
         }
     }
 }

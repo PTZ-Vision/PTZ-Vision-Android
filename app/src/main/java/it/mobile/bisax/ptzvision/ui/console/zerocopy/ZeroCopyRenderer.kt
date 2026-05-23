@@ -41,8 +41,8 @@ class ZeroCopyRenderer(
         }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        val textureId = createExternalTexture()
-        surfaceTexture = SurfaceTexture(textureId).also {
+        val newTextureId = createExternalTexture()
+        surfaceTexture = SurfaceTexture(newTextureId).also {
             it.setOnFrameAvailableListener(this)
         }
         surface = Surface(surfaceTexture)
@@ -141,6 +141,13 @@ class ZeroCopyRenderer(
         GLES20.glAttachShader(program, vertex)
         GLES20.glAttachShader(program, fragment)
         GLES20.glLinkProgram(program)
+        val linkStatus = IntArray(1)
+        GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, linkStatus, 0)
+        if (linkStatus[0] == 0) {
+            val log = GLES20.glGetProgramInfoLog(program)
+            GLES20.glDeleteProgram(program)
+            throw IllegalStateException("OpenGL program link failed: $log")
+        }
         return program
     }
 
@@ -148,6 +155,13 @@ class ZeroCopyRenderer(
         val shader = GLES20.glCreateShader(type)
         GLES20.glShaderSource(shader, shaderCode)
         GLES20.glCompileShader(shader)
+        val compileStatus = IntArray(1)
+        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compileStatus, 0)
+        if (compileStatus[0] == 0) {
+            val log = GLES20.glGetShaderInfoLog(shader)
+            GLES20.glDeleteShader(shader)
+            throw IllegalStateException("OpenGL shader compile failed: $log")
+        }
         return shader
     }
 

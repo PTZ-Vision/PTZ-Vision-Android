@@ -111,15 +111,16 @@ class RtspStreamManager(
         }
         onError(error)
         reconnectJob?.cancel()
+        val delayMs = backoffMs
+        backoffMs = (backoffMs * 2).coerceAtMost(MAX_BACKOFF_MS)
         reconnectJob = scope.launch {
-            delay(backoffMs)
+            delay(delayMs)
             if (released) return@launch
             val url = currentUrl
             val surface = currentSurfaceView
             if (url != null && surface != null) {
                 createPlayer(url, surface)
             }
-            backoffMs = (backoffMs * 2).coerceAtMost(MAX_BACKOFF_MS)
         }
     }
 
