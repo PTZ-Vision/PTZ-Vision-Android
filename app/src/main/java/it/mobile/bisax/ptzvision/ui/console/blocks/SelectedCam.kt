@@ -1,8 +1,6 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
 import android.content.Context
-import android.util.Log
-import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,37 +17,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.DefaultLoadControl
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.rtsp.RtspMediaSource
-import androidx.media3.ui.PlayerView
 import it.mobile.bisax.ptzvision.R
 import it.mobile.bisax.ptzvision.data.cam.Cam
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
-import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.Socket
-import javax.net.SocketFactory
+import it.mobile.bisax.ptzvision.ui.console.zerocopy.ZeroCopyVideoPreview
 
-@OptIn(UnstableApi::class)
+private enum class StreamTier {
+    PRIMARY,
+    FALLBACK
+}
+
+private enum class StreamStatus {
+    LOADING,
+    PLAYING,
+    ERROR
+}
+
 @Composable
 fun SelectedCam(
     modifier: Modifier = Modifier,
@@ -58,107 +54,44 @@ fun SelectedCam(
     cam: Cam? = null,
     mainViewModel: MainViewModel
 ) {
-    var player: ExoPlayer? by remember { mutableStateOf(null) }
-    var streamingError by remember(cam) { mutableStateOf(false) }
+    var streamTier by remember(cam) { mutableStateOf(StreamTier.PRIMARY) }
+    var streamStatus by remember(cam) { mutableStateOf(StreamStatus.LOADING) }
+    var restartToken by remember(cam) { mutableStateOf(0) }
+    var isPaused by remember { mutableStateOf(false) }
 
-    fun resetPlayer() {
-        player?.stop()
-        player?.release()
-        player = null
-        streamingError = false
+    val rtspUrl = cam?.let { "rtsp://${it.ip}:${it.streamPort}/2" }
+
+    fun restartStream() {
+        streamTier = StreamTier.PRIMARY
+        streamStatus = StreamStatus.LOADING
+        restartToken += 1
     }
 
-    fun initPlayer(currentCam: Cam) {
-        resetPlayer()
-        val loadControl = DefaultLoadControl
-            .Builder()
-            .setBufferDurationsMs(
-                500,
-                1000,
-                250,
-                500
-            )
-            .setPrioritizeTimeOverSizeThresholds(true)
-            .build()
-
-        player = ExoPlayer.Builder(context).setLoadControl(loadControl).build()
-        player?.addListener(object : Player.Listener {
-            override fun onPlayerError(error: PlaybackException) {
-                resetPlayer()
-                streamingError = true
-            }
-
-            override fun onRenderedFirstFrame() {
-                streamingError = false
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_ENDED) {
-                    resetPlayer()
-                    streamingError = true
-                }
-            }
-        })
-        val mediaItem = MediaItem.fromUri("rtsp://${currentCam.ip}:${currentCam.streamPort}/2")
-        try {
-            val rtspMediaSource = RtspMediaSource
-                .Factory()
-                .setForceUseRtpTcp(true)
-                .setSocketFactory(object : SocketFactory() {
-                    private val defaultSocketFactory = getDefault()
-                    override fun createSocket(host: String?, port: Int): Socket {
-                        val socket = defaultSocketFactory.createSocket()
-                        socket.connect(
-                            InetSocketAddress(InetAddress.getByName(host), port),
-                            1000
-                        )
-                        return socket
-                    }
-
-                    override fun createSocket(
-                        host: String?,
-                        port: Int,
-                        localHost: InetAddress?,
-                        localPort: Int
-                    ): Socket {
-                        throw UnsupportedOperationException()
-                    }
-
-                    override fun createSocket(host: InetAddress?, port: Int): Socket {
-                        throw UnsupportedOperationException()
-                    }
-
-                    override fun createSocket(
-                        host: InetAddress?,
-                        port: Int,
-                        localHost: InetAddress?,
-                        localPort: Int
-                    ): Socket {
-                        throw UnsupportedOperationException()
-                    }
-                })
-                .createMediaSource(mediaItem)
-            player?.addMediaSource(rtspMediaSource)
-            player?.prepare()
-            player?.play()
-        } catch (e: Exception) {
-            resetPlayer()
-            Log.e("SelectedCam", "Error: ${e.message}")
-            streamingError = true
+    fun handleTierError(_: Throwable) {
+        if (streamTier == StreamTier.PRIMARY) {
+            streamTier = StreamTier.FALLBACK
+            streamStatus = StreamStatus.LOADING
+        } else {
+            streamStatus = StreamStatus.ERROR
         }
     }
 
-    // Gestione del ciclo di vita per la pausa e il rilascio del player
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {
-                    resetPlayer() // Ferma e rilascia il player quando l'Activity va in pausa
+                    isPaused = true
                 }
                 Lifecycle.Event.ON_RESUME -> {
-                    //player?.play() // Riprendi la riproduzione quando l'Activity riprende
+                    isPaused = false
+                    if (cam != null) {
+                        restartStream()
+                    }
                 }
-                else -> {}
+                Lifecycle.Event.ON_DESTROY -> {
+                    isPaused = true
+                }
+                else -> Unit
             }
         }
 
@@ -166,13 +99,12 @@ fun SelectedCam(
 
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            resetPlayer() // Assicurati che il player sia rilasciato quando il composable viene smontato
         }
     }
 
     LaunchedEffect(cam) {
-        if (cam != null) {
-            initPlayer(cam)
+        if (cam != null && !isPaused) {
+            restartStream()
         }
     }
 
@@ -181,82 +113,85 @@ fun SelectedCam(
         contentAlignment = Alignment.Center
     ) {
         if (cam != null) {
-            if (player != null && !streamingError) {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // ExoPlayerView occupa tutto lo spazio disponibile
-                    ExoPlayerView(
-                        exoPlayer = player!!,
-                        modifier = Modifier
-                            .weight(1f) // Occupa lo spazio rimanente nella colonna
-                            .fillMaxWidth()
-                    )
-
-                    // Il testo occupa solo lo spazio necessario
-                    Text(
-                        text = "${cam.name} (${cam.ip})",
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top=5.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            } else if (streamingError) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(text = "Error while streaming", color = Color.White)
-                    ReconnectButton {
-                        initPlayer(cam)
-                        mainViewModel.resetPTZController()
-                        mainViewModel.initPTZController()
+            when {
+                isPaused -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = "Streaming disconnected", color = Color.White)
+                        ReconnectButton {
+                            restartStream()
+                            mainViewModel.resetPTZController()
+                            mainViewModel.initPTZController()
+                        }
                     }
                 }
-            } else {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(text = "Streaming disconnected", color = Color.White)
-                    ReconnectButton {
-                        initPlayer(cam)
-                        mainViewModel.resetPTZController()
-                        mainViewModel.initPTZController()
+                else -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .background(Color.Black.copy(alpha = 0.5f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (rtspUrl != null) {
+                                key(restartToken, streamTier) {
+                                    if (streamTier == StreamTier.PRIMARY) {
+                                        ZeroCopyVideoPreview(
+                                            rtspUrl = rtspUrl,
+                                            modifier = Modifier.fillMaxSize(),
+                                            onFirstFrame = {
+                                                streamStatus = StreamStatus.PLAYING
+                                            },
+                                            onError = ::handleTierError
+                                        )
+                                    } else {
+                                        RtspSurfacePreview(
+                                            rtspUrl = rtspUrl,
+                                            modifier = Modifier.fillMaxSize(),
+                                            onPlaying = {
+                                                streamStatus = StreamStatus.PLAYING
+                                            },
+                                            onError = {
+                                                streamStatus = StreamStatus.ERROR
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            if (streamStatus == StreamStatus.ERROR) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(text = "Error while streaming", color = Color.White)
+                                    ReconnectButton {
+                                        restartStream()
+                                        mainViewModel.resetPTZController()
+                                        mainViewModel.initPTZController()
+                                    }
+                                }
+                            }
+                        }
+                        Text(
+                            text = "${cam.name} (${cam.ip})",
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 5.dp),
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }
         } else {
             Text(text = "No camera selected", color = Color.White)
         }
-    }
-}
-
-@OptIn(UnstableApi::class)
-@Composable
-fun ExoPlayerView(exoPlayer: ExoPlayer, modifier: Modifier = Modifier) {
-    val playerViewRef = remember { mutableStateOf<PlayerView?>(null) }
-
-    AndroidView(
-        factory = { context ->
-            PlayerView(context).also {
-                it.useController = false
-                playerViewRef.value = it
-                it.setBackgroundColor(Color.Transparent.toArgb())
-                it.setShutterBackgroundColor(Color.Transparent.toArgb())
-            }
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Color.Black.copy(alpha = 0.5f))
-    )
-
-    LaunchedEffect(exoPlayer) {
-        playerViewRef.value?.player = exoPlayer
     }
 }
 
