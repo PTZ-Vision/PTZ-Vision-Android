@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.LifecycleOwner
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.blocks.FocusSlider
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
@@ -71,9 +70,7 @@ fun MainScreenPortrait(
                 .fillMaxWidth()
                 .weight(0.35f)
                 .padding(0.dp, 0.dp, 0.dp, 10.dp),
-            context = context,
             cam = mainUiState.activeCams.getOrNull(0),
-            lifecycleOwner = context as LifecycleOwner,
             mainViewModel = mainViewModel
         )
 

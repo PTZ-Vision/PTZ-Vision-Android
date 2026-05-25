@@ -16,6 +16,7 @@ roomKtx = "2.8.4"
 roomCompiler = "2.8.4"
 roomCommon = "2.8.4"
 material3WindowSizeClassAndroid = "1.4.0"
+rtspClientAndroid = "5.6.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,6 +47,7 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 apache-httpcomponents-httpclient = { group = "org.apache.httpcomponents", name = "httpclient", version = "4.5.14" }
 coil-compose = { group = "io.coil-kt", name="coil-compose", version = "2.7.0" }
+rtsp-client-android = { group = "com.github.alexeyvasilyev", name = "rtsp-client-android", version.ref = "rtspClientAndroid" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

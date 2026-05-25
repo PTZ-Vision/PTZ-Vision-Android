@@ -99,6 +99,7 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.exoplayer.rtsp)
+    implementation(libs.rtsp.client.android)
     implementation(libs.coil.compose)
 }
 
