@@ -1,17 +1,19 @@
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
-    id("com.google.devtools.ksp") version "1.9.23-1.0.20"
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlinCompose)
 }
 
 android {
     namespace = "it.mobile.bisax.ptzvision"
-    compileSdk = 34
+    compileSdk {
+        version = release(37) { minorApiLevel = 2 }
+    }
 
     defaultConfig {
         applicationId = "it.mobile.bisax.ptzvision"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = 29 // Android 10
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -48,20 +50,18 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.12"
+    testOptions {
+        // android.util.Log & co. return default values instead of throwing in JVM unit tests.
+        unitTests.isReturnDefaultValues = true
     }
 
     packaging {
@@ -69,6 +69,14 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/DEPENDENCIES"
         }
+    }
+}
+
+kotlin {
+    // Compila con JDK 25 (scaricato automaticamente da foojay se manca).
+    jvmToolchain(25)
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
     }
 }
 
@@ -81,6 +89,7 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.common)
@@ -96,10 +105,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.apache.httpcomponents.httpclient)
-    implementation(libs.androidx.media3.ui)
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.exoplayer.dash)
-    implementation(libs.androidx.media3.exoplayer.rtsp)
+    implementation(libs.rtsp.client.android)
     implementation(libs.coil.compose)
 }
 

@@ -1,10 +1,8 @@
 package it.mobile.bisax.ptzvision.ui.console.screen
 
 import android.content.Context
-import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,7 +28,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.LifecycleOwner
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.blocks.FocusSlider
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
@@ -42,7 +39,6 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MainScreenLandscape(
     mainViewModel: MainViewModel,
@@ -69,9 +65,7 @@ fun MainScreenLandscape(
                     modifier = Modifier
                         .weight(0.5f)
                         .fillMaxHeight(),
-                    context = context,
                     cam = mainUiState.activeCams.getOrNull(0),
-                    lifecycleOwner = context as LifecycleOwner,
                     mainViewModel = mainViewModel
                 )
             }
@@ -176,9 +170,7 @@ fun MainScreenLandscape(
                     modifier = Modifier
                         .weight(0.5f)
                         .fillMaxHeight(),
-                    context = context,
                     cam = mainUiState.activeCams.getOrNull(0),
-                    lifecycleOwner = context as LifecycleOwner,
                     mainViewModel = mainViewModel
                 )
             }

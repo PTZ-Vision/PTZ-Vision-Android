@@ -2,10 +2,8 @@ package it.mobile.bisax.ptzvision.ui.console.screen
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,7 +28,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.LifecycleOwner
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.blocks.FocusSlider
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
@@ -42,7 +39,6 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreenPortrait(
@@ -71,9 +67,7 @@ fun MainScreenPortrait(
                 .fillMaxWidth()
                 .weight(0.35f)
                 .padding(0.dp, 0.dp, 0.dp, 10.dp),
-            context = context,
             cam = mainUiState.activeCams.getOrNull(0),
-            lifecycleOwner = context as LifecycleOwner,
             mainViewModel = mainViewModel
         )
 

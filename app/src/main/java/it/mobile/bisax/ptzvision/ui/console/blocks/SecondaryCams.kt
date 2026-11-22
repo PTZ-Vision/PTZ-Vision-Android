@@ -1,6 +1,5 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
-import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.animation.Crossfade
@@ -68,14 +67,10 @@ fun SecondaryCams(
                             coroutineScope.launch {
                                 mainViewModel.setNewActiveCam(i)
                             }
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
-                            }
+                            vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
                         } else {
                             onClick()
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                                vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
-                            }
+                            vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
                         }
                     },
                 horizontalAlignment = Alignment.CenterHorizontally,
