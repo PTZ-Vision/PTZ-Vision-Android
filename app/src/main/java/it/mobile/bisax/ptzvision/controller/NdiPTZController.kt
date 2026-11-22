@@ -1,8 +1,10 @@
 package it.mobile.bisax.ptzvision.controller
 
+import android.util.Log
 import android.util.Pair
 import it.mobile.bisax.ptzvision.controller.PTZController.Result
 import it.mobile.bisax.ptzvision.data.cam.Cam
+import it.mobile.bisax.ptzvision.ndi.decodeSources
 import it.mobile.bisax.ptzvision.ndi.NdiNative
 import it.mobile.bisax.ptzvision.ndi.NdiReceiver
 import it.mobile.bisax.ptzvision.ndi.NdiReceiverPool
@@ -18,9 +20,11 @@ import java.io.IOException
  * NDI conventions (Processing.NDI.Recv.ex.h): pan_speed > 0 = LEFT, tilt_speed > 0 = up,
  * zoom_speed > 0 = zoom in, focus_speed > 0 = focus inwards (near).
  */
-class NdiPTZController(cam: Cam) : PTZController, Closeable {
+class NdiPTZController(private val cam: Cam) : PTZController, Closeable {
     private val receiver: NdiReceiver = NdiReceiverPool.acquire(cam.ndiSourceName)
         ?: throw IOException(NdiRuntime.unavailableReason ?: "Cannot create NDI receiver for '${cam.ndiSourceName}'")
+
+    private var trackingHost: String? = null
 
     private val handle get() = receiver.handle
 
@@ -40,8 +44,34 @@ class NdiPTZController(cam: Cam) : PTZController, Closeable {
         else NdiNative.ptzFocusSpeed(handle, 0f)
     }
 
-    // No standard NDI message for auto tracking.
-    override fun setAutoTracking(autoTracking: Boolean): Result = Result.NOT_SUPPORTED
+    // NDI exposes PTZ but has no tracking command. Use the same camera's VISCA control port.
+    override fun setAutoTracking(autoTracking: Boolean): Result {
+        if (receiver.isReleased) return Result.FAILURE
+        val host = cam.ip.takeIf { it.isNotBlank() } ?: trackingHost ?: discoverControlHost()
+        if (host == null) {
+            Log.w("NdiTracking", "No control address for ${cam.ndiSourceName}")
+            return Result.FAILURE
+        }
+        if (receiver.isReleased) return Result.FAILURE
+        val result = ViscaTracking.set(host, cam.controlPort, autoTracking)
+        trackingHost = host.takeIf { result == Result.SUCCESS }
+        Log.i("NdiTracking", "Tracking $autoTracking on $host:${cam.controlPort}: $result")
+        return result
+    }
+
+    private fun discoverControlHost(): String? {
+        val finder = NdiNative.finderCreate(null)
+        if (finder == 0L) return null
+        try {
+            repeat(10) {
+                val sources = decodeSources(NdiNative.finderGetSources(finder, 500))
+                sources.firstOrNull { it.fullName == cam.ndiSourceName }?.host?.let { return it }
+            }
+            return null
+        } finally {
+            NdiNative.finderDestroy(finder)
+        }
+    }
 
     override fun setScene(scene: Int): Result =
         if (scene !in PRESET_RANGE) Result.FAILURE else send { NdiNative.ptzStorePreset(handle, scene) }

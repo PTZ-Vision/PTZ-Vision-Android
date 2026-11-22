@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.zoomLabel
+import it.mobile.bisax.ptzvision.ui.console.blocks.TrackingButton
 import it.mobile.bisax.ptzvision.ui.console.blocks.FocusSlider
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
 import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
@@ -89,35 +90,14 @@ fun MainScreenLandscape(
                     val vibe = context.getSystemService(Vibrator::class.java) as Vibrator
 
                     val aiBtn = @Composable {
-                        Button(
-                            onClick = {
-                                coroutine.launch {
-                                    mainViewModel.toggleAI()
-                                }
-                                vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-                            },
-                            enabled = cameraEnabled,
-                            modifier = Modifier
-                                .weight(0.4f)
-                                .then(
-                                    when (windowSize.widthSizeClass) {
-                                        WindowWidthSizeClass.Compact -> {
-                                            Modifier.padding(10.dp, 0.dp)
-                                        }
-
-                                        WindowWidthSizeClass.Medium -> {
-                                            Modifier.padding(10.dp, 0.dp)
-                                        }
-
-                                        else -> {
-                                            Modifier.padding(20.dp, 0.dp)
-                                        }
-                                    }
-                                ),
-                            colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAIEnabled) MaterialTheme.colorScheme.primary else Color.Gray)
-                        ) {
-                            Text(text = "AI Tracking")
-                        }
+                        TrackingButton(
+                            modifier = Modifier.weight(0.4f).padding(
+                                horizontal = 20.dp,
+                                vertical = if (windowSize.widthSizeClass == WindowWidthSizeClass.Medium) 0.dp else 5.dp
+                            ),
+                            state = mainUiState,
+                            viewModel = mainViewModel,
+                        ) { vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)) }
                     }
 
                     if (settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
@@ -129,13 +109,15 @@ fun MainScreenLandscape(
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = mainUiState.zoomLabel(),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(0.5f),
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) 15.sp else 20.sp
-                        )
+                        mainUiState.zoomLabel()?.let { zoom ->
+                            Text(
+                                text = zoom,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.weight(0.5f),
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) 15.sp else 20.sp
+                            )
+                        }
                         Button(
                             onClick = {
                                 coroutine.launch {

@@ -116,8 +116,8 @@ fun CameraSet(
             if (protocol == CamProtocol.NDI) {
                 NdiSourceInput(sourceName = ndiSourceName) { ndiSourceName = it }
                 Text(
-                    text = "IP and ports below are optional for NDI cameras: they are used for the RTSP " +
-                        "fallback preview and the camera snapshot." +
+                    text = "AI Tracking uses the VISCA control port on compatible cameras. The optional IP is used for tracking, RTSP " +
+                        "fallback and snapshots." +
                         if (!NdiRuntime.isAvailable) "\nNDI runtime not available on this build: PTZ control over NDI is disabled." else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -127,10 +127,8 @@ fun CameraSet(
             IPAddressInput(ip = ip) {
                 ip = it
             }
-            if (protocol == CamProtocol.VISCA) {
-                PortInput(title = "Control Port", port = controlPort) {
-                    controlPort = it
-                }
+            PortInput(title = if (protocol == CamProtocol.NDI) "VISCA Port (AI Tracking)" else "Control Port", port = controlPort) {
+                controlPort = it
             }
             PortInput(title = if (protocol == CamProtocol.NDI) "RTSP Port (fallback)" else "Streaming Port", port = streamPort) {
                 streamPort = it

@@ -38,7 +38,7 @@ A source advertises PTZ support with the connection metadata `<ndi_capabilities 
 receiver reads through `NDIlib_recv_ptz_is_supported()`.
 
 **Limit:** PTZ over NDI is **one-way**. There is no standard message to read the current pan, tilt or zoom position,
-the focus mode or presets. That is why the zoom indicator shows `--x` for NDI cameras.
+the focus mode or presets. The console hides the zoom readout when the camera does not report a level.
 
 ### NDI compared with VISCA-over-IP + RTSP (what PTZ Vision used before)
 

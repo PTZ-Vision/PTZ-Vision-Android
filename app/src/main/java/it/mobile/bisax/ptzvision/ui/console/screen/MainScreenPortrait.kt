@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.zoomLabel
+import it.mobile.bisax.ptzvision.ui.console.blocks.TrackingButton
 import it.mobile.bisax.ptzvision.ui.console.blocks.FocusSlider
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
 import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
@@ -81,23 +82,11 @@ fun MainScreenPortrait(
             val vibe = context.getSystemService(Vibrator::class.java) as Vibrator
 
             val aiBtn = @Composable { modifier: Modifier ->
-                Button(
-                    onClick = {
-                        coroutine.launch {
-                            mainViewModel.toggleAI()
-                        }
-                        vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-                    },
-                    modifier = modifier
-                        .padding(
-                            15.dp,
-                            0.dp
-                        ),
-                    colors = ButtonDefaults.buttonColors(containerColor = if (mainUiState.isAIEnabled) MaterialTheme.colorScheme.primary else Color.Gray),
-                    enabled = cameraEnabled
-                ) {
-                    Text(text = "AI Tracking")
-                }
+                TrackingButton(
+                    modifier = modifier.padding(15.dp, 0.dp),
+                    state = mainUiState,
+                    viewModel = mainViewModel,
+                ) { vibe.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)) }
             }
 
             if (settingsUiState.layout == SettingsUiState.Layout.J_LEFT)
@@ -109,13 +98,15 @@ fun MainScreenPortrait(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = mainUiState.zoomLabel(),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(0.5f),
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) 15.sp else 20.sp
-                )
+                mainUiState.zoomLabel()?.let { zoom ->
+                    Text(
+                        text = zoom,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(0.5f),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) 15.sp else 20.sp
+                    )
+                }
                 Button(
                     onClick = {
                         coroutine.launch {

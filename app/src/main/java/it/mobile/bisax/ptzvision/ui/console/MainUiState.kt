@@ -13,5 +13,6 @@ data class MainUiState(
     val ptzController: PTZController? = null
 )
 
-/** Zoom indicator text: "--x" when the camera cannot report its zoom position. */
-fun MainUiState.zoomLabel(): String = if (zoomFeedback) "${zoomLevel}x" else "--x"
+/** Only display a measured zoom level for the selected camera. */
+fun MainUiState.zoomLabel(): String? =
+    if (zoomFeedback && zoomLevel > 0.0 && zoomLevel.isFinite()) "${zoomLevel}x" else null

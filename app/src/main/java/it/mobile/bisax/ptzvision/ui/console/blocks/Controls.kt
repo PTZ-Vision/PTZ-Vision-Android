@@ -115,7 +115,7 @@ fun JoyStick(
 
 
             LaunchedEffect(enabled) {
-                if (!enabled) {
+                if (!enabled && (positionX != 0f || positionY != 0f)) {
                     offsetX = centerPx
                     offsetY = centerPx
                     radius = 0f
@@ -316,7 +316,7 @@ private fun SliderBox(
             }
 
             LaunchedEffect(enabled) {
-                if (!enabled) {
+                if (!enabled && positionY != 0f) {
                     offsetY = centerY
                     radius = 0f
                     theta = 0f
