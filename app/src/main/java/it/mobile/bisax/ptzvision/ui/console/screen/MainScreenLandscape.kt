@@ -1,10 +1,8 @@
 package it.mobile.bisax.ptzvision.ui.console.screen
 
 import android.content.Context
-import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,7 +39,6 @@ import it.mobile.bisax.ptzvision.ui.settings.SettingsUiState
 import it.mobile.bisax.ptzvision.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MainScreenLandscape(
     mainViewModel: MainViewModel,

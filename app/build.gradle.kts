@@ -1,17 +1,19 @@
 plugins {
     alias(libs.plugins.androidApplication)
-    id("com.google.devtools.ksp") version "2.3.2"
+    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlinCompose)
 }
 
 android {
     namespace = "it.mobile.bisax.ptzvision"
-    compileSdk = 36
+    compileSdk {
+        version = release(37) { minorApiLevel = 2 }
+    }
 
     defaultConfig {
         applicationId = "it.mobile.bisax.ptzvision"
-        minSdk = 24
-        targetSdk = 36
+        minSdk = 29 // Android 10
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -48,12 +50,18 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    testOptions {
+        // android.util.Log & co. return default values instead of throwing in JVM unit tests.
+        unitTests.isReturnDefaultValues = true
     }
 
     packaging {
@@ -65,8 +73,10 @@ android {
 }
 
 kotlin {
+    // Compila con JDK 25 (scaricato automaticamente da foojay se manca).
+    jvmToolchain(25)
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
     }
 }
 
@@ -95,10 +105,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.apache.httpcomponents.httpclient)
-    implementation(libs.androidx.media3.ui)
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.exoplayer.dash)
-    implementation(libs.androidx.media3.exoplayer.rtsp)
     implementation(libs.rtsp.client.android)
     implementation(libs.coil.compose)
 }

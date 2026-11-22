@@ -1,10 +1,8 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
-import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -38,7 +36,6 @@ data class ButtonData(
     val onLongClick: (Offset) -> Unit,
 )
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun ScenesGrid(
     modifier: Modifier = Modifier,

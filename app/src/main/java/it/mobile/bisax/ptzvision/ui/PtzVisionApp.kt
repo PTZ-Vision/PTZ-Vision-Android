@@ -1,7 +1,5 @@
 package it.mobile.bisax.ptzvision.ui
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -37,7 +35,6 @@ enum class PTZRoutes(@StringRes val route: Int) {
     CAMERA_EDIT(R.string.camera_edit_route)
 }
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun PtzVisionApp(
     navController: NavHostController = rememberNavController(),

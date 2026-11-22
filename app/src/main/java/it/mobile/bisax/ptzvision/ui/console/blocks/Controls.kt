@@ -1,6 +1,5 @@
 package it.mobile.bisax.ptzvision.ui.console.blocks
 
-import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.foundation.background
@@ -57,7 +56,6 @@ import androidx.compose.ui.unit.min as minDp
 
 
 fun createVibration(vibePercentage: Float): VibrationEffect? {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
     val loopMs = 101
 
     val timings = LongArray(loopMs)
@@ -193,7 +191,7 @@ fun JoyStick(
 
                                     val clampedRadius = minOf(radius, maxRadius)
                                     val vibePercentage = clampedRadius / maxRadius
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hapticFeedbackEnabled) {
+                                    if (hapticFeedbackEnabled) {
                                         vibe.cancel()
                                         if ((vibePercentage * 24).toInt() > 0)
                                             vibe.vibrate(createVibration(vibePercentage))
@@ -382,7 +380,7 @@ private fun SliderBox(
                                         val clampedRadius =
                                             sign(radius) * minOf(abs(radius), maxYOffset)
                                         val vibePercentage = abs(clampedRadius / maxYOffset)
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hapticFeedbackEnabled) {
+                                        if (hapticFeedbackEnabled) {
                                             vibe.cancel()
                                             if ((vibePercentage * 7).toInt() > 0)
                                                 vibe.vibrate(createVibration(vibePercentage))

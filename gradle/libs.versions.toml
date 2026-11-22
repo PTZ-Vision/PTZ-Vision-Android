@@ -1,29 +1,25 @@
 [versions]
-agp = "9.2.1"
-kotlin = "2.3.21"
-coreKtx = "1.18.0"
+agp = "9.5.2"
+kotlin = "2.4.21"
+coreKtx = "1.19.1"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-lifecycleRuntimeKtx = "2.10.0"
+lifecycleRuntimeKtx = "2.11.1"
 activityCompose = "1.13.0"
-composeBom = "2026.05.01"
-media3Ui = "1.10.1"
-lifecycleViewmodelCompose = "2.10.0"
-navigationCompose = "2.9.8"
-roomRuntime = "2.8.4"
-roomKtx = "2.8.4"
-roomCompiler = "2.8.4"
-roomCommon = "2.8.4"
-material3WindowSizeClassAndroid = "1.4.0"
-rtspClientAndroid = "5.6.4"
+composeBom = "2026.11.01"
+lifecycleViewmodelCompose = "2.11.1"
+navigationCompose = "2.10.2"
+roomRuntime = "2.8.5"
+roomKtx = "2.8.5"
+roomCompiler = "2.8.5"
+roomCommon = "2.8.5"
+material3WindowSizeClassAndroid = "1.5.0"
+rtspClientAndroid = "7.1.1"
+ksp = "2.3.14"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Ui" }
-androidx-media3-exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "media3Ui" }
-androidx-media3-exoplayer-rtsp = { module = "androidx.media3:media3-exoplayer-rtsp", version.ref = "media3Ui" }
-androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Ui" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -52,4 +48,5 @@ rtsp-client-android = { group = "com.github.alexeyvasilyev", name = "rtsp-client
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

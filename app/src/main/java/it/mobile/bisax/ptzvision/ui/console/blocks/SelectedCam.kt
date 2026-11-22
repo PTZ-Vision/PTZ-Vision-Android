@@ -24,8 +24,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import it.mobile.bisax.ptzvision.R
 import it.mobile.bisax.ptzvision.data.cam.Cam
+import it.mobile.bisax.ptzvision.ui.console.LowLatencyWifiLockEffect
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
-import it.mobile.bisax.ptzvision.ui.console.RtspStreamManager
+import it.mobile.bisax.ptzvision.ui.console.RtspClientAdapter
 import it.mobile.bisax.ptzvision.ui.console.screen.RtspPreview
 import it.mobile.bisax.ptzvision.ui.console.zerocopy.ZeroCopyVideoPreview
 
@@ -35,9 +36,9 @@ fun SelectedCam(
     cam: Cam? = null,
     mainViewModel: MainViewModel
 ) {
-    var useFallback by remember(cam) { mutableStateOf(false) }
-    var rtspState by remember(cam) { mutableStateOf<RtspStreamManager.StreamState?>(null) }
-    var restartKey by remember(cam) { mutableStateOf(0) }
+    var useFallback by remember(cam?.id) { mutableStateOf(false) }
+    var rtspState by remember(cam?.id) { mutableStateOf<RtspClientAdapter.State?>(null) }
+    var restartKey by remember(cam?.id) { mutableStateOf(0) }
 
     fun resetStream() {
         useFallback = false
@@ -49,6 +50,7 @@ fun SelectedCam(
         contentAlignment = Alignment.Center
     ) {
         if (cam != null) {
+            LowLatencyWifiLockEffect()
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -73,7 +75,7 @@ fun SelectedCam(
                         )
                     }
 
-                    if (useFallback && rtspState is RtspStreamManager.StreamState.Error) {
+                    if (useFallback && rtspState is RtspClientAdapter.State.Error) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
