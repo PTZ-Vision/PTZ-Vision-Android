@@ -146,6 +146,13 @@ Java_it_mobile_bisax_ptzvision_ndi_NdiNative_nativeInit(JNIEnv* env, jobject) {
         LOGW("%s", g_init_error.c_str());
         return env->NewStringUTF(g_init_error.c_str());
     }
+    // Android packages lib*.so, but NDI opens the FFmpeg libraries by their versioned
+    // SONAMEs. Preload in dependency order and retain them for the lifetime of the SDK.
+    for (const char* library : {"libavutil.so", "libavcodec.so"}) {
+        if (!dlopen(library, RTLD_NOW | RTLD_LOCAL)) {
+            LOGW("NDI HX decoder library %s unavailable: %s", library, dlerror());
+        }
+    }
     using load_fn = const NDIlib_v6* (*)();
     auto load = reinterpret_cast<load_fn>(dlsym(handle, "NDIlib_v6_load"));
     if (!load) {

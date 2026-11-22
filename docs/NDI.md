@@ -107,8 +107,14 @@ The NDI runtime is **not** in the repository. Without it the app builds and runs
    ```properties
    ndi.sdk.dir=C:/path/to/NDI SDK for Android
    ```
-3. Build as usual. `lib/<abi>/libndi.so` is packaged (`libndifile.so` is excluded) and
-   `BuildConfig.NDI_RUNTIME_BUNDLED` is `true`.
+3. For HX video with NDI Android 6.4, set `ANDROID_NDK_HOME` to the NDK version in
+   `app/build.gradle.kts` and run `bash tools/build-ndi-hx.sh` on macOS or Linux before assembling
+   the APK. It builds FFmpeg 7.1.5 for all three supported Android ABIs, with H.264, HEVC and AAC
+   decoders. Rerun after deleting the root `build/ndi-hx` directory. For a Windows build,
+   copy the generated `build/ndi-hx/jniLibs` and `build/ndi-hx/assets` directories from the build host.
+4. Build as usual. With the SDK configured, Gradle packages the NDI runtime, the prepared HX
+   libraries and their license. The JNI bridge preloads the FFmpeg libraries so NDI can resolve
+   `libavutil.so.59` and `libavcodec.so.61` inside the APK.
 
 The CI workflow (`build-release.yml`) does not download the SDK, so the public release APK does **not** include NDI.
 

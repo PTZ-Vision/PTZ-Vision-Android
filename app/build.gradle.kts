@@ -54,7 +54,12 @@ android {
         getByName("main") {
             // NDI runtime (libndi.so, proprietary, NOT committed): taken from the NDI SDK for
             // Android pointed to by `ndi.sdk.dir` in local.properties or the NDI_SDK_DIR env var.
-            ndiSdkLibDir?.takeIf { it.exists() }?.let { jniLibs.directories += it.absolutePath }
+            ndiSdkLibDir?.takeIf { it.exists() }?.let {
+                jniLibs.directories += it.absolutePath
+                val hxBuild = rootProject.layout.buildDirectory.dir("ndi-hx").get()
+                jniLibs.directories += hxBuild.dir("jniLibs").asFile.absolutePath
+                assets.srcDir(hxBuild.dir("assets"))
+            }
         }
     }
 
