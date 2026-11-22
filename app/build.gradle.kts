@@ -1,7 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlinCompose)
+}
+
+// Optional NDI® SDK for Android (see docs/NDI.md). Only its lib/<abi>/libndi.so is packaged.
+val ndiSdkLibDir: File? = run {
+    val props = Properties()
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { props.load(it) }
+    (props.getProperty("ndi.sdk.dir") ?: System.getenv("NDI_SDK_DIR"))?.let { File(it, "lib") }
 }
 
 android {
@@ -20,6 +29,32 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+        }
+        externalNativeBuild {
+            cmake {
+                arguments += "-DANDROID_STL=c++_static"
+            }
+        }
+        buildConfigField("boolean", "NDI_RUNTIME_BUNDLED", ndiSdkLibDir?.exists()?.toString() ?: "false")
+    }
+
+    ndkVersion = "30.0.16248370"
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "4.1.2"
+        }
+    }
+
+    sourceSets {
+        getByName("main") {
+            // NDI runtime (libndi.so, proprietary, NOT committed): taken from the NDI SDK for
+            // Android pointed to by `ndi.sdk.dir` in local.properties or the NDI_SDK_DIR env var.
+            ndiSdkLibDir?.takeIf { it.exists() }?.let { jniLibs.directories += it.absolutePath }
         }
     }
 
@@ -68,6 +103,10 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/DEPENDENCIES"
+        }
+        jniLibs {
+            // The NDI file recorder/player library is not used by the app.
+            excludes += "**/libndifile.so"
         }
     }
 }

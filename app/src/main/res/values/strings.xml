@@ -6,6 +6,7 @@
     <string name="console_route">Console</string>
     <string name="camera_add_route">Add camera</string>
     <string name="camera_edit_route">Edit camera</string>
+    <string name="ndi_discovery_route">Find NDI cameras</string>
 
     <string name="console_btn">Go to console</string>
     <string name="settings_btn">Settings</string>

@@ -8,6 +8,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.lifecycle.ViewModelProvider
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModelFactory
+import it.mobile.bisax.ptzvision.ndi.NdiRuntime
 import it.mobile.bisax.ptzvision.ui.PtzVisionApp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.MainViewModelFactory
@@ -19,6 +20,8 @@ class MainActivity : ComponentActivity() {
         @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Loads the NDI runtime (if packaged) and keeps NsdManager alive for NDI discovery.
+        NdiRuntime.init(this)
 
         setContent {
             PTZVisionTheme {

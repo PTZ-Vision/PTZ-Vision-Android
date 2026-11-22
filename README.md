@@ -6,7 +6,7 @@
 
 **PTZ Vision** is an Android application developed as a project for the **Mobile Programming** course at the **University of Trento** (Computer Science degree).
 
-> **Note**: This project was developed in a short timeframe, so the application is minimal and only supports the **VISCA** protocol (for PTZ control) and **RTSP** (for video streaming).
+> **Note**: The application supports **VISCA over IP** (PTZ control) with **RTSP** (video), and **NDI®** cameras (automatic discovery, PTZ control and video), see [docs/NDI.md](docs/NDI.md).
 
 ---
 
@@ -14,6 +14,7 @@
 
 - **Full PTZ Control**: Pan, Tilt and Zoom via virtual joystick
 - **RTSP Video Streaming**: Real-time camera preview
+- **NDI® support**: automatic discovery of NDI sources, PTZ control and low-latency video over NDI (requires the NDI SDK at build time, see [docs/NDI.md](docs/NDI.md))
 - **Multi-camera Support**: Manage multiple cameras with quick selection
 - **Auto Focus & AI Tracking**: Support for advanced camera features
 - **Adaptive Layout**: Interface optimized for Portrait and Landscape orientation
@@ -118,3 +119,7 @@ by [Isaia Tonini](https://github.com/Isax03) and [Kevin Delugan](https://github.
 
 See the [LICENSE](LICENSE) file for details.
 
+
+---
+
+NDI® is a registered trademark of Vizrt NDI AB. This project uses the NDI SDK (headers under the MIT license); the NDI runtime is not part of this repository.

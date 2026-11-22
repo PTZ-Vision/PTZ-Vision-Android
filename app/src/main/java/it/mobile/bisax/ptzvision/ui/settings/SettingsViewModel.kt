@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteConstraintException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import it.mobile.bisax.ptzvision.data.cam.Cam
+import it.mobile.bisax.ptzvision.data.cam.CamProtocol
+import it.mobile.bisax.ptzvision.ndi.NdiRuntime
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,14 +47,28 @@ class SettingsViewModel(
         saveUIState(appContext, settingsUiState.value.layout)
     }
 
-    suspend fun insertCam(name: String, ip: String, controlPort: Int, streamPort: Int, httpPort: Int, active: Boolean): Boolean? {
+    fun toggleNdiHighBandwidth() {
+        _settingsUiState.update { currentState ->
+            currentState.copy(ndiHighBandwidth = !currentState.ndiHighBandwidth)
+        }
+        NdiRuntime.highBandwidthVideo = settingsUiState.value.ndiHighBandwidth
+
+        saveUIState(appContext, settingsUiState.value.layout)
+    }
+
+    suspend fun insertCam(
+        name: String, ip: String, controlPort: Int, streamPort: Int, httpPort: Int, active: Boolean,
+        protocol: CamProtocol = CamProtocol.VISCA, ndiSourceName: String = ""
+    ): Boolean? {
         val cam = Cam(
             name = name,
             ip = ip,
             controlPort = controlPort,
             streamPort = streamPort,
             httpPort = httpPort,
-            active = false
+            active = false,
+            protocol = protocol,
+            ndiSourceName = if (protocol == CamProtocol.NDI) ndiSourceName.trim() else ""
         )
 
         val id = camsViewModel.addCam(cam)
@@ -66,7 +82,10 @@ class SettingsViewModel(
         return true
     }
 
-    suspend fun updateCam(id: Int, name: String, ip: String, controlPort: Int, streamPort: Int, httpPort: Int, active: Boolean): Boolean? {
+    suspend fun updateCam(
+        id: Int, name: String, ip: String, controlPort: Int, streamPort: Int, httpPort: Int, active: Boolean,
+        protocol: CamProtocol = CamProtocol.VISCA, ndiSourceName: String = ""
+    ): Boolean? {
         val cam = Cam(
             id = id,
             name = name,
@@ -74,7 +93,9 @@ class SettingsViewModel(
             controlPort = controlPort,
             streamPort = streamPort,
             httpPort = httpPort,
-            active = active
+            active = active,
+            protocol = protocol,
+            ndiSourceName = if (protocol == CamProtocol.NDI) ndiSourceName.trim() else ""
         )
 
         try{
@@ -102,13 +123,16 @@ class SettingsViewModel(
         val sharedPref = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
         val layout = sharedPref.getInt("layout", 0)
         val hapticFeedbackEnabled = sharedPref.getBoolean("hapticFeedbackEnabled", false)
+        val ndiHighBandwidth = sharedPref.getBoolean("ndiHighBandwidth", false)
+        NdiRuntime.highBandwidthVideo = ndiHighBandwidth
 
         camsViewModel.getAllCamsStream.collect { cams ->
             _settingsUiState.update {
                 it.copy(
                     cams = cams,
                     layout = SettingsUiState.Layout.fromInt(layout),
-                    hapticFeedbackEnabled = hapticFeedbackEnabled
+                    hapticFeedbackEnabled = hapticFeedbackEnabled,
+                    ndiHighBandwidth = ndiHighBandwidth
                 )
             }
         }
@@ -119,6 +143,7 @@ class SettingsViewModel(
         with(sharedPref.edit()) {
             putInt("layout", layout.layoutID)
             putBoolean("hapticFeedbackEnabled", settingsUiState.value.hapticFeedbackEnabled)
+            putBoolean("ndiHighBandwidth", settingsUiState.value.ndiHighBandwidth)
             apply()
         }
     }

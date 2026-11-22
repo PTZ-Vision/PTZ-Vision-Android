@@ -3,7 +3,11 @@ package it.mobile.bisax.ptzvision.ui.console
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import it.mobile.bisax.ptzvision.controller.NdiPTZController
+import it.mobile.bisax.ptzvision.controller.PTZController
 import it.mobile.bisax.ptzvision.controller.ViscaPTZController
+import it.mobile.bisax.ptzvision.data.cam.Cam
+import it.mobile.bisax.ptzvision.data.cam.CamProtocol
 import it.mobile.bisax.ptzvision.controller.utils.MathUtils
 import it.mobile.bisax.ptzvision.data.cam.CamsViewModel
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.Closeable
 
 class MainViewModel(
     private val camsViewModel: CamsViewModel
@@ -47,24 +52,33 @@ class MainViewModel(
 
     fun initPTZController() {
         viewModelScope.launch(Dispatchers.IO) {
+            val cam = _uiState.value.activeCams.getOrNull(0) ?: return@launch
             val newController = try {
-                ViscaPTZController(_uiState.value.activeCams[0])
+                createController(cam)
             } catch (e: Exception) {
                 Log.d("MainViewModel", "Error creating PTZController: ${e.message}")
                 null
             }
 
+            var stale = false
             _uiState.update {
-                it.copy(
-                    ptzController = newController,
-                )
+                // The selected camera changed while we were connecting: drop this controller.
+                if (it.activeCams.getOrNull(0) != cam || it.ptzController != null) {
+                    stale = true
+                    it
+                } else it.copy(ptzController = newController)
+            }
+            if (stale) {
+                closeController(newController)
+                return@launch
             }
 
             if(newController == null)
                 return@launch
 
-            var zoom = getZoomLevel()
-            if (zoom == 0.0 || zoom > 30.0) {
+            val zoomFeedback = newController.zoom.first != PTZController.Result.NOT_SUPPORTED
+            var zoom = if (zoomFeedback) getZoomLevel() else 0.0
+            if (zoomFeedback && (zoom == 0.0 || zoom > 30.0)) {
                 zoom = _uiState.value.zoomLevel
             }
 
@@ -72,6 +86,7 @@ class MainViewModel(
                 it.copy(
                     isAIEnabled = getAIStatus(),
                     zoomLevel = zoom,
+                    zoomFeedback = zoomFeedback,
                     isAutoFocusEnabled = getAutoFocusStatus()
                 )
             }
@@ -79,10 +94,30 @@ class MainViewModel(
     }
 
     fun resetPTZController() {
-        (_uiState.value.ptzController as ViscaPTZController?)?.close()
+        val old = _uiState.value.ptzController
         _uiState.update {
             it.copy(ptzController = null)
         }
+        closeController(old)
+    }
+
+    private fun createController(cam: Cam): PTZController = when (cam.protocol) {
+        CamProtocol.NDI -> NdiPTZController(cam)
+        CamProtocol.VISCA -> ViscaPTZController(cam)
+    }
+
+    private fun closeController(controller: PTZController?) {
+        if (controller !is Closeable) return
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching { controller.close() }
+                .onFailure { Log.d("MainViewModel", "Error closing PTZController: ${it.message}") }
+        }
+    }
+
+    override fun onCleared() {
+        // viewModelScope is already cancelled here: close synchronously (both closes are cheap).
+        runCatching { (_uiState.value.ptzController as? Closeable)?.close() }
+        super.onCleared()
     }
 
     fun setNewActiveCam(camSlot: Int) {
@@ -91,12 +126,14 @@ class MainViewModel(
         newActiveCams[0] = _uiState.value.activeCams[camSlot]
         newActiveCams[camSlot] = _uiState.value.activeCams[0]
 
+        val old = _uiState.value.ptzController
         _uiState.update {
             it.copy(
                 activeCams = newActiveCams,
                 ptzController = null
             )
         }
+        closeController(old)
 
         initPTZController()
     }
@@ -124,6 +161,7 @@ class MainViewModel(
         withContext(Dispatchers.IO) {
             val zoomIntensity = posY / maxPos
             _uiState.value.ptzController?.zoom(MathUtils.clampUnit(zoomIntensity))
+            if (!_uiState.value.zoomFeedback) return@withContext
 
             // TO FIX: This is a workaround to update the zoom level in the UI
             var newZoom = getZoomLevel()
@@ -170,6 +208,7 @@ class MainViewModel(
 
     suspend fun updateZoomLevel() {
         withContext(Dispatchers.IO) {
+            if (!_uiState.value.zoomFeedback) return@withContext
             val zoom = getZoomLevel()
             if(zoom == 0.0 || zoom > 30.0)
                 return@withContext
@@ -188,6 +227,7 @@ class MainViewModel(
             }
 
             camsViewModel.getActiveCamsStream.collect { cams ->
+                closeController(_uiState.value.ptzController)
                 // Aggiorna subito le telecamere attive
                 _uiState.update {
                     it.copy(

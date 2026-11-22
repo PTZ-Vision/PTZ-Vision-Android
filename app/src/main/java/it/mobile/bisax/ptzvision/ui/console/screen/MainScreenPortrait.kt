@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
+import it.mobile.bisax.ptzvision.ui.console.zoomLabel
 import it.mobile.bisax.ptzvision.ui.console.blocks.FocusSlider
 import it.mobile.bisax.ptzvision.ui.console.blocks.JoyStick
 import it.mobile.bisax.ptzvision.ui.console.blocks.ScenesGrid
@@ -109,7 +110,7 @@ fun MainScreenPortrait(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = mainUiState.zoomLevel.toString()+"x",
+                    text = mainUiState.zoomLabel(),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(0.5f),
                     fontFamily = FontFamily.Monospace,

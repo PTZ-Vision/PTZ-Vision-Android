@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -26,6 +28,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.mobile.bisax.ptzvision.data.cam.Cam
+import it.mobile.bisax.ptzvision.ndi.NdiRuntime
+import it.mobile.bisax.ptzvision.ui.settings.sections.NdiDiscoverBtn
 import it.mobile.bisax.ptzvision.ui.settings.sections.Camera
 import it.mobile.bisax.ptzvision.ui.settings.sections.CameraAddBtn
 import it.mobile.bisax.ptzvision.ui.settings.sections.Layout
@@ -37,7 +41,8 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     goHome: () -> Unit,
     onCameraAddClick: () -> Unit,
-    onCameraModifyClick: (Cam) -> Unit
+    onCameraModifyClick: (Cam) -> Unit,
+    onNdiDiscoveryClick: () -> Unit
 ) {
     (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     val uiState by settingsViewModel.settingsUiState.collectAsState()
@@ -75,9 +80,12 @@ fun SettingsScreen(
                 SettingsSection(
                     title = "Cameras",
                     helper = {
-                        CameraAddBtn(
-                            onAddClick = onCameraAddClick
-                        )
+                        Row {
+                            NdiDiscoverBtn(onClick = onNdiDiscoveryClick)
+                            CameraAddBtn(
+                                onAddClick = onCameraAddClick
+                            )
+                        }
                     }
                 ){}
             }
@@ -119,6 +127,40 @@ fun SettingsScreen(
                             onCheckedChange = {
                                 settingsViewModel.toggleHapticFeedback()
                             }
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsSection(title = "NDI®") {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = "Full quality NDI preview", style = TextStyle(fontSize = 16.sp))
+                                Text(
+                                    text = "Off: low-bandwidth proxy stream (recommended on Wi-Fi). Applies on reconnect.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = uiState.ndiHighBandwidth,
+                                onCheckedChange = { settingsViewModel.toggleNdiHighBandwidth() },
+                                enabled = NdiRuntime.isAvailable
+                            )
+                        }
+                        Text(
+                            text = (if (NdiRuntime.isAvailable) "NDI runtime ${NdiRuntime.version ?: ""}"
+                                else "NDI runtime not available: ${NdiRuntime.unavailableReason ?: "unknown"}") +
+                                "\nNDI® is a registered trademark of Vizrt NDI AB (ndi.video).",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(vertical = 8.dp)
                         )
                     }
                 }

@@ -28,6 +28,8 @@ import it.mobile.bisax.ptzvision.ui.console.LowLatencyWifiLockEffect
 import it.mobile.bisax.ptzvision.ui.console.MainViewModel
 import it.mobile.bisax.ptzvision.ui.console.RtspClientAdapter
 import it.mobile.bisax.ptzvision.ui.console.screen.RtspPreview
+import it.mobile.bisax.ptzvision.ndi.NdiRuntime
+import it.mobile.bisax.ptzvision.ui.console.ndi.NdiVideoPreview
 import it.mobile.bisax.ptzvision.ui.console.zerocopy.ZeroCopyVideoPreview
 
 @Composable
@@ -59,7 +61,29 @@ fun SelectedCam(
                         .weight(1f)
                         .fillMaxWidth()
                 ) {
-                    if (!useFallback) {
+                    val useNdiVideo = cam.isNdi && NdiRuntime.isAvailable
+                    if (useNdiVideo && !useFallback) {
+                        NdiVideoPreview(
+                            cam = cam,
+                            modifier = Modifier.fillMaxSize(),
+                            restartKey = restartKey,
+                            onError = { useFallback = true }
+                        )
+                    } else if (cam.isNdi && cam.ip.isBlank()) {
+                        // NDI camera without an IP: no RTSP fallback possible.
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = if (NdiRuntime.isAvailable) "No NDI video from ${cam.ndiSourceName}"
+                                else "NDI runtime not available",
+                                color = Color.White
+                            )
+                            if (NdiRuntime.isAvailable) ReconnectButton { resetStream() }
+                        }
+                    } else if (!useFallback && !cam.isNdi) {
                         ZeroCopyVideoPreview(
                             cam = cam,
                             modifier = Modifier.fillMaxSize(),
@@ -92,7 +116,7 @@ fun SelectedCam(
                 }
 
                 Text(
-                    text = "${cam.name} (${cam.ip})",
+                    text = if (cam.isNdi) "${cam.name} (NDI: ${cam.ndiSourceName})" else "${cam.name} (${cam.ip})",
                     color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier
                         .fillMaxWidth()

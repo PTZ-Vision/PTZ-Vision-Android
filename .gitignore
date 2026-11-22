@@ -13,3 +13,7 @@ local.properties
 keystore.jks
 *.jks
 local.properties
+
+# NDI SDK runtime binaries (proprietary, never commit)
+libndi.so
+libndifile.so

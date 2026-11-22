@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -112,8 +113,10 @@ fun Camera(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = cam.ip,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                    text = if (cam.isNdi) "NDI · ${cam.ndiSourceName}" else cam.ip,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Row(
@@ -191,6 +194,26 @@ fun CameraAddBtn(
         )
         Text(
             text = "Add",
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.secondary
+        )
+    }
+}
+@Composable
+fun NdiDiscoverBtn(
+    onClick: () -> Unit
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier.padding(start = 16.dp)
+    ) {
+        Icon(
+            Icons.Default.Search,
+            contentDescription = "Find NDI cameras",
+            tint = MaterialTheme.colorScheme.secondary
+        )
+        Text(
+            text = "NDI",
             fontSize = 18.sp,
             color = MaterialTheme.colorScheme.secondary
         )
